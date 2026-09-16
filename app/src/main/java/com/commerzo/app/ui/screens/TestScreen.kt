@@ -8,26 +8,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Flag
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -40,25 +34,32 @@ fun TestScreen(
     subjectId: String,
     chapterId: String,
     onBack: () -> Unit,
-    testViewModel: TestViewModel =
-        viewModel()
+    onTestFinished: (
+        total: Int,
+        answered: Int,
+        correct: Int,
+        wrong: Int,
+        unattempted: Int,
+        marked: Int
+    ) -> Unit
 ) {
 
-    val questions by
-        testViewModel.questions.collectAsState()
+    val viewModel: TestViewModel = viewModel()
 
-    val currentIndex by
-        testViewModel.currentIndex.collectAsState()
+    val questions by viewModel.questions.collectAsState()
+    val currentIndex by viewModel.currentIndex.collectAsState()
+    val timeRemaining by viewModel.timeRemaining.collectAsState()
+    val isFinished by viewModel.isFinished.collectAsState()
 
-    val remainingSeconds by
-        testViewModel.remainingSeconds.collectAsState()
+    val currentQuestion =
+        questions.getOrNull(currentIndex)
 
-    val isFinished by
-        testViewModel.isFinished.collectAsState()
+    var showSubmitDialog by remember {
+        mutableStateOf(false)
+    }
 
-    LaunchedEffect(subjectId, chapterId) {
-
-        testViewModel.loadTest(
+    LaunchedEffect(Unit) {
+        viewModel.loadTest(
             subjectId = subjectId,
             chapterId = chapterId
         )
@@ -66,427 +67,269 @@ fun TestScreen(
 
     LaunchedEffect(isFinished) {
 
-        while (!isFinished) {
+        if (!isFinished) {
 
-            delay(1000)
+            while (true) {
 
-            testViewModel.decreaseTimer()
+                delay(1000)
+
+                viewModel.decreaseTimer()
+
+                if (viewModel.isFinished.value) {
+                    break
+                }
+            }
         }
     }
 
-    if (questions.isEmpty()) {
+    LaunchedEffect(isFinished) {
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(20.dp)
-        ) {
+        if (isFinished && questions.isNotEmpty()) {
 
-            Text(
-                text = "No questions available."
+            onTestFinished(
+                questions.size,
+                viewModel.getAnsweredCount(),
+                viewModel.getCorrectCount(),
+                viewModel.getWrongCount(),
+                viewModel.getUnattemptedCount(),
+                viewModel.getMarkedCount()
             )
         }
+    }
 
+    if (currentQuestion == null || isFinished) {
         return
     }
 
-    if (isFinished) {
+    if (showSubmitDialog) {
 
-        TestFinishedView(
-            total = questions.size,
-            answered =
-                testViewModel.getAnsweredCount(),
-            correct =
-                testViewModel.getCorrectCount(),
-            wrong =
-                testViewModel.getWrongCount(),
-            unattempted =
-                testViewModel.getUnattemptedCount(),
-            marked =
-                testViewModel.getMarkedCount(),
-            onRestart = {
-                testViewModel.restartTest()
+        AlertDialog(
+            onDismissRequest = {
+                showSubmitDialog = false
             },
-            onBack = onBack
-        )
 
-        return
-    }
+            title = {
+                Text("Submit Test?")
+            },
 
-    val current =
-        questions[currentIndex]
-
-    val minutes =
-        remainingSeconds / 60
-
-    val seconds =
-        remainingSeconds % 60
-
-    val timerText =
-        String.format(
-            "%02d:%02d",
-            minutes,
-            seconds
-        )
-
-    val progress =
-        (currentIndex + 1).toFloat() /
-            questions.size.toFloat()
-
-    Scaffold(
-
-        topBar = {
-
-            TopAppBar(
-
-                title = {
-                    Text("Test")
-                },
-
-                navigationIcon = {
-
-                    IconButton(
-                        onClick = onBack
-                    ) {
-
-                        Icon(
-                            imageVector =
-                                Icons.Default.ArrowBack,
-                            contentDescription =
-                                "Back"
-                        )
-                    }
-                },
-
-                actions = {
-
-                    Text(
-                        text = timerText,
-                        style =
-                            MaterialTheme
-                                .typography
-                                .titleMedium,
-
-                        modifier =
-                            Modifier.padding(
-                                end = 16.dp
-                            )
-                    )
-                }
-            )
-        }
-
-    ) { paddingValues ->
-
-        LazyColumn(
-
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-
-            verticalArrangement =
-                Arrangement.spacedBy(12.dp)
-        ) {
-
-            item {
-
-                Spacer(
-                    modifier =
-                        Modifier.height(8.dp)
+            text = {
+                Text(
+                    "Are you sure you want to submit this test?"
                 )
+            },
 
-                Row(
-                    modifier =
-                        Modifier.fillMaxWidth(),
-                    horizontalArrangement =
-                        Arrangement.SpaceBetween
-                ) {
-
-                    Text(
-                        text =
-                            "Question ${currentIndex + 1}/50",
-                        style =
-                            MaterialTheme
-                                .typography
-                                .titleMedium
-                    )
-
-                    Text(
-                        text =
-                            "Answered ${
-                                testViewModel
-                                    .getAnsweredCount()
-                            }",
-                        style =
-                            MaterialTheme
-                                .typography
-                                .bodyMedium
-                    )
-                }
-
-                Spacer(
-                    modifier =
-                        Modifier.height(8.dp)
-                )
-
-                LinearProgressIndicator(
-                    progress = {
-                        progress
-                    },
-                    modifier =
-                        Modifier.fillMaxWidth()
-                )
-
-                Spacer(
-                    modifier =
-                        Modifier.height(16.dp)
-                )
-
-                Card(
-                    modifier =
-                        Modifier.fillMaxWidth(),
-
-                    colors =
-                        CardDefaults.cardColors(
-                            containerColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .surfaceVariant
-                        )
-                ) {
-
-                    Text(
-                        text =
-                            current.question.question,
-
-                        modifier =
-                            Modifier.padding(18.dp),
-
-                        style =
-                            MaterialTheme
-                                .typography
-                                .titleLarge
-                    )
-                }
-
-                Spacer(
-                    modifier =
-                        Modifier.height(8.dp)
-                )
-            }
-
-            itemsIndexed(
-                items =
-                    current.question.options
-            ) { index, option ->
-
-                TestQuestionOption(
-
-                    index = index,
-
-                    text = option,
-
-                    selected =
-                        current.selectedAnswer ==
-                            index,
-
-                    onClick = {
-
-                        testViewModel
-                            .selectAnswer(index)
-                    }
-                )
-            }
-
-            item {
-
-                Row(
-                    modifier =
-                        Modifier.fillMaxWidth(),
-                    horizontalArrangement =
-                        Arrangement.SpaceBetween
-                ) {
-
-                    TextButton(
-                        onClick = {
-                            testViewModel
-                                .previousQuestion()
-                        },
-                        enabled =
-                            currentIndex > 0
-                    ) {
-
-                        Text("Previous")
-                    }
-
-                    TextButton(
-                        onClick = {
-                            testViewModel
-                                .toggleMarkForReview()
-                        }
-                    ) {
-
-                        Icon(
-                            imageVector =
-                                Icons.Default.Flag,
-                            contentDescription =
-                                "Mark for review"
-                        )
-
-                        Text(
-                            text =
-                                if (
-                                    current.markedForReview
-                                ) {
-                                    "Marked"
-                                } else {
-                                    " Review"
-                                }
-                        )
-                    }
-
-                    TextButton(
-                        onClick = {
-                            testViewModel
-                                .nextQuestion()
-                        },
-                        enabled =
-                            currentIndex <
-                                questions.lastIndex
-                    ) {
-
-                        Text("Next")
-                    }
-                }
-
-                Spacer(
-                    modifier =
-                        Modifier.height(8.dp)
-                )
+            confirmButton = {
 
                 Button(
                     onClick = {
-                        testViewModel.finishTest()
-                    },
-                    modifier =
-                        Modifier.fillMaxWidth()
+
+                        showSubmitDialog = false
+                        viewModel.finishTest()
+                    }
                 ) {
-
-                    Text("Submit Test")
+                    Text("Submit")
                 }
+            },
 
-                Spacer(
-                    modifier =
-                        Modifier.height(24.dp)
-                )
+            dismissButton = {
+
+                OutlinedButton(
+                    onClick = {
+                        showSubmitDialog = false
+                    }
+                ) {
+                    Text("Cancel")
+                }
             }
-        }
+        )
     }
-}
 
-@Composable
-private fun TestFinishedView(
-    total: Int,
-    answered: Int,
-    correct: Int,
-    wrong: Int,
-    unattempted: Int,
-    marked: Int,
-    onRestart: () -> Unit,
-    onBack: () -> Unit
-) {
+    val minutes =
+        timeRemaining / 60
+
+    val seconds =
+        timeRemaining % 60
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp),
-        verticalArrangement =
-            Arrangement.Center
+            .padding(16.dp)
     ) {
 
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement =
+                Arrangement.SpaceBetween
+        ) {
+
+            Text(
+                text = "Question ${currentIndex + 1}/${questions.size}",
+                style =
+                    MaterialTheme.typography.titleMedium
+            )
+
+            Text(
+                text =
+                    "%02d:%02d".format(
+                        minutes,
+                        seconds
+                    ),
+                style =
+                    MaterialTheme.typography.titleMedium
+            )
+        }
+
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
+
         Text(
-            text = "Test Submitted 🎉",
+            text =
+                "Answered: ${viewModel.getAnsweredCount()}",
             style =
-                MaterialTheme.typography
-                    .headlineMedium
+                MaterialTheme.typography.bodyMedium
         )
 
         Spacer(
-            modifier =
-                Modifier.height(20.dp)
+            modifier = Modifier.height(16.dp)
         )
 
         Card(
-            modifier =
-                Modifier.fillMaxWidth(),
-
-            colors =
-                CardDefaults.cardColors(
-                    containerColor =
-                        MaterialTheme
-                            .colorScheme
-                            .primaryContainer
-                )
+            modifier = Modifier.fillMaxWidth()
         ) {
 
             Column(
-                modifier =
-                    Modifier.padding(20.dp)
+                modifier = Modifier.padding(18.dp)
             ) {
 
                 Text(
-                    text = "Total Questions: $total"
+                    text = currentQuestion.question,
+                    style =
+                        MaterialTheme.typography.titleMedium
                 )
 
-                Text(
-                    text = "Answered: $answered"
+                Spacer(
+                    modifier = Modifier.height(16.dp)
                 )
 
-                Text(
-                    text = "Correct: $correct"
-                )
+                currentQuestion.options
+                    .forEachIndexed { index, option ->
+
+                        TestQuestionOption(
+                            text = option,
+                            selected =
+                                viewModel
+                                    .getSelectedAnswer(
+                                        currentIndex
+                                    ) == index,
+                            onClick = {
+                                viewModel.selectAnswer(
+                                    index
+                                )
+                            }
+                        )
+
+                        Spacer(
+                            modifier =
+                                Modifier.height(8.dp)
+                        )
+                    }
+            }
+        }
+
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
+            OutlinedButton(
+                onClick = {
+                    viewModel.previousQuestion()
+                },
+
+                enabled = currentIndex > 0,
+
+                modifier =
+                    Modifier.weight(1f)
+            ) {
+                Text("Previous")
+            }
+
+            Spacer(
+                modifier = Modifier.width(8.dp)
+            )
+
+            OutlinedButton(
+                onClick = {
+                    viewModel.toggleMarkForReview()
+                },
+
+                modifier =
+                    Modifier.weight(1f)
+            ) {
 
                 Text(
-                    text = "Wrong: $wrong"
-                )
-
-                Text(
-                    text = "Unattempted: $unattempted"
-                )
-
-                Text(
-                    text = "Marked for Review: $marked"
+                    if (
+                        viewModel.isCurrentQuestionMarked()
+                    ) {
+                        "Unmark"
+                    } else {
+                        "Mark Review"
+                    }
                 )
             }
         }
 
         Spacer(
-            modifier =
-                Modifier.height(20.dp)
+            modifier = Modifier.height(10.dp)
         )
 
-        Button(
-            onClick = onRestart,
-            modifier =
-                Modifier.fillMaxWidth()
+        Row(
+            modifier = Modifier.fillMaxWidth()
         ) {
 
-            Text("Restart Test")
+            Button(
+                onClick = {
+                    viewModel.nextQuestion()
+                },
+
+                enabled =
+                    currentIndex < questions.lastIndex,
+
+                modifier =
+                    Modifier.weight(1f)
+            ) {
+                Text("Next")
+            }
+
+            Spacer(
+                modifier = Modifier.width(8.dp)
+            )
+
+            Button(
+                onClick = {
+                    showSubmitDialog = true
+                },
+
+                modifier =
+                    Modifier.weight(1f)
+            ) {
+                Text("Submit")
+            }
         }
 
         Spacer(
-            modifier =
-                Modifier.height(10.dp)
+            modifier = Modifier.height(12.dp)
         )
 
-        Button(
+        OutlinedButton(
             onClick = onBack,
-            modifier =
-                Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ) {
-
-            Text("Back")
+            Text("Exit Test")
         }
     }
 }
