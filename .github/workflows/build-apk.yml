@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build COMMERZO Debug APK
+    name: Build COMMERZO APK
     runs-on: ubuntu-latest
 
     steps:
@@ -20,7 +20,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-          cache: gradle
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
@@ -29,16 +28,18 @@ jobs:
 
       - name: Install Android SDK packages
         run: |
-          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          sdkmanager --install \
+            "platform-tools" \
+            "platforms;android-36" \
+            "build-tools;36.0.0"
 
-      - name: Accept Android SDK licenses
-        run: yes | sdkmanager --licenses > /dev/null || true
-
-      - name: Grant Gradle permission
-        run: chmod +x gradlew
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '8.13'
 
       - name: Build Debug APK
-        run: ./gradlew --no-daemon assembleDebug
+        run: gradle --no-daemon assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
