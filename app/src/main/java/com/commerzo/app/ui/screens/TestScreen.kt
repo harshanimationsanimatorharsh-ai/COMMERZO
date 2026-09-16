@@ -43,7 +43,6 @@ fun TestScreen(
     ) -> Unit,
     onBack: () -> Unit
 ) {
-
     val viewModel: TestViewModel = viewModel()
 
     val questions by viewModel.questions.collectAsState()
@@ -65,26 +64,21 @@ fun TestScreen(
     }
 
     LaunchedEffect(isFinished) {
-
         if (!isFinished) {
-
             while (true) {
-
                 delay(1000)
-
-                viewModel.decreaseTimer()
 
                 if (viewModel.isFinished.value) {
                     break
                 }
+
+                viewModel.decreaseTimer()
             }
         }
     }
 
     LaunchedEffect(isFinished) {
-
         if (isFinished && questions.isNotEmpty()) {
-
             onTestFinished(
                 questions.size,
                 viewModel.getAnsweredCount(),
@@ -101,7 +95,6 @@ fun TestScreen(
     }
 
     if (showSubmitDialog) {
-
         AlertDialog(
             onDismissRequest = {
                 showSubmitDialog = false
@@ -197,6 +190,7 @@ fun TestScreen(
                 currentQuestion.options.forEachIndexed { index, option ->
 
                     TestQuestionOption(
+                        index = index,
                         text = option,
                         selected =
                             viewModel.getSelectedAnswer(
@@ -242,7 +236,6 @@ fun TestScreen(
                 },
                 modifier = Modifier.weight(1f)
             ) {
-
                 Text(
                     if (viewModel.isCurrentQuestionMarked()) {
                         "Unmark"
