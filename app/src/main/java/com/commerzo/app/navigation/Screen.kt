@@ -11,4 +11,12 @@ sealed class Screen(val route: String) {
     data object Games : Screen("games")
 
     data object Profile : Screen("profile")
+
+    data object SubjectSelection : Screen("subject_selection")
+
+    data object Chapters : Screen("chapters/{subjectId}") {
+        fun createRoute(subjectId: String): String {
+            return "chapters/$subjectId"
+        }
+    }
 }
