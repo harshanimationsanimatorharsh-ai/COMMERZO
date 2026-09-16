@@ -21,238 +21,247 @@ import com.commerzo.app.ui.screens.TestsScreen
 @Composable
 fun AppNavigation() {
 
-val navController = rememberNavController()
+    val navController = rememberNavController()
 
-NavHost(
-    navController = navController,
-    startDestination = Screen.Home.route
-) {
+    NavHost(
+        navController = navController,
+        startDestination = Screen.Home.route
+    ) {
 
-    composable(Screen.Home.route) {
+        composable(Screen.Home.route) {
 
-        HomeScreen(
-            onSubjectClick = { subjectId ->
+            HomeScreen(
+                onSubjectClick = { subjectId ->
 
-                navController.navigate(
-                    Screen.Chapters.createRoute(subjectId)
-                )
-            }
-        )
-    }
-
-    composable(Screen.Practice.route) {
-        PracticeScreen()
-    }
-
-    composable(Screen.Tests.route) {
-
-        TestsScreen(
-            onStartTest = { subjectId, chapterId ->
-
-                navController.navigate(
-                    Screen.Test.createRoute(
-                        subjectId,
-                        chapterId
+                    navController.navigate(
+                        Screen.Chapters.createRoute(subjectId)
                     )
-                )
-            },
-            onOpenHistory = {
+                }
+            )
+        }
 
-                navController.navigate("test_history")
-            }
-        )
-    }
+        composable(Screen.Practice.route) {
+            PracticeScreen()
+        }
 
-    composable(Screen.Games.route) {
-        GamesScreen()
-    }
+        composable(Screen.Tests.route) {
 
-    composable(Screen.Profile.route) {
-        ProfileScreen()
-    }
+            TestsScreen(
+                onStartTest = { subjectId, chapterId ->
 
-    composable(Screen.SubjectSelection.route) {
-        SubjectSelectionScreen()
-    }
-
-    composable(
-        route = Screen.Chapters.route,
-        arguments = listOf(
-            navArgument("subjectId") {
-                type = NavType.StringType
-            }
-        )
-    ) { backStackEntry ->
-
-        val subjectId =
-            backStackEntry.arguments?.getString("subjectId")
-                ?: return@composable
-
-        ChapterScreen(
-            subjectId = subjectId,
-
-            onBack = {
-                navController.popBackStack()
-            },
-
-            onChapterClick = { chapterId ->
-
-                navController.navigate(
-                    Screen.Questions.createRoute(
-                        subjectId,
-                        chapterId
+                    navController.navigate(
+                        Screen.Test.createRoute(
+                            subjectId,
+                            chapterId
+                        )
                     )
-                )
-            }
-        )
-    }
+                },
 
-    composable(
-        route = Screen.Questions.route,
-        arguments = listOf(
-            navArgument("subjectId") {
-                type = NavType.StringType
-            },
-            navArgument("chapterId") {
-                type = NavType.StringType
-            }
-        )
-    ) { backStackEntry ->
+                onOpenHistory = {
 
-        val subjectId =
-            backStackEntry.arguments?.getString("subjectId")
-                ?: return@composable
+                    navController.navigate("test_history")
+                }
+            )
+        }
 
-        val chapterId =
-            backStackEntry.arguments?.getString("chapterId")
-                ?: return@composable
+        composable(Screen.Games.route) {
+            GamesScreen()
+        }
 
-        QuestionScreen(
-            subjectId = subjectId,
-            chapterId = chapterId,
-            onBack = {
-                navController.popBackStack()
-            }
-        )
-    }
+        composable(Screen.Profile.route) {
+            ProfileScreen()
+        }
 
-    composable(
-        route = Screen.Test.route,
-        arguments = listOf(
-            navArgument("subjectId") {
-                type = NavType.StringType
-            },
-            navArgument("chapterId") {
-                type = NavType.StringType
-            }
-        )
-    ) { backStackEntry ->
+        composable(Screen.SubjectSelection.route) {
 
-        val subjectId =
-            backStackEntry.arguments?.getString("subjectId")
-                ?: return@composable
+            SubjectSelectionScreen(
+                onSubjectClick = { subjectId ->
 
-        val chapterId =
-            backStackEntry.arguments?.getString("chapterId")
-                ?: return@composable
+                    navController.navigate(
+                        Screen.Chapters.createRoute(subjectId)
+                    )
+                }
+            )
+        }
 
-        TestScreen(
-            subjectId = subjectId,
-            chapterId = chapterId,
+        composable(
+            route = Screen.Chapters.route,
+            arguments = listOf(
+                navArgument("subjectId") {
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
 
-            onTestFinished = {
-                total,
-                answered,
-                correct,
-                wrong,
-                unattempted,
-                marked ->
+            val subjectId =
+                backStackEntry.arguments?.getString("subjectId")
+                    ?: return@composable
 
-                navController.navigate(
-                    "test_result/$total/$answered/$correct/$wrong/$unattempted/$marked"
-                )
-            },
+            ChapterScreen(
+                subjectId = subjectId,
 
-            onBack = {
-                navController.popBackStack()
-            }
-        )
-    }
+                onBack = {
+                    navController.popBackStack()
+                },
 
-    composable(
-        route = "test_result/{total}/{answered}/{correct}/{wrong}/{unattempted}/{marked}",
-        arguments = listOf(
-            navArgument("total") {
-                type = NavType.IntType
-            },
-            navArgument("answered") {
-                type = NavType.IntType
-            },
-            navArgument("correct") {
-                type = NavType.IntType
-            },
-            navArgument("wrong") {
-                type = NavType.IntType
-            },
-            navArgument("unattempted") {
-                type = NavType.IntType
-            },
-            navArgument("marked") {
-                type = NavType.IntType
-            }
-        )
-    ) { backStackEntry ->
+                onChapterClick = { chapterId ->
 
-        val total =
-            backStackEntry.arguments?.getInt("total") ?: 0
+                    navController.navigate(
+                        Screen.Questions.createRoute(
+                            subjectId,
+                            chapterId
+                        )
+                    )
+                }
+            )
+        }
 
-        val answered =
-            backStackEntry.arguments?.getInt("answered") ?: 0
+        composable(
+            route = Screen.Questions.route,
+            arguments = listOf(
+                navArgument("subjectId") {
+                    type = NavType.StringType
+                },
+                navArgument("chapterId") {
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
 
-        val correct =
-            backStackEntry.arguments?.getInt("correct") ?: 0
+            val subjectId =
+                backStackEntry.arguments?.getString("subjectId")
+                    ?: return@composable
 
-        val wrong =
-            backStackEntry.arguments?.getInt("wrong") ?: 0
+            val chapterId =
+                backStackEntry.arguments?.getString("chapterId")
+                    ?: return@composable
 
-        val unattempted =
-            backStackEntry.arguments?.getInt("unattempted") ?: 0
+            QuestionScreen(
+                subjectId = subjectId,
+                chapterId = chapterId,
 
-        val marked =
-            backStackEntry.arguments?.getInt("marked") ?: 0
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
 
-        TestResultScreen(
-            total = total,
-            answered = answered,
-            correct = correct,
-            wrong = wrong,
-            unattempted = unattempted,
-            marked = marked,
+        composable(
+            route = Screen.Test.route,
+            arguments = listOf(
+                navArgument("subjectId") {
+                    type = NavType.StringType
+                },
+                navArgument("chapterId") {
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
 
-            onRestart = {
-                navController.popBackStack()
-            },
+            val subjectId =
+                backStackEntry.arguments?.getString("subjectId")
+                    ?: return@composable
 
-            onBackToTests = {
+            val chapterId =
+                backStackEntry.arguments?.getString("chapterId")
+                    ?: return@composable
 
-                navController.navigate(
-                    Screen.Tests.route
-                ) {
-                    popUpTo(
+            TestScreen(
+                subjectId = subjectId,
+                chapterId = chapterId,
+
+                onTestFinished = {
+                    total,
+                    answered,
+                    correct,
+                    wrong,
+                    unattempted,
+                    marked ->
+
+                    navController.navigate(
+                        "test_result/$total/$answered/$correct/$wrong/$unattempted/$marked"
+                    )
+                },
+
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(
+            route = "test_result/{total}/{answered}/{correct}/{wrong}/{unattempted}/{marked}",
+            arguments = listOf(
+                navArgument("total") {
+                    type = NavType.IntType
+                },
+                navArgument("answered") {
+                    type = NavType.IntType
+                },
+                navArgument("correct") {
+                    type = NavType.IntType
+                },
+                navArgument("wrong") {
+                    type = NavType.IntType
+                },
+                navArgument("unattempted") {
+                    type = NavType.IntType
+                },
+                navArgument("marked") {
+                    type = NavType.IntType
+                }
+            )
+        ) { backStackEntry ->
+
+            val total =
+                backStackEntry.arguments?.getInt("total") ?: 0
+
+            val answered =
+                backStackEntry.arguments?.getInt("answered") ?: 0
+
+            val correct =
+                backStackEntry.arguments?.getInt("correct") ?: 0
+
+            val wrong =
+                backStackEntry.arguments?.getInt("wrong") ?: 0
+
+            val unattempted =
+                backStackEntry.arguments?.getInt("unattempted") ?: 0
+
+            val marked =
+                backStackEntry.arguments?.getInt("marked") ?: 0
+
+            TestResultScreen(
+                total = total,
+                answered = answered,
+                correct = correct,
+                wrong = wrong,
+                unattempted = unattempted,
+                marked = marked,
+
+                onRestart = {
+                    navController.popBackStack()
+                },
+
+                onBackToTests = {
+
+                    navController.navigate(
                         Screen.Tests.route
                     ) {
-                        inclusive = false
+                        popUpTo(
+                            Screen.Tests.route
+                        ) {
+                            inclusive = false
+                        }
                     }
                 }
-            }
-        )
-    }
+            )
+        }
 
-    composable(
-        route = "test_history"
-    ) {
-        TestHistoryScreen()
+        composable(
+            route = "test_history"
+        ) {
+            TestHistoryScreen()
+        }
     }
-}
-
 }
