@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -34,6 +35,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.commerzo.app.ui.components.AnswerOption
 import com.commerzo.app.ui.viewmodel.PracticeSessionViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuestionScreen(
     subjectId: String,
@@ -71,7 +73,6 @@ fun QuestionScreen(
         questionViewModel.bookmarkedQuestions.collectAsState()
 
     LaunchedEffect(subjectId, chapterId) {
-
         questionViewModel.loadQuestions(
             subjectId = subjectId,
             chapterId = chapterId
@@ -82,20 +83,16 @@ fun QuestionScreen(
 
         Scaffold(
             topBar = {
-
                 TopAppBar(
                     title = {
                         Text("Practice")
                     },
                     navigationIcon = {
-
                         IconButton(
                             onClick = onBack
                         ) {
-
                             Icon(
-                                imageVector =
-                                    Icons.Default.ArrowBack,
+                                imageVector = Icons.Default.ArrowBack,
                                 contentDescription = "Back"
                             )
                         }
@@ -110,7 +107,6 @@ fun QuestionScreen(
                     .padding(paddingValues)
                     .padding(20.dp)
             ) {
-
                 Text(
                     text = "No questions available yet."
                 )
@@ -123,20 +119,13 @@ fun QuestionScreen(
     if (isFinished) {
 
         PracticeResultScreen(
-
             totalQuestions = questions.size,
-
             correctAnswers = correctAnswers,
-
             wrongAnswers = wrongAnswers,
-
-            unattemptedAnswers =
-                unattemptedAnswers,
-
+            unattemptedAnswers = unattemptedAnswers,
             onRestart = {
                 questionViewModel.restart()
             },
-
             onBackToChapters = {
                 onBack()
             }
@@ -145,23 +134,19 @@ fun QuestionScreen(
         return
     }
 
-    val currentQuestion =
-        questions[currentIndex]
+    val currentQuestion = questions[currentIndex]
 
     val progress =
         (currentIndex + 1).toFloat() /
             questions.size.toFloat()
 
     val isBookmarked =
-        bookmarkedQuestions
-            .contains(currentQuestion.id)
+        bookmarkedQuestions.contains(currentQuestion.id)
 
     Scaffold(
-
         topBar = {
 
             TopAppBar(
-
                 title = {
                     Text("Practice")
                 },
@@ -173,8 +158,7 @@ fun QuestionScreen(
                     ) {
 
                         Icon(
-                            imageVector =
-                                Icons.Default.ArrowBack,
+                            imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
@@ -184,8 +168,7 @@ fun QuestionScreen(
 
                     IconButton(
                         onClick = {
-                            questionViewModel
-                                .toggleBookmark()
+                            questionViewModel.toggleBookmark()
                         }
                     ) {
 
@@ -196,18 +179,16 @@ fun QuestionScreen(
                                 } else {
                                     Icons.Default.BookmarkBorder
                                 },
-                            contentDescription =
-                                "Bookmark"
+
+                            contentDescription = "Bookmark"
                         )
                     }
                 }
             )
         }
-
     ) { paddingValues ->
 
         LazyColumn(
-
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
@@ -292,12 +273,10 @@ fun QuestionScreen(
             }
 
             itemsIndexed(
-                items =
-                    currentQuestion.options
+                items = currentQuestion.options
             ) { index, option ->
 
                 AnswerOption(
-
                     index = index,
 
                     text = option,
@@ -308,21 +287,18 @@ fun QuestionScreen(
                     isCorrect =
                         submitted &&
                             index ==
-                            currentQuestion
-                                .correctAnswer,
+                            currentQuestion.correctAnswer,
 
                     isWrong =
                         submitted &&
                             selectedAnswer == index &&
                             index !=
-                            currentQuestion
-                                .correctAnswer,
+                            currentQuestion.correctAnswer,
 
                     enabled = !submitted,
 
                     onClick = {
-                        questionViewModel
-                            .selectAnswer(index)
+                        questionViewModel.selectAnswer(index)
                     }
                 )
             }
@@ -336,10 +312,8 @@ fun QuestionScreen(
                 if (!submitted) {
 
                     Button(
-
                         onClick = {
-                            questionViewModel
-                                .submitAnswer()
+                            questionViewModel.submitAnswer()
                         },
 
                         enabled =
@@ -363,8 +337,7 @@ fun QuestionScreen(
                                 containerColor =
                                     if (
                                         selectedAnswer ==
-                                        currentQuestion
-                                            .correctAnswer
+                                        currentQuestion.correctAnswer
                                     ) {
                                         MaterialTheme
                                             .colorScheme
@@ -386,8 +359,7 @@ fun QuestionScreen(
                                 text =
                                     if (
                                         selectedAnswer ==
-                                        currentQuestion
-                                            .correctAnswer
+                                        currentQuestion.correctAnswer
                                     ) {
                                         "✓ Correct Answer"
                                     } else {
@@ -408,8 +380,7 @@ fun QuestionScreen(
                             Text(
                                 text =
                                     "Explanation: " +
-                                        currentQuestion
-                                            .explanation,
+                                        currentQuestion.explanation,
 
                                 style =
                                     MaterialTheme
@@ -425,10 +396,8 @@ fun QuestionScreen(
                     )
 
                     Button(
-
                         onClick = {
-                            questionViewModel
-                                .nextQuestion()
+                            questionViewModel.nextQuestion()
                         },
 
                         modifier =
