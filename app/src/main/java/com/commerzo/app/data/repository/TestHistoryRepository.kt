@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class TestHistoryRepository {
+object TestHistoryRepository {
 
     private val _history =
         MutableStateFlow<List<TestHistory>>(emptyList())
@@ -31,20 +31,22 @@ class TestHistoryRepository {
                 0
             }
 
-        val test =
-            TestHistory(
-                id = System.currentTimeMillis(),
-                subjectId = subjectId,
-                chapterId = chapterId,
-                totalQuestions = totalQuestions,
-                answered = answered,
-                correct = correct,
-                wrong = wrong,
-                unattempted = unattempted,
-                marked = marked,
-                percentage = percentage,
-                timestamp = System.currentTimeMillis()
-            )
+        val currentTime =
+            System.currentTimeMillis()
+
+        val test = TestHistory(
+            id = currentTime,
+            subjectId = subjectId,
+            chapterId = chapterId,
+            totalQuestions = totalQuestions,
+            answered = answered,
+            correct = correct,
+            wrong = wrong,
+            unattempted = unattempted,
+            marked = marked,
+            percentage = percentage,
+            timestamp = currentTime
+        )
 
         _history.value =
             listOf(test) + _history.value
