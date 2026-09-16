@@ -2,17 +2,15 @@ package com.commerzo.app.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -22,15 +20,18 @@ import androidx.compose.ui.unit.dp
 import com.commerzo.app.data.repository.ChapterRepository
 import com.commerzo.app.ui.components.ChapterCard
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChapterScreen(
     subjectId: String,
-    onBack: () -> Unit
+    onBack: () -> Unit = {},
+    onChapterClick: (String) -> Unit = {}
 ) {
 
     val repository = ChapterRepository()
-    val chapters = repository.getChapters(subjectId)
+
+    val chapters = repository.getChapters(
+        subjectId = subjectId
+    )
 
     val subjectName = when (subjectId) {
         "accountancy" -> "Accountancy"
@@ -68,13 +69,9 @@ fun ChapterScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.Center
+                    .padding(20.dp)
             ) {
-                Text(
-                    text = "No chapters available.",
-                    style = MaterialTheme.typography.titleMedium
-                )
+                Text("No chapters available yet.")
             }
 
         } else {
@@ -82,31 +79,21 @@ fun ChapterScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp),
+                    .padding(paddingValues),
+                contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
 
-                item {
-                    Text(
-                        text = "Choose a chapter",
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(
-                            top = 16.dp,
-                            bottom = 6.dp
-                        )
-                    )
-                }
-
                 items(
                     items = chapters,
-                    key = {
-                        it.id
-                    }
+                    key = { it.id }
                 ) { chapter ->
 
                     ChapterCard(
-                        chapter = chapter
+                        chapter = chapter,
+                        onClick = {
+                            onChapterClick(chapter.id)
+                        }
                     )
                 }
             }
