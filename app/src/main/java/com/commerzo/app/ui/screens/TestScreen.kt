@@ -33,7 +33,6 @@ import kotlinx.coroutines.delay
 fun TestScreen(
     subjectId: String,
     chapterId: String,
-    onBack: () -> Unit,
     onTestFinished: (
         total: Int,
         answered: Int,
@@ -41,7 +40,8 @@ fun TestScreen(
         wrong: Int,
         unattempted: Int,
         marked: Int
-    ) -> Unit
+    ) -> Unit,
+    onBack: () -> Unit
 ) {
 
     val viewModel: TestViewModel = viewModel()
@@ -51,14 +51,13 @@ fun TestScreen(
     val timeRemaining by viewModel.timeRemaining.collectAsState()
     val isFinished by viewModel.isFinished.collectAsState()
 
-    val currentQuestion =
-        questions.getOrNull(currentIndex)
+    val currentQuestion = questions.getOrNull(currentIndex)
 
     var showSubmitDialog by remember {
         mutableStateOf(false)
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(subjectId, chapterId) {
         viewModel.loadTest(
             subjectId = subjectId,
             chapterId = chapterId
@@ -107,22 +106,17 @@ fun TestScreen(
             onDismissRequest = {
                 showSubmitDialog = false
             },
-
             title = {
                 Text("Submit Test?")
             },
-
             text = {
                 Text(
                     "Are you sure you want to submit this test?"
                 )
             },
-
             confirmButton = {
-
                 Button(
                     onClick = {
-
                         showSubmitDialog = false
                         viewModel.finishTest()
                     }
@@ -130,9 +124,7 @@ fun TestScreen(
                     Text("Submit")
                 }
             },
-
             dismissButton = {
-
                 OutlinedButton(
                     onClick = {
                         showSubmitDialog = false
@@ -144,11 +136,8 @@ fun TestScreen(
         )
     }
 
-    val minutes =
-        timeRemaining / 60
-
-    val seconds =
-        timeRemaining % 60
+    val minutes = timeRemaining / 60
+    val seconds = timeRemaining % 60
 
     Column(
         modifier = Modifier
@@ -158,24 +147,20 @@ fun TestScreen(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement =
-                Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
             Text(
                 text = "Question ${currentIndex + 1}/${questions.size}",
-                style =
-                    MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium
             )
 
             Text(
-                text =
-                    "%02d:%02d".format(
-                        minutes,
-                        seconds
-                    ),
-                style =
-                    MaterialTheme.typography.titleMedium
+                text = "%02d:%02d".format(
+                    minutes,
+                    seconds
+                ),
+                style = MaterialTheme.typography.titleMedium
             )
         }
 
@@ -184,10 +169,8 @@ fun TestScreen(
         )
 
         Text(
-            text =
-                "Answered: ${viewModel.getAnsweredCount()}",
-            style =
-                MaterialTheme.typography.bodyMedium
+            text = "Answered: ${viewModel.getAnsweredCount()}",
+            style = MaterialTheme.typography.bodyMedium
         )
 
         Spacer(
@@ -204,36 +187,30 @@ fun TestScreen(
 
                 Text(
                     text = currentQuestion.question,
-                    style =
-                        MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium
                 )
 
                 Spacer(
                     modifier = Modifier.height(16.dp)
                 )
 
-                currentQuestion.options
-                    .forEachIndexed { index, option ->
+                currentQuestion.options.forEachIndexed { index, option ->
 
-                        TestQuestionOption(
-                            text = option,
-                            selected =
-                                viewModel
-                                    .getSelectedAnswer(
-                                        currentIndex
-                                    ) == index,
-                            onClick = {
-                                viewModel.selectAnswer(
-                                    index
-                                )
-                            }
-                        )
+                    TestQuestionOption(
+                        text = option,
+                        selected =
+                            viewModel.getSelectedAnswer(
+                                currentIndex
+                            ) == index,
+                        onClick = {
+                            viewModel.selectAnswer(index)
+                        }
+                    )
 
-                        Spacer(
-                            modifier =
-                                Modifier.height(8.dp)
-                        )
-                    }
+                    Spacer(
+                        modifier = Modifier.height(8.dp)
+                    )
+                }
             }
         }
 
@@ -249,11 +226,8 @@ fun TestScreen(
                 onClick = {
                     viewModel.previousQuestion()
                 },
-
                 enabled = currentIndex > 0,
-
-                modifier =
-                    Modifier.weight(1f)
+                modifier = Modifier.weight(1f)
             ) {
                 Text("Previous")
             }
@@ -266,15 +240,11 @@ fun TestScreen(
                 onClick = {
                     viewModel.toggleMarkForReview()
                 },
-
-                modifier =
-                    Modifier.weight(1f)
+                modifier = Modifier.weight(1f)
             ) {
 
                 Text(
-                    if (
-                        viewModel.isCurrentQuestionMarked()
-                    ) {
+                    if (viewModel.isCurrentQuestionMarked()) {
                         "Unmark"
                     } else {
                         "Mark Review"
@@ -295,12 +265,8 @@ fun TestScreen(
                 onClick = {
                     viewModel.nextQuestion()
                 },
-
-                enabled =
-                    currentIndex < questions.lastIndex,
-
-                modifier =
-                    Modifier.weight(1f)
+                enabled = currentIndex < questions.lastIndex,
+                modifier = Modifier.weight(1f)
             ) {
                 Text("Next")
             }
@@ -313,9 +279,7 @@ fun TestScreen(
                 onClick = {
                     showSubmitDialog = true
                 },
-
-                modifier =
-                    Modifier.weight(1f)
+                modifier = Modifier.weight(1f)
             ) {
                 Text("Submit")
             }
