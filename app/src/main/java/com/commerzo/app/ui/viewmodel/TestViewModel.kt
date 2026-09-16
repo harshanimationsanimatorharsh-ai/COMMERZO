@@ -10,7 +10,8 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class TestViewModel : ViewModel() {
 
-    private val repository = QuestionRepository()
+    private val repository =
+        QuestionRepository()
 
     private val _questions =
         MutableStateFlow<List<TestQuestionState>>(emptyList())
@@ -24,23 +25,17 @@ class TestViewModel : ViewModel() {
     val currentIndex: StateFlow<Int> =
         _currentIndex.asStateFlow()
 
-    private val _remainingSeconds =
+    private val _timeRemaining =
         MutableStateFlow(50 * 60)
 
-    val remainingSeconds: StateFlow<Int> =
-        _remainingSeconds.asStateFlow()
+    val timeRemaining: StateFlow<Int> =
+        _timeRemaining.asStateFlow()
 
     private val _isFinished =
         MutableStateFlow(false)
 
     val isFinished: StateFlow<Boolean> =
         _isFinished.asStateFlow()
-
-    private val _isStarted =
-        MutableStateFlow(false)
-
-    val isStarted: StateFlow<Boolean> =
-        _isStarted.asStateFlow()
 
     fun loadTest(
         subjectId: String,
@@ -53,74 +48,104 @@ class TestViewModel : ViewModel() {
                 chapterId = chapterId
             )
 
-        val testQuestions =
-            buildTestQuestions(sourceQuestions)
+        if (sourceQuestions.isEmpty()) {
+            return
+        }
 
-        _questions.value = testQuestions
+        val testQuestions =
+            buildTestQuestions(
+                sourceQuestions
+            )
+
+        _questions.value =
+            testQuestions
+
         _currentIndex.value = 0
-        _remainingSeconds.value = 50 * 60
+        _timeRemaining.value = 50 * 60
         _isFinished.value = false
-        _isStarted.value = true
     }
 
     private fun buildTestQuestions(
-        sourceQuestions: List<Question>
+        source: List<Question>
     ): List<TestQuestionState> {
 
-        if (sourceQuestions.isEmpty()) {
-            return emptyList()
-        }
+        val result =
+            mutableListOf<TestQuestionState>()
 
-        val result = mutableListOf<Question>()
+        var index = 0
 
         while (result.size < 50) {
-            result.addAll(sourceQuestions)
 
-            if (result.size >= 50) {
-                break
-            }
-        }
+            val question =
+                source[index % source.size]
 
-        return result
-            .take(50)
-            .map { question ->
+            result.add(
                 TestQuestionState(
                     question = question
                 )
-            }
+            )
+
+            index++
+        }
+
+        return result
     }
 
-    fun selectAnswer(index: Int) {
-
-        if (_isFinished.value) return
+    fun selectAnswer(answer: Int) {
 
         val list =
             _questions.value.toMutableList()
 
-        if (list.isEmpty()) return
-
         val current =
-            list[_currentIndex.value]
+            list.getOrNull(_currentIndex.value)
+                ?: return
 
         list[_currentIndex.value] =
             current.copy(
-                selectedAnswer = index
+                selectedAnswer = answer
             )
 
         _questions.value = list
     }
 
-    fun toggleMarkForReview() {
+    fun getSelectedAnswer(
+        index: Int
+    ): Int? {
 
-        if (_isFinished.value) return
+        return _questions.value
+            .getOrNull(index)
+            ?.selectedAnswer
+    }
+
+    fun nextQuestion() {
+
+        if (
+            _currentIndex.value <
+            _questions.value.lastIndex
+        ) {
+
+            _currentIndex.value++
+        } else {
+
+            finishTest()
+        }
+    }
+
+    fun previousQuestion() {
+
+        if (_currentIndex.value > 0) {
+            _currentIndex.value--
+        }
+    }
+
+    fun toggleMarkForReview() {
 
         val list =
             _questions.value.toMutableList()
 
-        if (list.isEmpty()) return
-
         val current =
-            list[_currentIndex.value]
+            list.getOrNull(_currentIndex.value)
+                ?: return
 
         list[_currentIndex.value] =
             current.copy(
@@ -131,44 +156,23 @@ class TestViewModel : ViewModel() {
         _questions.value = list
     }
 
-    fun goToQuestion(index: Int) {
+    fun isCurrentQuestionMarked(): Boolean {
 
-        if (
-            index >= 0 &&
-            index < _questions.value.size
-        ) {
-            _currentIndex.value = index
-        }
-    }
-
-    fun nextQuestion() {
-
-        val next =
-            _currentIndex.value + 1
-
-        if (next < _questions.value.size) {
-            _currentIndex.value = next
-        }
-    }
-
-    fun previousQuestion() {
-
-        val previous =
-            _currentIndex.value - 1
-
-        if (previous >= 0) {
-            _currentIndex.value = previous
-        }
+        return _questions.value
+            .getOrNull(_currentIndex.value)
+            ?.markedForReview
+            ?: false
     }
 
     fun decreaseTimer() {
 
-        if (_isFinished.value) return
+        if (_isFinished.value) {
+            return
+        }
 
-        if (_remainingSeconds.value > 0) {
+        if (_timeRemaining.value > 0) {
 
-            _remainingSeconds.value -= 1
-
+            _timeRemaining.value--
         } else {
 
             finishTest()
@@ -176,6 +180,7 @@ class TestViewModel : ViewModel() {
     }
 
     fun finishTest() {
+
         _isFinished.value = true
     }
 
@@ -192,15 +197,21 @@ class TestViewModel : ViewModel() {
 
         _questions.value = reset
         _currentIndex.value = 0
-        _remainingSeconds.value = 50 * 60
+        _timeRemaining.value = 50 * 60
         _isFinished.value = false
-        _isStarted.value = true
     }
 
     fun getAnsweredCount(): Int {
 
         return _questions.value.count {
             it.selectedAnswer != null
+        }
+    }
+
+    fun getUnattemptedCount(): Int {
+
+        return _questions.value.count {
+            it.selectedAnswer == null
         }
     }
 
@@ -228,13 +239,6 @@ class TestViewModel : ViewModel() {
             it.selectedAnswer != null &&
                 it.selectedAnswer !=
                 it.question.correctAnswer
-        }
-    }
-
-    fun getUnattemptedCount(): Int {
-
-        return _questions.value.count {
-            it.selectedAnswer == null
         }
     }
 }
