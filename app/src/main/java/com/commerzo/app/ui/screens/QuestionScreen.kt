@@ -12,6 +12,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -30,21 +32,43 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.commerzo.app.ui.components.AnswerOption
-import com.commerzo.app.ui.viewmodel.QuestionViewModel
+import com.commerzo.app.ui.viewmodel.PracticeSessionViewModel
 
 @Composable
 fun QuestionScreen(
     subjectId: String,
     chapterId: String,
     onBack: () -> Unit,
-    questionViewModel: QuestionViewModel = viewModel()
+    questionViewModel: PracticeSessionViewModel =
+        viewModel()
 ) {
 
-    val questions by questionViewModel.questions.collectAsState()
-    val currentIndex by questionViewModel.currentQuestionIndex.collectAsState()
-    val selectedAnswer by questionViewModel.selectedAnswer.collectAsState()
-    val isSubmitted by questionViewModel.isSubmitted.collectAsState()
-    val score by questionViewModel.score.collectAsState()
+    val questions by
+        questionViewModel.questions.collectAsState()
+
+    val currentIndex by
+        questionViewModel.currentIndex.collectAsState()
+
+    val selectedAnswer by
+        questionViewModel.selectedAnswer.collectAsState()
+
+    val submitted by
+        questionViewModel.submitted.collectAsState()
+
+    val correctAnswers by
+        questionViewModel.correctAnswers.collectAsState()
+
+    val wrongAnswers by
+        questionViewModel.wrongAnswers.collectAsState()
+
+    val unattemptedAnswers by
+        questionViewModel.unattemptedAnswers.collectAsState()
+
+    val isFinished by
+        questionViewModel.isFinished.collectAsState()
+
+    val bookmarkedQuestions by
+        questionViewModel.bookmarkedQuestions.collectAsState()
 
     LaunchedEffect(subjectId, chapterId) {
 
@@ -58,16 +82,20 @@ fun QuestionScreen(
 
         Scaffold(
             topBar = {
+
                 TopAppBar(
                     title = {
                         Text("Practice")
                     },
                     navigationIcon = {
+
                         IconButton(
                             onClick = onBack
                         ) {
+
                             Icon(
-                                imageVector = Icons.Default.ArrowBack,
+                                imageVector =
+                                    Icons.Default.ArrowBack,
                                 contentDescription = "Back"
                             )
                         }
@@ -84,8 +112,7 @@ fun QuestionScreen(
             ) {
 
                 Text(
-                    text = "No questions available yet.",
-                    style = MaterialTheme.typography.titleMedium
+                    text = "No questions available yet."
                 )
             }
         }
@@ -93,15 +120,44 @@ fun QuestionScreen(
         return
     }
 
-    val currentQuestion = questions[currentIndex]
+    if (isFinished) {
+
+        PracticeResultScreen(
+
+            totalQuestions = questions.size,
+
+            correctAnswers = correctAnswers,
+
+            wrongAnswers = wrongAnswers,
+
+            unattemptedAnswers =
+                unattemptedAnswers,
+
+            onRestart = {
+                questionViewModel.restart()
+            },
+
+            onBackToChapters = {
+                onBack()
+            }
+        )
+
+        return
+    }
+
+    val currentQuestion =
+        questions[currentIndex]
 
     val progress =
-        (currentIndex + 1).toFloat() / questions.size.toFloat()
+        (currentIndex + 1).toFloat() /
+            questions.size.toFloat()
 
-    val isLastQuestion =
-        currentIndex == questions.lastIndex
+    val isBookmarked =
+        bookmarkedQuestions
+            .contains(currentQuestion.id)
 
     Scaffold(
+
         topBar = {
 
             TopAppBar(
@@ -117,21 +173,48 @@ fun QuestionScreen(
                     ) {
 
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector =
+                                Icons.Default.ArrowBack,
                             contentDescription = "Back"
+                        )
+                    }
+                },
+
+                actions = {
+
+                    IconButton(
+                        onClick = {
+                            questionViewModel
+                                .toggleBookmark()
+                        }
+                    ) {
+
+                        Icon(
+                            imageVector =
+                                if (isBookmarked) {
+                                    Icons.Default.Bookmark
+                                } else {
+                                    Icons.Default.BookmarkBorder
+                                },
+                            contentDescription =
+                                "Bookmark"
                         )
                     }
                 }
             )
         }
+
     ) { paddingValues ->
 
         LazyColumn(
+
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+
+            verticalArrangement =
+                Arrangement.spacedBy(12.dp)
         ) {
 
             item {
@@ -142,17 +225,22 @@ fun QuestionScreen(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement =
+                        Arrangement.SpaceBetween
                 ) {
 
                     Text(
-                        text = "Question ${currentIndex + 1}/${questions.size}",
-                        style = MaterialTheme.typography.titleMedium
+                        text =
+                            "Question ${currentIndex + 1}/${questions.size}",
+                        style =
+                            MaterialTheme.typography.titleMedium
                     )
 
                     Text(
-                        text = "Score: $score",
-                        style = MaterialTheme.typography.titleMedium
+                        text =
+                            "Score: $correctAnswers",
+                        style =
+                            MaterialTheme.typography.titleMedium
                     )
                 }
 
@@ -161,7 +249,9 @@ fun QuestionScreen(
                 )
 
                 LinearProgressIndicator(
-                    progress = { progress },
+                    progress = {
+                        progress
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -170,17 +260,29 @@ fun QuestionScreen(
                 )
 
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor =
-                            MaterialTheme.colorScheme.surfaceVariant
-                    )
+                    modifier =
+                        Modifier.fillMaxWidth(),
+
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor =
+                                MaterialTheme
+                                    .colorScheme
+                                    .surfaceVariant
+                        )
                 ) {
 
                     Text(
-                        text = currentQuestion.question,
-                        modifier = Modifier.padding(18.dp),
-                        style = MaterialTheme.typography.titleLarge
+                        text =
+                            currentQuestion.question,
+
+                        modifier =
+                            Modifier.padding(18.dp),
+
+                        style =
+                            MaterialTheme
+                                .typography
+                                .titleLarge
                     )
                 }
 
@@ -190,23 +292,37 @@ fun QuestionScreen(
             }
 
             itemsIndexed(
-                items = currentQuestion.options
+                items =
+                    currentQuestion.options
             ) { index, option ->
 
                 AnswerOption(
+
                     index = index,
+
                     text = option,
-                    isSelected = selectedAnswer == index,
+
+                    isSelected =
+                        selectedAnswer == index,
+
                     isCorrect =
-                        isSubmitted &&
-                        index == currentQuestion.correctAnswer,
+                        submitted &&
+                            index ==
+                            currentQuestion
+                                .correctAnswer,
+
                     isWrong =
-                        isSubmitted &&
-                        selectedAnswer == index &&
-                        index != currentQuestion.correctAnswer,
-                    enabled = !isSubmitted,
+                        submitted &&
+                            selectedAnswer == index &&
+                            index !=
+                            currentQuestion
+                                .correctAnswer,
+
+                    enabled = !submitted,
+
                     onClick = {
-                        questionViewModel.selectAnswer(index)
+                        questionViewModel
+                            .selectAnswer(index)
                     }
                 )
             }
@@ -217,14 +333,20 @@ fun QuestionScreen(
                     modifier = Modifier.height(4.dp)
                 )
 
-                if (!isSubmitted) {
+                if (!submitted) {
 
                     Button(
+
                         onClick = {
-                            questionViewModel.submitAnswer()
+                            questionViewModel
+                                .submitAnswer()
                         },
-                        enabled = selectedAnswer != null,
-                        modifier = Modifier.fillMaxWidth()
+
+                        enabled =
+                            selectedAnswer != null,
+
+                        modifier =
+                            Modifier.fillMaxWidth()
                     ) {
 
                         Text("Submit Answer")
@@ -233,95 +355,102 @@ fun QuestionScreen(
                 } else {
 
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor =
-                                if (
-                                    selectedAnswer ==
-                                    currentQuestion.correctAnswer
-                                ) {
-                                    MaterialTheme.colorScheme
-                                        .primaryContainer
-                                } else {
-                                    MaterialTheme.colorScheme
-                                        .errorContainer
-                                }
-                        )
+                        modifier =
+                            Modifier.fillMaxWidth(),
+
+                        colors =
+                            CardDefaults.cardColors(
+                                containerColor =
+                                    if (
+                                        selectedAnswer ==
+                                        currentQuestion
+                                            .correctAnswer
+                                    ) {
+                                        MaterialTheme
+                                            .colorScheme
+                                            .primaryContainer
+                                    } else {
+                                        MaterialTheme
+                                            .colorScheme
+                                            .errorContainer
+                                    }
+                            )
                     ) {
 
                         Column(
-                            modifier = Modifier.padding(16.dp)
+                            modifier =
+                                Modifier.padding(16.dp)
                         ) {
 
                             Text(
                                 text =
                                     if (
                                         selectedAnswer ==
-                                        currentQuestion.correctAnswer
+                                        currentQuestion
+                                            .correctAnswer
                                     ) {
                                         "✓ Correct Answer"
                                     } else {
                                         "✗ Wrong Answer"
                                     },
+
                                 style =
-                                    MaterialTheme.typography.titleMedium
+                                    MaterialTheme
+                                        .typography
+                                        .titleMedium
                             )
 
                             Spacer(
-                                modifier = Modifier.height(8.dp)
+                                modifier =
+                                    Modifier.height(8.dp)
                             )
 
                             Text(
                                 text =
-                                    "Explanation: ${currentQuestion.explanation}",
+                                    "Explanation: " +
+                                        currentQuestion
+                                            .explanation,
+
                                 style =
-                                    MaterialTheme.typography.bodyMedium
+                                    MaterialTheme
+                                        .typography
+                                        .bodyMedium
                             )
                         }
                     }
 
                     Spacer(
-                        modifier = Modifier.height(8.dp)
+                        modifier =
+                            Modifier.height(8.dp)
                     )
 
                     Button(
+
                         onClick = {
-
-                            if (isLastQuestion) {
-                                questionViewModel.restart()
-                            } else {
-                                questionViewModel.nextQuestion()
-                            }
-
+                            questionViewModel
+                                .nextQuestion()
                         },
-                        modifier = Modifier.fillMaxWidth()
+
+                        modifier =
+                            Modifier.fillMaxWidth()
                     ) {
 
                         Text(
-                            text =
-                                if (isLastQuestion) {
-                                    "Restart Practice"
-                                } else {
-                                    "Next Question"
-                                }
-                        )
-                    }
-
-                    if (isLastQuestion) {
-
-                        Spacer(
-                            modifier = Modifier.height(6.dp)
-                        )
-
-                        Text(
-                            text = "Final Score: $score/${questions.size}",
-                            style = MaterialTheme.typography.titleLarge
+                            if (
+                                currentIndex ==
+                                questions.lastIndex
+                            ) {
+                                "Finish Practice"
+                            } else {
+                                "Next Question"
+                            }
                         )
                     }
                 }
 
                 Spacer(
-                    modifier = Modifier.height(24.dp)
+                    modifier =
+                        Modifier.height(24.dp)
                 )
             }
         }
