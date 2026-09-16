@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.COMMERZO" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">@color/commerzo_black</item>
+        <item name="android:navigationBarColor">@color/commerzo_black</item>
+        <item name="android:colorAccent">@color/commerzo_primary</item>
+
+        <!-- Android 12+ Splash Screen -->
+        <item name="android:windowSplashScreenBackground">@color/commerzo_black</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/commerzo_launcher_icon</item>
+
+    </style>
+
+</resources>
