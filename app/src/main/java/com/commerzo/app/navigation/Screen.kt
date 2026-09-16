@@ -19,4 +19,13 @@ sealed class Screen(val route: String) {
             return "chapters/$subjectId"
         }
     }
+
+    data object Questions : Screen("questions/{subjectId}/{chapterId}") {
+        fun createRoute(
+            subjectId: String,
+            chapterId: String
+        ): String {
+            return "questions/$subjectId/$chapterId"
+        }
+    }
 }
