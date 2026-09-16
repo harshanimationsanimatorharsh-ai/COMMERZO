@@ -1,0 +1,1 @@
+# COMMERZO ProGuard rules
