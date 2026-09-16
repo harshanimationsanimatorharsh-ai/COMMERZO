@@ -7,34 +7,8 @@ import kotlinx.coroutines.flow.StateFlow
 
 class TestHistoryViewModel : ViewModel() {
 
-    private val repository =
-        TestHistoryRepository()
-
     val history: StateFlow<List<TestHistory>> =
-        repository.history
-
-    fun saveTest(
-        subjectId: String,
-        chapterId: String,
-        totalQuestions: Int,
-        answered: Int,
-        correct: Int,
-        wrong: Int,
-        unattempted: Int,
-        marked: Int
-    ) {
-
-        repository.saveTest(
-            subjectId = subjectId,
-            chapterId = chapterId,
-            totalQuestions = totalQuestions,
-            answered = answered,
-            correct = correct,
-            wrong = wrong,
-            unattempted = unattempted,
-            marked = marked
-        )
-    }
+        TestHistoryRepository.history
 
     fun getTotalTests(): Int {
         return history.value.size
