@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.commerzo.app.data.repository.ChapterRepository
 import com.commerzo.app.ui.components.ChapterCard
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChapterScreen(
     subjectId: String,
