@@ -28,24 +28,26 @@ fun AppNavigation() {
         startDestination = Screen.Home.route
     ) {
 
+        // HOME
         composable(Screen.Home.route) {
 
             HomeScreen(
                 onSubjectClick = { subjectId ->
 
                     navController.navigate(
-                        Screen.Chapters.createRoute(
-                            subjectId
-                        )
+                        Screen.Chapters.createRoute(subjectId)
                     )
                 }
             )
         }
 
+        // PRACTICE
         composable(Screen.Practice.route) {
+
             PracticeScreen()
         }
 
+        // TESTS
         composable(Screen.Tests.route) {
 
             TestsScreen(
@@ -53,11 +55,12 @@ fun AppNavigation() {
 
                     navController.navigate(
                         Screen.Test.createRoute(
-                            subjectId,
-                            chapterId
+                            subjectId = subjectId,
+                            chapterId = chapterId
                         )
                     )
                 },
+
                 onOpenHistory = {
 
                     navController.navigate(
@@ -67,20 +70,28 @@ fun AppNavigation() {
             )
         }
 
+        // GAMES
         composable(Screen.Games.route) {
+
             GamesScreen()
         }
 
+        // PROFILE
         composable(Screen.Profile.route) {
+
             ProfileScreen()
         }
 
+        // SUBJECT SELECTION
         composable(Screen.SubjectSelection.route) {
+
             SubjectSelectionScreen()
         }
 
+        // CHAPTERS
         composable(
             route = Screen.Chapters.route,
+
             arguments = listOf(
                 navArgument("subjectId") {
                     type = NavType.StringType
@@ -89,30 +100,38 @@ fun AppNavigation() {
         ) { backStackEntry ->
 
             val subjectId =
-                backStackEntry.arguments?.getString(
-                    "subjectId"
-                ) ?: return@composable
+                backStackEntry.arguments
+                    ?.getString("subjectId")
+                    ?: return@composable
 
             ChapterScreen(
                 subjectId = subjectId,
+
+                onBack = {
+                    navController.popBackStack()
+                },
+
                 onChapterClick = { chapterId ->
 
                     navController.navigate(
                         Screen.Questions.createRoute(
-                            subjectId,
-                            chapterId
+                            subjectId = subjectId,
+                            chapterId = chapterId
                         )
                     )
                 }
             )
         }
 
+        // PRACTICE QUESTIONS
         composable(
             route = Screen.Questions.route,
+
             arguments = listOf(
                 navArgument("subjectId") {
                     type = NavType.StringType
                 },
+
                 navArgument("chapterId") {
                     type = NavType.StringType
                 }
@@ -120,30 +139,35 @@ fun AppNavigation() {
         ) { backStackEntry ->
 
             val subjectId =
-                backStackEntry.arguments?.getString(
-                    "subjectId"
-                ) ?: return@composable
+                backStackEntry.arguments
+                    ?.getString("subjectId")
+                    ?: return@composable
 
             val chapterId =
-                backStackEntry.arguments?.getString(
-                    "chapterId"
-                ) ?: return@composable
+                backStackEntry.arguments
+                    ?.getString("chapterId")
+                    ?: return@composable
 
             QuestionScreen(
                 subjectId = subjectId,
+
                 chapterId = chapterId,
+
                 onBack = {
                     navController.popBackStack()
                 }
             )
         }
 
+        // TEST
         composable(
             route = Screen.Test.route,
+
             arguments = listOf(
                 navArgument("subjectId") {
                     type = NavType.StringType
                 },
+
                 navArgument("chapterId") {
                     type = NavType.StringType
                 }
@@ -151,17 +175,18 @@ fun AppNavigation() {
         ) { backStackEntry ->
 
             val subjectId =
-                backStackEntry.arguments?.getString(
-                    "subjectId"
-                ) ?: return@composable
+                backStackEntry.arguments
+                    ?.getString("subjectId")
+                    ?: return@composable
 
             val chapterId =
-                backStackEntry.arguments?.getString(
-                    "chapterId"
-                ) ?: return@composable
+                backStackEntry.arguments
+                    ?.getString("chapterId")
+                    ?: return@composable
 
             TestScreen(
                 subjectId = subjectId,
+
                 chapterId = chapterId,
 
                 onTestFinished = {
@@ -183,24 +208,33 @@ fun AppNavigation() {
             )
         }
 
+        // TEST RESULT
         composable(
-            route = "test_result/{total}/{answered}/{correct}/{wrong}/{unattempted}/{marked}",
+            route =
+                "test_result/{total}/{answered}/{correct}/{wrong}/{unattempted}/{marked}",
+
             arguments = listOf(
+
                 navArgument("total") {
                     type = NavType.IntType
                 },
+
                 navArgument("answered") {
                     type = NavType.IntType
                 },
+
                 navArgument("correct") {
                     type = NavType.IntType
                 },
+
                 navArgument("wrong") {
                     type = NavType.IntType
                 },
+
                 navArgument("unattempted") {
                     type = NavType.IntType
                 },
+
                 navArgument("marked") {
                     type = NavType.IntType
                 }
@@ -208,41 +242,46 @@ fun AppNavigation() {
         ) { backStackEntry ->
 
             val total =
-                backStackEntry.arguments?.getInt(
-                    "total"
-                ) ?: 0
+                backStackEntry.arguments
+                    ?.getInt("total")
+                    ?: 0
 
             val answered =
-                backStackEntry.arguments?.getInt(
-                    "answered"
-                ) ?: 0
+                backStackEntry.arguments
+                    ?.getInt("answered")
+                    ?: 0
 
             val correct =
-                backStackEntry.arguments?.getInt(
-                    "correct"
-                ) ?: 0
+                backStackEntry.arguments
+                    ?.getInt("correct")
+                    ?: 0
 
             val wrong =
-                backStackEntry.arguments?.getInt(
-                    "wrong"
-                ) ?: 0
+                backStackEntry.arguments
+                    ?.getInt("wrong")
+                    ?: 0
 
             val unattempted =
-                backStackEntry.arguments?.getInt(
-                    "unattempted"
-                ) ?: 0
+                backStackEntry.arguments
+                    ?.getInt("unattempted")
+                    ?: 0
 
             val marked =
-                backStackEntry.arguments?.getInt(
-                    "marked"
-                ) ?: 0
+                backStackEntry.arguments
+                    ?.getInt("marked")
+                    ?: 0
 
             TestResultScreen(
                 total = total,
+
                 answered = answered,
+
                 correct = correct,
+
                 wrong = wrong,
+
                 unattempted = unattempted,
+
                 marked = marked,
 
                 onRestart = {
@@ -264,9 +303,11 @@ fun AppNavigation() {
             )
         }
 
+        // TEST HISTORY
         composable(
             route = "test_history"
         ) {
+
             TestHistoryScreen()
         }
     }
