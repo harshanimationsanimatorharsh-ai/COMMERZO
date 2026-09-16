@@ -15,6 +15,7 @@ import com.commerzo.app.ui.screens.GamesScreen
 import com.commerzo.app.ui.screens.HomeScreen
 import com.commerzo.app.ui.screens.PracticeScreen
 import com.commerzo.app.ui.screens.ProfileScreen
+import com.commerzo.app.ui.screens.QuestionScreen
 import com.commerzo.app.ui.screens.SubjectSelectionScreen
 import com.commerzo.app.ui.screens.TestsScreen
 
@@ -36,6 +37,7 @@ fun AppNavigation() {
         ) {
 
             composable(Screen.Home.route) {
+
                 HomeScreen(
                     onSubjectClick = { subjectId ->
                         navController.navigate(
@@ -46,30 +48,27 @@ fun AppNavigation() {
             }
 
             composable(Screen.Practice.route) {
-                SubjectSelectionScreen(
-                    onSubjectClick = { subjectId ->
-                        navController.navigate(
-                            Screen.Chapters.createRoute(subjectId)
-                        )
-                    }
-                )
+
+                PracticeScreen()
             }
 
             composable(Screen.Tests.route) {
+
                 TestsScreen()
             }
 
             composable(Screen.Games.route) {
+
                 GamesScreen()
             }
 
             composable(Screen.Profile.route) {
+
                 ProfileScreen()
             }
 
-            composable(
-                route = Screen.SubjectSelection.route
-            ) {
+            composable(Screen.SubjectSelection.route) {
+
                 SubjectSelectionScreen(
                     onSubjectClick = { subjectId ->
                         navController.navigate(
@@ -89,11 +88,52 @@ fun AppNavigation() {
             ) { backStackEntry ->
 
                 val subjectId =
-                    backStackEntry.arguments?.getString("subjectId")
+                    backStackEntry.arguments
+                        ?.getString("subjectId")
                         ?: return@composable
 
                 ChapterScreen(
                     subjectId = subjectId,
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                    onChapterClick = { chapterId ->
+
+                        navController.navigate(
+                            Screen.Questions.createRoute(
+                                subjectId = subjectId,
+                                chapterId = chapterId
+                            )
+                        )
+                    }
+                )
+            }
+
+            composable(
+                route = Screen.Questions.route,
+                arguments = listOf(
+                    navArgument("subjectId") {
+                        type = NavType.StringType
+                    },
+                    navArgument("chapterId") {
+                        type = NavType.StringType
+                    }
+                )
+            ) { backStackEntry ->
+
+                val subjectId =
+                    backStackEntry.arguments
+                        ?.getString("subjectId")
+                        ?: return@composable
+
+                val chapterId =
+                    backStackEntry.arguments
+                        ?.getString("chapterId")
+                        ?: return@composable
+
+                QuestionScreen(
+                    subjectId = subjectId,
+                    chapterId = chapterId,
                     onBack = {
                         navController.popBackStack()
                     }
