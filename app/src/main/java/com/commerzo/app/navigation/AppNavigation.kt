@@ -3,7 +3,6 @@ package com.commerzo.app.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -18,6 +17,7 @@ import com.commerzo.app.ui.screens.PracticeScreen
 import com.commerzo.app.ui.screens.ProfileScreen
 import com.commerzo.app.ui.screens.QuestionScreen
 import com.commerzo.app.ui.screens.SubjectSelectionScreen
+import com.commerzo.app.ui.screens.TestHistoryScreen
 import com.commerzo.app.ui.screens.TestResultScreen
 import com.commerzo.app.ui.screens.TestScreen
 import com.commerzo.app.ui.screens.TestsScreen
@@ -144,7 +144,6 @@ fun AppNavigation() {
                     navArgument("subjectId") {
                         type = NavType.StringType
                     },
-
                     navArgument("chapterId") {
                         type = NavType.StringType
                     }
@@ -163,9 +162,7 @@ fun AppNavigation() {
                         ?: return@composable
 
                 QuestionScreen(
-
                     subjectId = subjectId,
-
                     chapterId = chapterId,
 
                     onBack = {
@@ -181,7 +178,6 @@ fun AppNavigation() {
                     navArgument("subjectId") {
                         type = NavType.StringType
                     },
-
                     navArgument("chapterId") {
                         type = NavType.StringType
                     }
@@ -202,7 +198,6 @@ fun AppNavigation() {
                 TestScreen(
 
                     subjectId = subjectId,
-
                     chapterId = chapterId,
 
                     onBack = {
@@ -236,27 +231,21 @@ fun AppNavigation() {
                     "test_result/{total}/{answered}/{correct}/{wrong}/{unattempted}/{marked}",
 
                 arguments = listOf(
-
                     navArgument("total") {
                         type = NavType.IntType
                     },
-
                     navArgument("answered") {
                         type = NavType.IntType
                     },
-
                     navArgument("correct") {
                         type = NavType.IntType
                     },
-
                     navArgument("wrong") {
                         type = NavType.IntType
                     },
-
                     navArgument("unattempted") {
                         type = NavType.IntType
                     },
-
                     navArgument("marked") {
                         type = NavType.IntType
                     }
@@ -298,9 +287,7 @@ fun AppNavigation() {
                     marked = marked,
 
                     onRestart = {
-
                         navController.popBackStack()
-
                     },
 
                     onBackToTests = {
@@ -317,6 +304,13 @@ fun AppNavigation() {
                         }
                     }
                 )
+            }
+
+            composable(
+                route = "test_history"
+            ) {
+
+                TestHistoryScreen()
             }
         }
     }
