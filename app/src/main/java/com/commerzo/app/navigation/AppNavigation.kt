@@ -17,6 +17,7 @@ import com.commerzo.app.ui.screens.TestHistoryScreen
 import com.commerzo.app.ui.screens.TestResultScreen
 import com.commerzo.app.ui.screens.TestScreen
 import com.commerzo.app.ui.screens.TestsScreen
+import com.commerzo.app.ui.screens.WelcomeScreen
 
 @Composable
 fun AppNavigation() {
@@ -25,14 +26,26 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = "welcome"
     ) {
 
-        composable(Screen.Home.route) {
+        composable("welcome") {
+            WelcomeScreen()
 
+            androidx.compose.runtime.LaunchedEffect(Unit) {
+                kotlinx.coroutines.delay(2500)
+
+                navController.navigate(Screen.Home.route) {
+                    popUpTo("welcome") {
+                        inclusive = true
+                    }
+                }
+            }
+        }
+
+        composable(Screen.Home.route) {
             HomeScreen(
                 onSubjectClick = { subjectId ->
-
                     navController.navigate(
                         Screen.Chapters.createRoute(subjectId)
                     )
@@ -45,10 +58,8 @@ fun AppNavigation() {
         }
 
         composable(Screen.Tests.route) {
-
             TestsScreen(
                 onStartTest = { subjectId, chapterId ->
-
                     navController.navigate(
                         Screen.Test.createRoute(
                             subjectId,
@@ -56,9 +67,7 @@ fun AppNavigation() {
                         )
                     )
                 },
-
                 onOpenHistory = {
-
                     navController.navigate("test_history")
                 }
             )
@@ -73,10 +82,8 @@ fun AppNavigation() {
         }
 
         composable(Screen.SubjectSelection.route) {
-
             SubjectSelectionScreen(
                 onSubjectClick = { subjectId ->
-
                     navController.navigate(
                         Screen.Chapters.createRoute(subjectId)
                     )
@@ -99,13 +106,10 @@ fun AppNavigation() {
 
             ChapterScreen(
                 subjectId = subjectId,
-
                 onBack = {
                     navController.popBackStack()
                 },
-
                 onChapterClick = { chapterId ->
-
                     navController.navigate(
                         Screen.Questions.createRoute(
                             subjectId,
@@ -139,7 +143,6 @@ fun AppNavigation() {
             QuestionScreen(
                 subjectId = subjectId,
                 chapterId = chapterId,
-
                 onBack = {
                     navController.popBackStack()
                 }
@@ -169,7 +172,6 @@ fun AppNavigation() {
             TestScreen(
                 subjectId = subjectId,
                 chapterId = chapterId,
-
                 onTestFinished = {
                     total,
                     answered,
@@ -182,7 +184,6 @@ fun AppNavigation() {
                         "test_result/$total/$answered/$correct/$wrong/$unattempted/$marked"
                     )
                 },
-
                 onBack = {
                     navController.popBackStack()
                 }
@@ -238,13 +239,10 @@ fun AppNavigation() {
                 wrong = wrong,
                 unattempted = unattempted,
                 marked = marked,
-
                 onRestart = {
                     navController.popBackStack()
                 },
-
                 onBackToTests = {
-
                     navController.navigate(
                         Screen.Tests.route
                     ) {
@@ -258,9 +256,7 @@ fun AppNavigation() {
             )
         }
 
-        composable(
-            route = "test_history"
-        ) {
+        composable("test_history") {
             TestHistoryScreen()
         }
     }
