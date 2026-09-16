@@ -50,7 +50,8 @@ fun TestScreen(
     val timeRemaining by viewModel.timeRemaining.collectAsState()
     val isFinished by viewModel.isFinished.collectAsState()
 
-    val currentQuestion = questions.getOrNull(currentIndex)
+    val currentState = questions.getOrNull(currentIndex)
+    val currentQuestion = currentState?.question
 
     var showSubmitDialog by remember {
         mutableStateOf(false)
