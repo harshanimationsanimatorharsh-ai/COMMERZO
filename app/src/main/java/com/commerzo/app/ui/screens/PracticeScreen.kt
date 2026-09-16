@@ -17,7 +17,7 @@ fun PracticeScreen() {
         modifier = Modifier
             .fillMaxSize()
             .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
 
         Text(
@@ -25,11 +25,16 @@ fun PracticeScreen() {
             style = MaterialTheme.typography.headlineMedium
         )
 
-        Text("Accountancy")
-        Text("Business Studies")
-        Text("Economics")
-        Text("Mathematics")
-        Text("English")
-        Text("Hindi")
+        Text(
+            text = "Choose a subject to start chapter-wise practice.",
+            style = MaterialTheme.typography.bodyMedium
+        )
+
+        Text("📚 Accountancy")
+        Text("📈 Business Studies")
+        Text("💰 Economics")
+        Text("🧮 Mathematics")
+        Text("📖 English")
+        Text("📝 Hindi")
     }
 }
