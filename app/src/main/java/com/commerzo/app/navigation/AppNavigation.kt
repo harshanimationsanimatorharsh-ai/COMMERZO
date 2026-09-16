@@ -6,12 +6,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.commerzo.app.data.repository.TestHistoryRepository
-import com.commerzo.app.ui.components.CommerzoBottomBar
 import com.commerzo.app.ui.screens.ChapterScreen
 import com.commerzo.app.ui.screens.GamesScreen
 import com.commerzo.app.ui.screens.HomeScreen
-import com.commerzo.app.ui.screens.PracticeResultScreen
 import com.commerzo.app.ui.screens.PracticeScreen
 import com.commerzo.app.ui.screens.ProfileScreen
 import com.commerzo.app.ui.screens.QuestionScreen
@@ -24,43 +21,30 @@ import com.commerzo.app.ui.screens.TestsScreen
 @Composable
 fun AppNavigation() {
 
-    val navController =
-        rememberNavController()
+    val navController = rememberNavController()
 
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route
     ) {
 
-        composable(
-            route = Screen.Home.route
-        ) {
-
+        composable(Screen.Home.route) {
             HomeScreen(
                 onSubjectClick = { subjectId ->
                     navController.navigate(
-                        Screen.Chapters.createRoute(
-                            subjectId
-                        )
+                        Screen.Chapters.createRoute(subjectId)
                     )
                 }
             )
         }
 
-        composable(
-            route = Screen.Practice.route
-        ) {
-
+        composable(Screen.Practice.route) {
             PracticeScreen()
         }
 
-        composable(
-            route = Screen.Tests.route
-        ) {
-
+        composable(Screen.Tests.route) {
             TestsScreen(
                 onStartTest = { subjectId, chapterId ->
-
                     navController.navigate(
                         Screen.Test.createRoute(
                             subjectId,
@@ -68,34 +52,21 @@ fun AppNavigation() {
                         )
                     )
                 },
-
                 onOpenHistory = {
-
-                    navController.navigate(
-                        "test_history"
-                    )
+                    navController.navigate("test_history")
                 }
             )
         }
 
-        composable(
-            route = Screen.Games.route
-        ) {
-
+        composable(Screen.Games.route) {
             GamesScreen()
         }
 
-        composable(
-            route = Screen.Profile.route
-        ) {
-
+        composable(Screen.Profile.route) {
             ProfileScreen()
         }
 
-        composable(
-            route = Screen.SubjectSelection.route
-        ) {
-
+        composable(Screen.SubjectSelection.route) {
             SubjectSelectionScreen()
         }
 
@@ -109,14 +80,12 @@ fun AppNavigation() {
         ) { backStackEntry ->
 
             val subjectId =
-                backStackEntry.arguments
-                    ?.getString("subjectId")
+                backStackEntry.arguments?.getString("subjectId")
                     ?: return@composable
 
             ChapterScreen(
                 subjectId = subjectId,
                 onChapterClick = { chapterId ->
-
                     navController.navigate(
                         Screen.Questions.createRoute(
                             subjectId,
@@ -140,13 +109,11 @@ fun AppNavigation() {
         ) { backStackEntry ->
 
             val subjectId =
-                backStackEntry.arguments
-                    ?.getString("subjectId")
+                backStackEntry.arguments?.getString("subjectId")
                     ?: return@composable
 
             val chapterId =
-                backStackEntry.arguments
-                    ?.getString("chapterId")
+                backStackEntry.arguments?.getString("chapterId")
                     ?: return@composable
 
             QuestionScreen(
@@ -171,13 +138,11 @@ fun AppNavigation() {
         ) { backStackEntry ->
 
             val subjectId =
-                backStackEntry.arguments
-                    ?.getString("subjectId")
+                backStackEntry.arguments?.getString("subjectId")
                     ?: return@composable
 
             val chapterId =
-                backStackEntry.arguments
-                    ?.getString("chapterId")
+                backStackEntry.arguments?.getString("chapterId")
                     ?: return@composable
 
             TestScreen(
@@ -192,31 +157,19 @@ fun AppNavigation() {
                     unattempted,
                     marked ->
 
-                    TestHistoryRepository.saveTest(
-                        subjectId = subjectId,
-                        chapterId = chapterId,
-                        totalQuestions = total,
-                        answered = answered,
-                        correct = correct,
-                        wrong = wrong,
-                        unattempted = unattempted,
-                        marked = marked
-                    )
-
                     navController.navigate(
                         "test_result/$total/$answered/$correct/$wrong/$unattempted/$marked"
                     )
                 },
 
-                onExit = {
+                onBack = {
                     navController.popBackStack()
                 }
             )
         }
 
         composable(
-            route =
-                "test_result/{total}/{answered}/{correct}/{wrong}/{unattempted}/{marked}",
+            route = "test_result/{total}/{answered}/{correct}/{wrong}/{unattempted}/{marked}",
             arguments = listOf(
                 navArgument("total") {
                     type = NavType.IntType
@@ -240,34 +193,22 @@ fun AppNavigation() {
         ) { backStackEntry ->
 
             val total =
-                backStackEntry.arguments
-                    ?.getInt("total")
-                    ?: 0
+                backStackEntry.arguments?.getInt("total") ?: 0
 
             val answered =
-                backStackEntry.arguments
-                    ?.getInt("answered")
-                    ?: 0
+                backStackEntry.arguments?.getInt("answered") ?: 0
 
             val correct =
-                backStackEntry.arguments
-                    ?.getInt("correct")
-                    ?: 0
+                backStackEntry.arguments?.getInt("correct") ?: 0
 
             val wrong =
-                backStackEntry.arguments
-                    ?.getInt("wrong")
-                    ?: 0
+                backStackEntry.arguments?.getInt("wrong") ?: 0
 
             val unattempted =
-                backStackEntry.arguments
-                    ?.getInt("unattempted")
-                    ?: 0
+                backStackEntry.arguments?.getInt("unattempted") ?: 0
 
             val marked =
-                backStackEntry.arguments
-                    ?.getInt("marked")
-                    ?: 0
+                backStackEntry.arguments?.getInt("marked") ?: 0
 
             TestResultScreen(
                 total = total,
@@ -278,20 +219,12 @@ fun AppNavigation() {
                 marked = marked,
 
                 onRestart = {
-                    navController.popBackStack(
-                        Screen.Test.route,
-                        inclusive = false
-                    )
+                    navController.popBackStack()
                 },
 
                 onBackToTests = {
-
-                    navController.navigate(
-                        Screen.Tests.route
-                    ) {
-                        popUpTo(
-                            Screen.Tests.route
-                        ) {
+                    navController.navigate(Screen.Tests.route) {
+                        popUpTo(Screen.Tests.route) {
                             inclusive = false
                         }
                     }
@@ -299,10 +232,7 @@ fun AppNavigation() {
             )
         }
 
-        composable(
-            route = "test_history"
-        ) {
-
+        composable("test_history") {
             TestHistoryScreen()
         }
     }
