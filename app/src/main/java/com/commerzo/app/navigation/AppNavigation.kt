@@ -17,6 +17,7 @@ import com.commerzo.app.ui.screens.PracticeScreen
 import com.commerzo.app.ui.screens.ProfileScreen
 import com.commerzo.app.ui.screens.QuestionScreen
 import com.commerzo.app.ui.screens.SubjectSelectionScreen
+import com.commerzo.app.ui.screens.TestScreen
 import com.commerzo.app.ui.screens.TestsScreen
 
 @Composable
@@ -71,7 +72,19 @@ fun AppNavigation() {
                 Screen.Tests.route
             ) {
 
-                TestsScreen()
+                TestsScreen(
+                    onStartTest = {
+                            subjectId,
+                            chapterId ->
+
+                        navController.navigate(
+                            Screen.Test.createRoute(
+                                subjectId = subjectId,
+                                chapterId = chapterId
+                            )
+                        )
+                    }
+                )
             }
 
             composable(
@@ -180,6 +193,50 @@ fun AppNavigation() {
                         ?: return@composable
 
                 QuestionScreen(
+
+                    subjectId = subjectId,
+
+                    chapterId = chapterId,
+
+                    onBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(
+
+                route =
+                    Screen.Test.route,
+
+                arguments = listOf(
+
+                    navArgument("subjectId") {
+                        type =
+                            NavType.StringType
+                    },
+
+                    navArgument("chapterId") {
+                        type =
+                            NavType.StringType
+                    }
+                )
+
+            ) { backStackEntry ->
+
+                val subjectId =
+                    backStackEntry
+                        .arguments
+                        ?.getString("subjectId")
+                        ?: return@composable
+
+                val chapterId =
+                    backStackEntry
+                        .arguments
+                        ?.getString("chapterId")
+                        ?: return@composable
+
+                TestScreen(
 
                     subjectId = subjectId,
 
