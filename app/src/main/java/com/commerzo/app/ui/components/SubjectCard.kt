@@ -23,15 +23,19 @@ fun SubjectCard(
     subject: SubjectData,
     onClick: () -> Unit = {}
 ) {
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable {
+                onClick()
+            },
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
+
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -42,9 +46,12 @@ fun SubjectCard(
                 style = MaterialTheme.typography.headlineSmall
             )
 
-            Spacer(modifier = Modifier.width(14.dp))
+            Spacer(
+                modifier = Modifier.width(14.dp)
+            )
 
             Column {
+
                 Text(
                     text = subject.name,
                     style = MaterialTheme.typography.titleMedium
@@ -52,6 +59,11 @@ fun SubjectCard(
 
                 Text(
                     text = "${subject.chaptersCount} chapters",
+                    style = MaterialTheme.typography.bodySmall
+                )
+
+                Text(
+                    text = "${subject.classLevel.displayName} • ${subject.board.displayName}",
                     style = MaterialTheme.typography.bodySmall
                 )
             }
