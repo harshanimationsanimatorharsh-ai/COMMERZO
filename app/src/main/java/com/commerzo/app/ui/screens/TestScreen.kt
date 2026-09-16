@@ -142,7 +142,6 @@ fun TestScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-
             Text(
                 text = "Question ${currentIndex + 1}/${questions.size}",
                 style = MaterialTheme.typography.titleMedium
@@ -187,7 +186,9 @@ fun TestScreen(
                     modifier = Modifier.height(16.dp)
                 )
 
-                currentQuestion.options.forEachIndexed { index, option ->
+                for (index in currentQuestion.options.indices) {
+
+                    val option = currentQuestion.options[index]
 
                     TestQuestionOption(
                         index = index,
