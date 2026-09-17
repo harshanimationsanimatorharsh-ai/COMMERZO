@@ -1,212 +1,321 @@
 package com.commerzo.app.data.repository
 
+import com.commerzo.app.data.model.Board
+import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.model.Question
+import com.commerzo.app.data.model.QuestionDifficulty
 
 class QuestionRepository {
 
     fun getQuestions(
         subjectId: String,
-        chapterId: String
+        chapterId: String,
+        board: Board = Board.MP_BOARD,
+        classLevel: ClassLevel = ClassLevel.CLASS_12
     ): List<Question> {
 
         return when (chapterId) {
 
-            "accounting_for_partnership" -> listOf(
-                Question(
-                    id = "acc_001",
-                    question = "Partnership deed is a document containing the terms and conditions agreed upon by the partners.",
-                    options = listOf(
-                        "True",
-                        "False",
-                        "Only for companies",
-                        "Only for banks"
-                    ),
-                    correctAnswer = 0,
-                    explanation = "A partnership deed contains the terms and conditions mutually agreed upon by the partners.",
-                    subjectId = subjectId,
-                    chapterId = chapterId
-                ),
-                Question(
-                    id = "acc_002",
-                    question = "In the absence of an agreement, partners generally share profits and losses in:",
-                    options = listOf(
-                        "Equal ratio",
-                        "Capital ratio",
-                        "Sales ratio",
-                        "Current account ratio"
-                    ),
-                    correctAnswer = 0,
-                    explanation = "In the absence of an agreement, profits and losses are shared equally.",
-                    subjectId = subjectId,
-                    chapterId = chapterId
-                ),
-                Question(
-                    id = "acc_003",
-                    question = "Interest on partner's capital is allowed only when it is provided by:",
-                    options = listOf(
-                        "Partnership agreement",
-                        "Bank",
-                        "Government",
-                        "Customer"
-                    ),
-                    correctAnswer = 0,
-                    explanation = "Interest on capital is allowed according to the terms of the partnership agreement.",
-                    subjectId = subjectId,
-                    chapterId = chapterId
-                ),
-                Question(
-                    id = "acc_004",
-                    question = "The account prepared to distribute profits among partners is called:",
-                    options = listOf(
-                        "Profit and Loss Appropriation Account",
-                        "Cash Account",
-                        "Sales Account",
-                        "Purchase Account"
-                    ),
-                    correctAnswer = 0,
-                    explanation = "The Profit and Loss Appropriation Account shows the distribution of profit among partners.",
-                    subjectId = subjectId,
-                    chapterId = chapterId
-                ),
-                Question(
-                    id = "acc_005",
-                    question = "A partner is an agent of:",
-                    options = listOf(
-                        "The firm",
-                        "The bank",
-                        "The government",
-                        "Customers only"
-                    ),
-                    correctAnswer = 0,
-                    explanation = "Every partner is an agent of the firm for the purpose of its business.",
-                    subjectId = subjectId,
-                    chapterId = chapterId
-                )
+            "accountancy_class_12_1" -> accountancyPartnership(
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel
             )
 
-            "nature_significance_management" -> listOf(
-                Question(
-                    id = "bst_001",
-                    question = "Management is the process of getting things done through and with people.",
-                    options = listOf(
-                        "True",
-                        "False",
-                        "Only partly true",
-                        "None of these"
-                    ),
-                    correctAnswer = 0,
-                    explanation = "Management involves getting work done through and with people to achieve organisational objectives.",
-                    subjectId = subjectId,
-                    chapterId = chapterId
-                ),
-                Question(
-                    id = "bst_002",
-                    question = "Which function of management involves setting objectives?",
-                    options = listOf(
-                        "Planning",
-                        "Staffing",
-                        "Directing",
-                        "Controlling"
-                    ),
-                    correctAnswer = 0,
-                    explanation = "Planning involves setting objectives and deciding the course of action to achieve them.",
-                    subjectId = subjectId,
-                    chapterId = chapterId
-                )
+            "business_studies_class_12_1" -> businessManagement(
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel
             )
 
-            "national_income_accounting" -> listOf(
-                Question(
-                    id = "eco_001",
-                    question = "GDP stands for:",
-                    options = listOf(
-                        "Gross Domestic Product",
-                        "General Domestic Product",
-                        "Gross Development Product",
-                        "General Development Price"
-                    ),
-                    correctAnswer = 0,
-                    explanation = "GDP means Gross Domestic Product.",
-                    subjectId = subjectId,
-                    chapterId = chapterId
-                ),
-                Question(
-                    id = "eco_002",
-                    question = "National income is generally measured over a period of:",
-                    options = listOf(
-                        "One year",
-                        "One day",
-                        "One week",
-                        "One month only"
-                    ),
-                    correctAnswer = 0,
-                    explanation = "National income is a flow concept and is generally measured over a period of one year.",
-                    subjectId = subjectId,
-                    chapterId = chapterId
-                )
+            "economics_class_12_1" -> nationalIncome(
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel
             )
 
-            "matrices" -> listOf(
-                Question(
-                    id = "math_001",
-                    question = "A matrix having the same number of rows and columns is called:",
-                    options = listOf(
-                        "Square matrix",
-                        "Row matrix",
-                        "Column matrix",
-                        "Zero matrix"
-                    ),
-                    correctAnswer = 0,
-                    explanation = "A matrix with equal numbers of rows and columns is called a square matrix.",
-                    subjectId = subjectId,
-                    chapterId = chapterId
-                ),
-                Question(
-                    id = "math_002",
-                    question = "A matrix having all its elements equal to zero is called:",
-                    options = listOf(
-                        "Zero matrix",
-                        "Identity matrix",
-                        "Unit matrix",
-                        "Diagonal matrix"
-                    ),
-                    correctAnswer = 0,
-                    explanation = "A matrix in which every element is zero is called a zero matrix.",
-                    subjectId = subjectId,
-                    chapterId = chapterId
-                )
+            "mathematics_class_12_3" -> matrices(
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel
             )
 
-            else -> listOf(
-                Question(
-                    id = "demo_001",
-                    question = "COMMERZO practice question is ready. What should you do after selecting an answer?",
-                    options = listOf(
-                        "Submit the answer",
-                        "Close the app",
-                        "Delete the question",
-                        "Skip the entire subject"
-                    ),
-                    correctAnswer = 0,
-                    explanation = "Select an option and press Submit to check your answer.",
-                    subjectId = subjectId,
-                    chapterId = chapterId
-                ),
-                Question(
-                    id = "demo_002",
-                    question = "What does COMMERZO focus on?",
-                    options = listOf(
-                        "Learning and practice",
-                        "Only entertainment",
-                        "Only chatting",
-                        "Only video editing"
-                    ),
-                    correctAnswer = 0,
-                    explanation = "COMMERZO is being built as a learning, practice and test platform.",
-                    subjectId = subjectId,
-                    chapterId = chapterId
-                )
+            else -> demoQuestions(
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel
             )
         }
+    }
+
+    private fun accountancyPartnership(
+        subjectId: String,
+        chapterId: String,
+        board: Board,
+        classLevel: ClassLevel
+    ): List<Question> {
+        return listOf(
+            Question(
+                id = "acc_partnership_001",
+                question = "Partnership deed is a document containing the terms and conditions of partnership.",
+                options = listOf(
+                    "True",
+                    "False",
+                    "Only for companies",
+                    "Only for sole traders"
+                ),
+                correctAnswer = 0,
+                explanation = "A partnership deed records the terms and conditions agreed upon by partners.",
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel,
+                difficulty = QuestionDifficulty.EASY,
+                tags = listOf("partnership", "basics")
+            ),
+            Question(
+                id = "acc_partnership_002",
+                question = "In the absence of an agreement, partners generally share profits and losses in which ratio?",
+                options = listOf(
+                    "Capital ratio",
+                    "Equal ratio",
+                    "Sales ratio",
+                    "Current account ratio"
+                ),
+                correctAnswer = 1,
+                explanation = "In the absence of an agreement, profits and losses are shared equally among partners.",
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel,
+                difficulty = QuestionDifficulty.MEDIUM,
+                tags = listOf("profit", "loss", "partnership")
+            ),
+            Question(
+                id = "acc_partnership_003",
+                question = "Which account is prepared to record changes in the values of assets and liabilities during reconstitution?",
+                options = listOf(
+                    "Capital Account",
+                    "Cash Account",
+                    "Revaluation Account",
+                    "Trading Account"
+                ),
+                correctAnswer = 2,
+                explanation = "The Revaluation Account records increases or decreases in the values of assets and liabilities.",
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel,
+                difficulty = QuestionDifficulty.MEDIUM,
+                tags = listOf("revaluation", "reconstitution")
+            ),
+            Question(
+                id = "acc_partnership_004",
+                question = "Goodwill represents the reputation and other intangible advantages of a business.",
+                options = listOf(
+                    "True",
+                    "False",
+                    "Only a current asset",
+                    "Only a liability"
+                ),
+                correctAnswer = 0,
+                explanation = "Goodwill is an intangible asset representing the reputation and earning advantage of a business.",
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel,
+                difficulty = QuestionDifficulty.EASY,
+                tags = listOf("goodwill", "intangible-asset")
+            ),
+            Question(
+                id = "acc_partnership_005",
+                question = "When a new partner is admitted, the new partner usually brings goodwill for his or her share.",
+                options = listOf(
+                    "Never",
+                    "Only when business closes",
+                    "Usually",
+                    "Only in a company"
+                ),
+                correctAnswer = 2,
+                explanation = "On admission, a new partner may bring goodwill as compensation to existing partners for the share acquired.",
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel,
+                difficulty = QuestionDifficulty.MEDIUM,
+                tags = listOf("admission", "goodwill")
+            )
+        )
+    }
+
+    private fun businessManagement(
+        subjectId: String,
+        chapterId: String,
+        board: Board,
+        classLevel: ClassLevel
+    ): List<Question> {
+        return listOf(
+            Question(
+                id = "bst_management_001",
+                question = "Management is the process of getting things done effectively and efficiently.",
+                options = listOf(
+                    "True",
+                    "False",
+                    "Only a production activity",
+                    "Only a financial activity"
+                ),
+                correctAnswer = 0,
+                explanation = "Management involves achieving organisational goals effectively and efficiently.",
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel,
+                difficulty = QuestionDifficulty.EASY,
+                tags = listOf("management", "basics")
+            ),
+            Question(
+                id = "bst_management_002",
+                question = "Which function of management involves setting objectives and deciding in advance what should be done?",
+                options = listOf(
+                    "Planning",
+                    "Staffing",
+                    "Directing",
+                    "Controlling"
+                ),
+                correctAnswer = 0,
+                explanation = "Planning involves setting objectives and deciding in advance the course of action.",
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel,
+                difficulty = QuestionDifficulty.EASY,
+                tags = listOf("planning", "functions")
+            )
+        )
+    }
+
+    private fun nationalIncome(
+        subjectId: String,
+        chapterId: String,
+        board: Board,
+        classLevel: ClassLevel
+    ): List<Question> {
+        return listOf(
+            Question(
+                id = "eco_national_income_001",
+                question = "GDP measures the value of final goods and services produced within a country's domestic territory.",
+                options = listOf(
+                    "True",
+                    "False",
+                    "Only exports",
+                    "Only imports"
+                ),
+                correctAnswer = 0,
+                explanation = "GDP measures the market value of final goods and services produced within domestic territory during a period.",
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel,
+                difficulty = QuestionDifficulty.EASY,
+                tags = listOf("GDP", "national-income")
+            ),
+            Question(
+                id = "eco_national_income_002",
+                question = "Which of the following is deducted from GDP at market price to obtain GDP at factor cost?",
+                options = listOf(
+                    "Subsidies",
+                    "Net factor income",
+                    "Net indirect taxes",
+                    "Depreciation"
+                ),
+                correctAnswer = 2,
+                explanation = "GDP at factor cost can be obtained by subtracting net indirect taxes from GDP at market price.",
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel,
+                difficulty = QuestionDifficulty.MEDIUM,
+                tags = listOf("GDP", "factor-cost", "taxes")
+            )
+        )
+    }
+
+    private fun matrices(
+        subjectId: String,
+        chapterId: String,
+        board: Board,
+        classLevel: ClassLevel
+    ): List<Question> {
+        return listOf(
+            Question(
+                id = "math_matrices_001",
+                question = "A matrix having the same number of rows and columns is called a square matrix.",
+                options = listOf(
+                    "True",
+                    "False",
+                    "Row matrix",
+                    "Column matrix"
+                ),
+                correctAnswer = 0,
+                explanation = "A square matrix has an equal number of rows and columns.",
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel,
+                difficulty = QuestionDifficulty.EASY,
+                tags = listOf("matrices", "square-matrix")
+            ),
+            Question(
+                id = "math_matrices_002",
+                question = "If a matrix has 3 rows and 2 columns, what is its order?",
+                options = listOf(
+                    "2 × 3",
+                    "3 × 2",
+                    "3 × 3",
+                    "2 × 2"
+                ),
+                correctAnswer = 1,
+                explanation = "The order of a matrix is written as rows × columns. Therefore, the order is 3 × 2.",
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel,
+                difficulty = QuestionDifficulty.EASY,
+                tags = listOf("matrices", "order")
+            )
+        )
+    }
+
+    private fun demoQuestions(
+        subjectId: String,
+        chapterId: String,
+        board: Board,
+        classLevel: ClassLevel
+    ): List<Question> {
+        return listOf(
+            Question(
+                id = "${chapterId}_demo_001",
+                question = "This chapter's question bank is ready to be expanded with verified questions.",
+                options = listOf(
+                    "Question bank",
+                    "Attendance",
+                    "Profile",
+                    "Settings"
+                ),
+                correctAnswer = 0,
+                explanation = "COMMERZO uses a chapter-wise question architecture so verified questions can be added chapter by chapter.",
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel,
+                difficulty = QuestionDifficulty.EASY,
+                tags = listOf("demo", "chapter")
+            )
+        )
     }
 }
