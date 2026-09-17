@@ -41,36 +41,19 @@ fun QuestionScreen(
     subjectId: String,
     chapterId: String,
     onBack: () -> Unit,
-    questionViewModel: PracticeSessionViewModel =
-        viewModel()
+    questionViewModel: PracticeSessionViewModel = viewModel()
 ) {
 
-    val questions by
-        questionViewModel.questions.collectAsState()
-
-    val currentIndex by
-        questionViewModel.currentIndex.collectAsState()
-
-    val selectedAnswer by
-        questionViewModel.selectedAnswer.collectAsState()
-
-    val submitted by
-        questionViewModel.submitted.collectAsState()
-
-    val correctAnswers by
-        questionViewModel.correctAnswers.collectAsState()
-
-    val wrongAnswers by
-        questionViewModel.wrongAnswers.collectAsState()
-
-    val unattemptedAnswers by
-        questionViewModel.unattemptedAnswers.collectAsState()
-
-    val isFinished by
-        questionViewModel.isFinished.collectAsState()
-
-    val bookmarkedQuestions by
-        questionViewModel.bookmarkedQuestions.collectAsState()
+    val questions by questionViewModel.questions.collectAsState()
+    val currentIndex by questionViewModel.currentIndex.collectAsState()
+    val selectedAnswer by questionViewModel.selectedAnswer.collectAsState()
+    val submitted by questionViewModel.submitted.collectAsState()
+    val correctAnswers by questionViewModel.correctAnswers.collectAsState()
+    val wrongAnswers by questionViewModel.wrongAnswers.collectAsState()
+    val unattemptedAnswers by questionViewModel.unattemptedAnswers.collectAsState()
+    val isFinished by questionViewModel.isFinished.collectAsState()
+    val bookmarkedQuestions by questionViewModel.bookmarkedQuestions.collectAsState()
+    val answeredQuestions by questionViewModel.answeredQuestions.collectAsState()
 
     LaunchedEffect(subjectId, chapterId) {
         questionViewModel.loadQuestions(
@@ -134,11 +117,26 @@ fun QuestionScreen(
         return
     }
 
-    val currentQuestion = questions[currentIndex]
+    val currentQuestion =
+        questions.getOrNull(currentIndex)
+            ?: return
+
+    val totalQuestions =
+        questions.size
+
+    val answeredCount =
+        answeredQuestions.size
 
     val progress =
+        if (totalQuestions > 0) {
+            answeredCount.toFloat() / totalQuestions.toFloat()
+        } else {
+            0f
+        }
+
+    val questionProgress =
         (currentIndex + 1).toFloat() /
-            questions.size.toFloat()
+            totalQuestions.toFloat()
 
     val isBookmarked =
         bookmarkedQuestions.contains(currentQuestion.id)
@@ -156,7 +154,6 @@ fun QuestionScreen(
                     IconButton(
                         onClick = onBack
                     ) {
-
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back"
@@ -180,7 +177,12 @@ fun QuestionScreen(
                                     Icons.Default.BookmarkBorder
                                 },
 
-                            contentDescription = "Bookmark"
+                            contentDescription =
+                                if (isBookmarked) {
+                                    "Remove bookmark"
+                                } else {
+                                    "Bookmark question"
+                                }
                         )
                     }
                 }
@@ -212,16 +214,22 @@ fun QuestionScreen(
 
                     Text(
                         text =
-                            "Question ${currentIndex + 1}/${questions.size}",
+                            "Question ${currentIndex + 1}/$totalQuestions",
+
                         style =
-                            MaterialTheme.typography.titleMedium
+                            MaterialTheme
+                                .typography
+                                .titleMedium
                     )
 
                     Text(
                         text =
-                            "Score: $correctAnswers",
+                            "Answered: $answeredCount/$totalQuestions",
+
                         style =
-                            MaterialTheme.typography.titleMedium
+                            MaterialTheme
+                                .typography
+                                .titleMedium
                     )
                 }
 
@@ -231,9 +239,25 @@ fun QuestionScreen(
 
                 LinearProgressIndicator(
                     progress = {
-                        progress
+                        questionProgress
                     },
-                    modifier = Modifier.fillMaxWidth()
+
+                    modifier =
+                        Modifier.fillMaxWidth()
+                )
+
+                Spacer(
+                    modifier = Modifier.height(6.dp)
+                )
+
+                Text(
+                    text =
+                        "Completed: ${(progress * 100).toInt()}%",
+
+                    style =
+                        MaterialTheme
+                            .typography
+                            .bodyMedium
                 )
 
                 Spacer(
@@ -295,7 +319,8 @@ fun QuestionScreen(
                             index !=
                             currentQuestion.correctAnswer,
 
-                    enabled = !submitted,
+                    enabled =
+                        !submitted,
 
                     onClick = {
                         questionViewModel.selectAnswer(index)
