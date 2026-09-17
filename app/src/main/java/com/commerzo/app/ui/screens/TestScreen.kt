@@ -51,12 +51,12 @@ fun TestScreen(
     val timeRemaining by viewModel.timeRemaining.collectAsState()
     val isFinished by viewModel.isFinished.collectAsState()
 
-    val currentState = questions.getOrNull(currentIndex)
-    val currentQuestion = currentState?.question
-
     var showSubmitDialog by remember {
         mutableStateOf(false)
     }
+
+    val currentState = questions.getOrNull(currentIndex)
+    val currentQuestion = currentState?.question
 
     LaunchedEffect(subjectId, chapterId) {
         viewModel.loadTest(
@@ -182,7 +182,7 @@ fun TestScreen(
         )
 
         Text(
-            text = "Answered: ${viewModel.getAnsweredCount()}",
+            text = "Answered: ${viewModel.getAnsweredCount()} / ${questions.size}",
             style = MaterialTheme.typography.bodyMedium
         )
 
@@ -207,9 +207,7 @@ fun TestScreen(
                     modifier = Modifier.height(16.dp)
                 )
 
-                for (index in currentQuestion.options.indices) {
-
-                    val option = currentQuestion.options[index]
+                currentQuestion.options.forEachIndexed { index, option ->
 
                     TestQuestionOption(
                         index = index,
