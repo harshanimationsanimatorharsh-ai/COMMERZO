@@ -24,6 +24,16 @@ fun SubjectCard(
     onClick: () -> Unit = {}
 ) {
 
+    val className = when (subject.classLevel) {
+        com.commerzo.app.data.model.ClassLevel.CLASS_11 -> "Class 11"
+        com.commerzo.app.data.model.ClassLevel.CLASS_12 -> "Class 12"
+    }
+
+    val boardName = when (subject.board) {
+        com.commerzo.app.data.model.Board.CBSE -> "CBSE"
+        com.commerzo.app.data.model.Board.MP_BOARD -> "MP Board"
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -63,7 +73,7 @@ fun SubjectCard(
                 )
 
                 Text(
-                    text = "${subject.classLevel.displayName} • ${subject.board.displayName}",
+                    text = "$className • $boardName",
                     style = MaterialTheme.typography.bodySmall
                 )
             }
