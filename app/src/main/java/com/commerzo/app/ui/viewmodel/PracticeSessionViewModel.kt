@@ -239,6 +239,44 @@ class PracticeSessionViewModel(
         saveBookmarks(finalBookmarks)
     }
 
+    fun removeBookmark(
+        questionId: String
+    ) {
+
+        if (
+            !_bookmarkedQuestions.value
+                .contains(questionId)
+        ) {
+            return
+        }
+
+        val updatedBookmarks =
+            _bookmarkedQuestions.value
+                .toMutableSet()
+
+        updatedBookmarks.remove(
+            questionId
+        )
+
+        val finalBookmarks =
+            updatedBookmarks.toSet()
+
+        _bookmarkedQuestions.value =
+            finalBookmarks
+
+        saveBookmarks(finalBookmarks)
+    }
+
+    fun clearAllBookmarks() {
+
+        _bookmarkedQuestions.value =
+            emptySet()
+
+        saveBookmarks(
+            emptySet()
+        )
+    }
+
     fun isCurrentQuestionBookmarked(): Boolean {
 
         val currentQuestion =
