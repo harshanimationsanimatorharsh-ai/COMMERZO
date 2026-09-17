@@ -53,10 +53,13 @@ fun AppNavigation() {
                 CommerzoBottomBar(
                     currentRoute = currentRoute,
                     onNavigate = { route ->
+
                         navController.navigate(route) {
+
                             popUpTo("home") {
                                 saveState = true
                             }
+
                             launchSingleTop = true
                             restoreState = true
                         }
@@ -73,9 +76,11 @@ fun AppNavigation() {
         ) {
 
             composable("home") {
+
                 HomeScreen(
                     viewModel = homeViewModel,
                     onSubjectClick = { subject ->
+
                         navController.navigate(
                             "chapters/${subject.id}/${subject.name}/${subject.board.name}/${subject.classLevel.name}"
                         )
@@ -84,6 +89,7 @@ fun AppNavigation() {
             }
 
             composable("practice") {
+
                 PracticeScreen(
                     onSubjectClick = {
                         navController.navigate("subjects")
@@ -92,6 +98,7 @@ fun AppNavigation() {
             }
 
             composable("tests") {
+
                 TestsScreen(
                     onSubjectClick = {
                         navController.navigate("subjects")
@@ -108,9 +115,11 @@ fun AppNavigation() {
             }
 
             composable("subjects") {
+
                 SubjectSelectionScreen(
                     viewModel = subjectSelectionViewModel,
                     onSubjectClick = { subject ->
+
                         navController.navigate(
                             "chapters/${subject.id}/${subject.name}/${subject.board.name}/${subject.classLevel.name}"
                         )
@@ -121,15 +130,19 @@ fun AppNavigation() {
             composable(
                 route = "chapters/{subjectId}/{subjectName}/{board}/{classLevel}",
                 arguments = listOf(
+
                     navArgument("subjectId") {
                         type = NavType.StringType
                     },
+
                     navArgument("subjectName") {
                         type = NavType.StringType
                     },
+
                     navArgument("board") {
                         type = NavType.StringType
                     },
+
                     navArgument("classLevel") {
                         type = NavType.StringType
                     }
@@ -137,34 +150,41 @@ fun AppNavigation() {
             ) { entry ->
 
                 val subjectId =
-                    entry.arguments?.getString("subjectId") ?: return@composable
+                    entry.arguments?.getString("subjectId")
+                        ?: return@composable
 
                 val subjectName =
-                    entry.arguments?.getString("subjectName") ?: return@composable
+                    entry.arguments?.getString("subjectName")
+                        ?: return@composable
 
-                val board = runCatching {
-                    Board.valueOf(
-                        entry.arguments?.getString("board")
-                            ?: Board.MP_BOARD.name
-                    )
-                }.getOrDefault(Board.MP_BOARD)
+                val board =
+                    runCatching {
+                        Board.valueOf(
+                            entry.arguments?.getString("board")
+                                ?: Board.MP_BOARD.name
+                        )
+                    }.getOrDefault(Board.MP_BOARD)
 
-                val classLevel = runCatching {
-                    ClassLevel.valueOf(
-                        entry.arguments?.getString("classLevel")
-                            ?: ClassLevel.CLASS_12.name
-                    )
-                }.getOrDefault(ClassLevel.CLASS_12)
+                val classLevel =
+                    runCatching {
+                        ClassLevel.valueOf(
+                            entry.arguments?.getString("classLevel")
+                                ?: ClassLevel.CLASS_12.name
+                        )
+                    }.getOrDefault(ClassLevel.CLASS_12)
 
                 ChapterScreen(
                     subjectId = subjectId,
                     subjectName = subjectName,
                     board = board,
                     classLevel = classLevel,
+
                     onBack = {
                         navController.popBackStack()
                     },
+
                     onChapterClick = { chapterId, chapterTitle ->
+
                         navController.navigate(
                             "questions/$subjectId/$chapterId/$chapterTitle"
                         )
@@ -175,12 +195,15 @@ fun AppNavigation() {
             composable(
                 route = "questions/{subjectId}/{chapterId}/{chapterTitle}",
                 arguments = listOf(
+
                     navArgument("subjectId") {
                         type = NavType.StringType
                     },
+
                     navArgument("chapterId") {
                         type = NavType.StringType
                     },
+
                     navArgument("chapterTitle") {
                         type = NavType.StringType
                     }
@@ -188,14 +211,17 @@ fun AppNavigation() {
             ) { entry ->
 
                 val subjectId =
-                    entry.arguments?.getString("subjectId") ?: return@composable
+                    entry.arguments?.getString("subjectId")
+                        ?: return@composable
 
                 val chapterId =
-                    entry.arguments?.getString("chapterId") ?: return@composable
+                    entry.arguments?.getString("chapterId")
+                        ?: return@composable
 
                 QuestionScreen(
                     subjectId = subjectId,
                     chapterId = chapterId,
+
                     onBack = {
                         navController.popBackStack()
                     }
@@ -205,9 +231,11 @@ fun AppNavigation() {
             composable(
                 route = "test/{subjectId}/{chapterId}",
                 arguments = listOf(
+
                     navArgument("subjectId") {
                         type = NavType.StringType
                     },
+
                     navArgument("chapterId") {
                         type = NavType.StringType
                     }
@@ -215,24 +243,31 @@ fun AppNavigation() {
             ) { entry ->
 
                 val subjectId =
-                    entry.arguments?.getString("subjectId") ?: return@composable
+                    entry.arguments?.getString("subjectId")
+                        ?: return@composable
 
                 val chapterId =
-                    entry.arguments?.getString("chapterId") ?: return@composable
+                    entry.arguments?.getString("chapterId")
+                        ?: return@composable
 
                 TestScreen(
                     subjectId = subjectId,
                     chapterId = chapterId,
-                    onFinish = {
+
+                    onTestFinished = { _, _, _, _, _, _ ->
+
                         navController.navigate(
                             "test_result/$subjectId/$chapterId"
                         ) {
-                            popUpTo("test/$subjectId/$chapterId") {
+                            popUpTo(
+                                "test/$subjectId/$chapterId"
+                            ) {
                                 inclusive = true
                             }
                         }
                     },
-                    onExit = {
+
+                    onBack = {
                         navController.popBackStack()
                     }
                 )
@@ -241,9 +276,11 @@ fun AppNavigation() {
             composable(
                 route = "test_result/{subjectId}/{chapterId}",
                 arguments = listOf(
+
                     navArgument("subjectId") {
                         type = NavType.StringType
                     },
+
                     navArgument("chapterId") {
                         type = NavType.StringType
                     }
@@ -251,22 +288,30 @@ fun AppNavigation() {
             ) { entry ->
 
                 val subjectId =
-                    entry.arguments?.getString("subjectId") ?: return@composable
+                    entry.arguments?.getString("subjectId")
+                        ?: return@composable
 
                 val chapterId =
-                    entry.arguments?.getString("chapterId") ?: return@composable
+                    entry.arguments?.getString("chapterId")
+                        ?: return@composable
 
                 TestResultScreen(
+
                     onRestart = {
+
                         navController.navigate(
                             "test/$subjectId/$chapterId"
                         )
                     },
+
                     onBackToTests = {
+
                         navController.navigate("tests") {
+
                             popUpTo("home") {
                                 inclusive = false
                             }
+
                             launchSingleTop = true
                         }
                     }
