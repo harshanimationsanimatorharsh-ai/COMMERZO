@@ -18,47 +18,52 @@ class SubjectRepository {
                 emoji = "📊",
                 board = board,
                 classLevel = classLevel,
-                chaptersCount = 5
+                chaptersCount = 0
             ),
+
             SubjectData(
                 id = "business_studies",
                 name = "Business Studies",
                 emoji = "💼",
                 board = board,
                 classLevel = classLevel,
-                chaptersCount = 5
+                chaptersCount = 0
             ),
+
             SubjectData(
                 id = "economics",
                 name = "Economics",
                 emoji = "📈",
                 board = board,
                 classLevel = classLevel,
-                chaptersCount = 5
+                chaptersCount = 0
             ),
+
             SubjectData(
                 id = "mathematics",
                 name = "Mathematics",
                 emoji = "🧮",
                 board = board,
                 classLevel = classLevel,
-                chaptersCount = 5
+                chaptersCount = 0
             ),
+
             SubjectData(
                 id = "english",
                 name = "English",
                 emoji = "📖",
                 board = board,
                 classLevel = classLevel,
-                chaptersCount = 3
+                chaptersCount = 0
             ),
+
             SubjectData(
                 id = "hindi",
                 name = "Hindi",
                 emoji = "📝",
                 board = board,
                 classLevel = classLevel,
-                chaptersCount = 3
+                chaptersCount = 0
             )
         )
     }
