@@ -1,6 +1,8 @@
 package com.commerzo.app.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,445 +10,652 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.NavigateBefore
+import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.commerzo.app.ui.components.AnswerOption
+import com.commerzo.app.data.model.Board
+import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.ui.viewmodel.PracticeSessionViewModel
+import androidx.compose.runtime.collectAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuestionScreen(
     subjectId: String,
     chapterId: String,
+    board: Board = Board.MP_BOARD,
+    classLevel: ClassLevel = ClassLevel.CLASS_12,
     onBack: () -> Unit,
-    questionViewModel: PracticeSessionViewModel = viewModel()
+    viewModel: PracticeSessionViewModel = viewModel()
 ) {
 
-    val questions by questionViewModel.questions.collectAsState()
-    val currentIndex by questionViewModel.currentIndex.collectAsState()
-    val selectedAnswer by questionViewModel.selectedAnswer.collectAsState()
-    val submitted by questionViewModel.submitted.collectAsState()
-    val correctAnswers by questionViewModel.correctAnswers.collectAsState()
-    val wrongAnswers by questionViewModel.wrongAnswers.collectAsState()
-    val unattemptedAnswers by questionViewModel.unattemptedAnswers.collectAsState()
-    val isFinished by questionViewModel.isFinished.collectAsState()
-    val bookmarkedQuestions by questionViewModel.bookmarkedQuestions.collectAsState()
-    val answeredQuestions by questionViewModel.answeredQuestions.collectAsState()
+    val questions by viewModel.questions.collectAsState()
+    val currentIndex by viewModel.currentIndex.collectAsState()
+    val selectedAnswer by viewModel.selectedAnswer.collectAsState()
+    val submitted by viewModel.submitted.collectAsState()
+    val correctAnswers by viewModel.correctAnswers.collectAsState()
+    val wrongAnswers by viewModel.wrongAnswers.collectAsState()
+    val answeredQuestions by viewModel.answeredQuestions.collectAsState()
+    val isFinished by viewModel.isFinished.collectAsState()
+    val bookmarkedQuestions by viewModel.bookmarkedQuestions.collectAsState()
 
-    LaunchedEffect(subjectId, chapterId) {
-        questionViewModel.loadQuestions(
+    LaunchedEffect(subjectId, chapterId, board, classLevel) {
+        viewModel.loadQuestions(
             subjectId = subjectId,
-            chapterId = chapterId
+            chapterId = chapterId,
+            board = board,
+            classLevel = classLevel
         )
     }
 
-    if (questions.isEmpty()) {
-
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text("Practice")
-                    },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = onBack
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Back"
-                            )
-                        }
-                    }
-                )
-            }
-        ) { paddingValues ->
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(20.dp)
-            ) {
-                Text(
-                    text = "No questions available yet."
-                )
-            }
-        }
-
-        return
-    }
-
-    if (isFinished) {
-
-        PracticeResultScreen(
-            totalQuestions = questions.size,
-            correctAnswers = correctAnswers,
-            wrongAnswers = wrongAnswers,
-            unattemptedAnswers = unattemptedAnswers,
-            onRestart = {
-                questionViewModel.restart()
-            },
-            onBackToChapters = {
-                onBack()
-            }
-        )
-
-        return
-    }
-
-    val currentQuestion =
-        questions.getOrNull(currentIndex)
-            ?: return
-
-    val totalQuestions =
-        questions.size
-
-    val answeredCount =
-        answeredQuestions.size
-
-    val progress =
-        if (totalQuestions > 0) {
-            answeredCount.toFloat() / totalQuestions.toFloat()
-        } else {
-            0f
-        }
-
-    val questionProgress =
-        (currentIndex + 1).toFloat() /
-            totalQuestions.toFloat()
-
-    val isBookmarked =
-        bookmarkedQuestions.contains(currentQuestion.id)
+    val currentQuestion = questions.getOrNull(currentIndex)
 
     Scaffold(
         topBar = {
-
             TopAppBar(
                 title = {
-                    Text("Practice")
+                    Text(
+                        text = "Practice",
+                        fontWeight = FontWeight.Bold
+                    )
                 },
-
                 navigationIcon = {
-
-                    IconButton(
-                        onClick = onBack
-                    ) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
                 },
-
                 actions = {
-
-                    IconButton(
-                        onClick = {
-                            questionViewModel.toggleBookmark()
+                    if (currentQuestion != null) {
+                        IconButton(
+                            onClick = {
+                                viewModel.toggleBookmark()
+                            }
+                        ) {
+                            Icon(
+                                imageVector =
+                                    if (bookmarkedQuestions.contains(currentQuestion.id)) {
+                                        Icons.Default.Bookmark
+                                    } else {
+                                        Icons.Default.BookmarkBorder
+                                    },
+                                contentDescription =
+                                    if (bookmarkedQuestions.contains(currentQuestion.id)) {
+                                        "Remove bookmark"
+                                    } else {
+                                        "Bookmark question"
+                                    }
+                            )
                         }
-                    ) {
-
-                        Icon(
-                            imageVector =
-                                if (isBookmarked) {
-                                    Icons.Default.Bookmark
-                                } else {
-                                    Icons.Default.BookmarkBorder
-                                },
-
-                            contentDescription =
-                                if (isBookmarked) {
-                                    "Remove bookmark"
-                                } else {
-                                    "Bookmark question"
-                                }
-                        )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             )
         }
     ) { paddingValues ->
 
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-
-            verticalArrangement =
-                Arrangement.spacedBy(12.dp)
+                .background(MaterialTheme.colorScheme.background)
         ) {
 
-            item {
+            when {
 
-                Spacer(
-                    modifier = Modifier.height(8.dp)
-                )
+                isFinished -> {
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement =
-                        Arrangement.SpaceBetween
-                ) {
-
-                    Text(
-                        text =
-                            "Question ${currentIndex + 1}/$totalQuestions",
-
-                        style =
-                            MaterialTheme
-                                .typography
-                                .titleMedium
-                    )
-
-                    Text(
-                        text =
-                            "Answered: $answeredCount/$totalQuestions",
-
-                        style =
-                            MaterialTheme
-                                .typography
-                                .titleMedium
+                    PracticeResultContent(
+                        totalQuestions = questions.size,
+                        answeredQuestions = answeredQuestions.size,
+                        correctAnswers = correctAnswers,
+                        wrongAnswers = wrongAnswers,
+                        onRestart = {
+                            viewModel.restart()
+                        },
+                        onBack = onBack
                     )
                 }
 
-                Spacer(
-                    modifier = Modifier.height(8.dp)
-                )
+                currentQuestion == null -> {
 
-                LinearProgressIndicator(
-                    progress = {
-                        questionProgress
-                    },
-
-                    modifier =
-                        Modifier.fillMaxWidth()
-                )
-
-                Spacer(
-                    modifier = Modifier.height(6.dp)
-                )
-
-                Text(
-                    text =
-                        "Completed: ${(progress * 100).toInt()}%",
-
-                    style =
-                        MaterialTheme
-                            .typography
-                            .bodyMedium
-                )
-
-                Spacer(
-                    modifier = Modifier.height(18.dp)
-                )
-
-                Card(
-                    modifier =
-                        Modifier.fillMaxWidth(),
-
-                    colors =
-                        CardDefaults.cardColors(
-                            containerColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .surfaceVariant
-                        )
-                ) {
-
-                    Text(
-                        text =
-                            currentQuestion.question,
-
-                        modifier =
-                            Modifier.padding(18.dp),
-
-                        style =
-                            MaterialTheme
-                                .typography
-                                .titleLarge
-                    )
-                }
-
-                Spacer(
-                    modifier = Modifier.height(8.dp)
-                )
-            }
-
-            itemsIndexed(
-                items = currentQuestion.options
-            ) { index, option ->
-
-                AnswerOption(
-                    index = index,
-
-                    text = option,
-
-                    isSelected =
-                        selectedAnswer == index,
-
-                    isCorrect =
-                        submitted &&
-                            index ==
-                            currentQuestion.correctAnswer,
-
-                    isWrong =
-                        submitted &&
-                            selectedAnswer == index &&
-                            index !=
-                            currentQuestion.correctAnswer,
-
-                    enabled =
-                        !submitted,
-
-                    onClick = {
-                        questionViewModel.selectAnswer(index)
-                    }
-                )
-            }
-
-            item {
-
-                Spacer(
-                    modifier = Modifier.height(4.dp)
-                )
-
-                if (!submitted) {
-
-                    Button(
-                        onClick = {
-                            questionViewModel.submitAnswer()
-                        },
-
-                        enabled =
-                            selectedAnswer != null,
-
-                        modifier =
-                            Modifier.fillMaxWidth()
-                    ) {
-
-                        Text("Submit Answer")
-                    }
-
-                } else {
-
-                    Card(
-                        modifier =
-                            Modifier.fillMaxWidth(),
-
-                        colors =
-                            CardDefaults.cardColors(
-                                containerColor =
-                                    if (
-                                        selectedAnswer ==
-                                        currentQuestion.correctAnswer
-                                    ) {
-                                        MaterialTheme
-                                            .colorScheme
-                                            .primaryContainer
-                                    } else {
-                                        MaterialTheme
-                                            .colorScheme
-                                            .errorContainer
-                                    }
-                            )
-                    ) {
-
-                        Column(
-                            modifier =
-                                Modifier.padding(16.dp)
-                        ) {
-
-                            Text(
-                                text =
-                                    if (
-                                        selectedAnswer ==
-                                        currentQuestion.correctAnswer
-                                    ) {
-                                        "✓ Correct Answer"
-                                    } else {
-                                        "✗ Wrong Answer"
-                                    },
-
-                                style =
-                                    MaterialTheme
-                                        .typography
-                                        .titleMedium
-                            )
-
-                            Spacer(
-                                modifier =
-                                    Modifier.height(8.dp)
-                            )
-
-                            Text(
-                                text =
-                                    "Explanation: " +
-                                        currentQuestion.explanation,
-
-                                style =
-                                    MaterialTheme
-                                        .typography
-                                        .bodyMedium
-                            )
-                        }
-                    }
-
-                    Spacer(
-                        modifier =
-                            Modifier.height(8.dp)
-                    )
-
-                    Button(
-                        onClick = {
-                            questionViewModel.nextQuestion()
-                        },
-
-                        modifier =
-                            Modifier.fillMaxWidth()
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
 
                         Text(
-                            if (
-                                currentIndex ==
-                                questions.lastIndex
-                            ) {
-                                "Finish Practice"
-                            } else {
-                                "Next Question"
-                            }
+                            text = "No questions available",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
                         )
+
+                        Spacer(
+                            modifier = Modifier.height(8.dp)
+                        )
+
+                        Text(
+                            text = "This chapter does not have a valid question bank yet.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Spacer(
+                            modifier = Modifier.height(24.dp)
+                        )
+
+                        Button(
+                            onClick = onBack
+                        ) {
+                            Text("Go Back")
+                        }
                     }
                 }
 
-                Spacer(
-                    modifier =
-                        Modifier.height(24.dp)
+                else -> {
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp),
+                    ) {
+
+                        Spacer(
+                            modifier = Modifier.height(8.dp)
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            Text(
+                                text = "Question ${currentIndex + 1} of ${questions.size}",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Text(
+                                text = "${answeredQuestions.size}/${questions.size} answered",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        Spacer(
+                            modifier = Modifier.height(8.dp)
+                        )
+
+                        LinearProgressIndicator(
+                            progress = {
+                                if (questions.isEmpty()) {
+                                    0f
+                                } else {
+                                    (currentIndex + 1).toFloat() /
+                                        questions.size.toFloat()
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(6.dp)
+                        )
+
+                        Spacer(
+                            modifier = Modifier.height(16.dp)
+                        )
+
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(18.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor =
+                                    MaterialTheme.colorScheme.surface
+                            )
+                        ) {
+
+                            Column(
+                                modifier = Modifier.padding(18.dp)
+                            ) {
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.Top
+                                ) {
+
+                                    Text(
+                                        text = currentQuestion.question,
+                                        modifier = Modifier.weight(1f),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+
+                                    if (
+                                        bookmarkedQuestions.contains(
+                                            currentQuestion.id
+                                        )
+                                    ) {
+
+                                        Spacer(
+                                            modifier = Modifier.width(8.dp)
+                                        )
+
+                                        Icon(
+                                            imageVector = Icons.Default.Bookmark,
+                                            contentDescription = "Bookmarked",
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(
+                            modifier = Modifier.height(16.dp)
+                        )
+
+                        currentQuestion.options.forEachIndexed { index, option ->
+
+                            val isSelected =
+                                selectedAnswer == index
+
+                            val isCorrect =
+                                submitted &&
+                                    index == currentQuestion.correctAnswer
+
+                            val isWrong =
+                                submitted &&
+                                    isSelected &&
+                                    index != currentQuestion.correctAnswer
+
+                            OptionCard(
+                                optionIndex = index,
+                                optionText = option,
+                                isSelected = isSelected,
+                                isCorrect = isCorrect,
+                                isWrong = isWrong,
+                                enabled = !submitted,
+                                onClick = {
+                                    viewModel.selectAnswer(index)
+                                }
+                            )
+
+                            Spacer(
+                                modifier = Modifier.height(10.dp)
+                            )
+                        }
+
+                        if (submitted) {
+
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor =
+                                        MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            ) {
+
+                                Column(
+                                    modifier = Modifier.padding(16.dp)
+                                ) {
+
+                                    Row(
+                                        verticalAlignment =
+                                            Alignment.CenterVertically
+                                    ) {
+
+                                        Icon(
+                                            imageVector =
+                                                if (
+                                                    selectedAnswer ==
+                                                        currentQuestion.correctAnswer
+                                                ) {
+                                                    Icons.Default.Check
+                                                } else {
+                                                    Icons.Default.Lightbulb
+                                                },
+                                            contentDescription = null
+                                        )
+
+                                        Spacer(
+                                            modifier = Modifier.width(8.dp)
+                                        )
+
+                                        Text(
+                                            text =
+                                                if (
+                                                    selectedAnswer ==
+                                                        currentQuestion.correctAnswer
+                                                ) {
+                                                    "Correct!"
+                                                } else {
+                                                    "Correct answer: ${
+                                                        optionLetter(
+                                                            currentQuestion.correctAnswer
+                                                        )
+                                                    }"
+                                                },
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+
+                                    Spacer(
+                                        modifier = Modifier.height(8.dp)
+                                    )
+
+                                    Text(
+                                        text = currentQuestion.explanation,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 12.dp),
+                            horizontalArrangement =
+                                Arrangement.spacedBy(10.dp)
+                        ) {
+
+                            OutlinedButton(
+                                onClick = {
+                                    viewModel.previousQuestion()
+                                },
+                                enabled = currentIndex > 0,
+                                modifier = Modifier.weight(1f)
+                            ) {
+
+                                Icon(
+                                    imageVector =
+                                        Icons.Default.NavigateBefore,
+                                    contentDescription = null
+                                )
+
+                                Spacer(
+                                    modifier = Modifier.width(4.dp)
+                                )
+
+                                Text("Previous")
+                            }
+
+                            Button(
+                                onClick = {
+                                    if (!submitted) {
+                                        viewModel.submitAnswer()
+                                    } else {
+                                        viewModel.nextQuestion()
+                                    }
+                                },
+                                enabled =
+                                    if (submitted) {
+                                        true
+                                    } else {
+                                        selectedAnswer != null
+                                    },
+                                modifier = Modifier.weight(1f)
+                            ) {
+
+                                Text(
+                                    if (!submitted) {
+                                        "Submit"
+                                    } else if (
+                                        currentIndex ==
+                                            questions.lastIndex
+                                    ) {
+                                        "Finish"
+                                    } else {
+                                        "Next"
+                                    }
+                                )
+
+                                if (submitted) {
+
+                                    Spacer(
+                                        modifier = Modifier.width(4.dp)
+                                    )
+
+                                    Icon(
+                                        imageVector =
+                                            Icons.Default.NavigateNext,
+                                        contentDescription = null
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun OptionCard(
+    optionIndex: Int,
+    optionText: String,
+    isSelected: Boolean,
+    isCorrect: Boolean,
+    isWrong: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+
+    val containerColor = when {
+
+        isCorrect ->
+            Color(0xFF1B5E20)
+
+        isWrong ->
+            Color(0xFFB71C1C)
+
+        isSelected ->
+            MaterialTheme.colorScheme.primaryContainer
+
+        else ->
+            MaterialTheme.colorScheme.surface
+    }
+
+    val contentColor = when {
+
+        isCorrect || isWrong ->
+            Color.White
+
+        else ->
+            MaterialTheme.colorScheme.onSurface
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = containerColor,
+            contentColor = contentColor
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
+        )
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Text(
+                text = optionLetter(optionIndex),
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.width(32.dp)
+            )
+
+            Text(
+                text = optionText,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            if (isCorrect) {
+
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = "Correct"
+                )
+            }
+
+            if (isWrong) {
+
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Wrong"
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun PracticeResultContent(
+    totalQuestions: Int,
+    answeredQuestions: Int,
+    correctAnswers: Int,
+    wrongAnswers: Int,
+    onRestart: () -> Unit,
+    onBack: () -> Unit
+) {
+
+    val percentage =
+        if (totalQuestions > 0) {
+            (correctAnswers * 100) / totalQuestions
+        } else {
+            0
+        }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+
+        CircularProgressIndicator(
+            progress = {
+                percentage / 100f
+            },
+            modifier = Modifier.height(90.dp),
+            strokeWidth = 8.dp
+        )
+
+        Spacer(
+            modifier = Modifier.height(20.dp)
+        )
+
+        Text(
+            text = "Practice Complete",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        Text(
+            text = "$percentage%",
+            style = MaterialTheme.typography.displaySmall,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(
+            modifier = Modifier.height(20.dp)
+        )
+
+        Text("Total: $totalQuestions")
+        Text("Answered: $answeredQuestions")
+        Text("Correct: $correctAnswers")
+        Text("Wrong: $wrongAnswers")
+
+        Spacer(
+            modifier = Modifier.height(28.dp)
+        )
+
+        Button(
+            onClick = onRestart,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Practice Again")
+        }
+
+        Spacer(
+            modifier = Modifier.height(10.dp)
+        )
+
+        OutlinedButton(
+            onClick = onBack,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Back")
+        }
+    }
+}
+
+private fun optionLetter(index: Int): String {
+
+    return when (index) {
+        0 -> "A"
+        1 -> "B"
+        2 -> "C"
+        3 -> "D"
+        else -> "?"
     }
 }
