@@ -12,88 +12,241 @@ class ChapterRepository {
         classLevel: ClassLevel = ClassLevel.CLASS_12
     ): List<ChapterData> {
 
+        return when (classLevel) {
+            ClassLevel.CLASS_11 -> getClass11Chapters(subjectId, board)
+            ClassLevel.CLASS_12 -> getClass12Chapters(subjectId, board)
+        }
+    }
+
+    private fun getClass11Chapters(
+        subjectId: String,
+        board: Board
+    ): List<ChapterData> {
+
         return when (subjectId) {
 
-            "accountancy" -> listOf(
-                ChapterData(
-                    "accounting_for_partnership",
-                    subjectId,
-                    "Accounting for Partnership Firms",
-                    1,
-                    board,
-                    classLevel
-                ),
-                ChapterData(
-                    "accountancy_2",
-                    subjectId,
-                    "Accounting for Companies",
-                    2,
-                    board,
-                    classLevel
-                ),
-                ChapterData(
-                    "accountancy_3",
-                    subjectId,
-                    "Analysis of Financial Statements",
-                    3,
-                    board,
-                    classLevel
-                ),
-                ChapterData(
-                    "accountancy_4",
-                    subjectId,
-                    "Cash Flow Statement",
-                    4,
-                    board,
-                    classLevel
-                ),
-                ChapterData(
-                    "accountancy_5",
-                    subjectId,
-                    "Computerised Accounting",
-                    5,
-                    board,
-                    classLevel
+            "accountancy" -> chapters(
+                subjectId,
+                board,
+                ClassLevel.CLASS_11,
+                listOf(
+                    "Introduction to Accounting",
+                    "Theory Base of Accounting",
+                    "Recording of Transactions",
+                    "Bank Reconciliation Statement",
+                    "Trial Balance and Rectification of Errors",
+                    "Depreciation, Provisions and Reserves",
+                    "Bill of Exchange",
+                    "Financial Statements"
                 )
             )
 
-            "business_studies" -> listOf(
-                ChapterData("bst_1", subjectId, "Nature and Significance of Management", 1, board, classLevel),
-                ChapterData("bst_2", subjectId, "Principles of Management", 2, board, classLevel),
-                ChapterData("bst_3", subjectId, "Business Environment", 3, board, classLevel),
-                ChapterData("bst_4", subjectId, "Planning", 4, board, classLevel),
-                ChapterData("bst_5", subjectId, "Organising", 5, board, classLevel)
+            "business_studies" -> chapters(
+                subjectId,
+                board,
+                ClassLevel.CLASS_11,
+                listOf(
+                    "Nature and Purpose of Business",
+                    "Forms of Business Organisation",
+                    "Public, Private and Global Enterprises",
+                    "Business Services",
+                    "Emerging Modes of Business",
+                    "Social Responsibility of Business",
+                    "Formation of a Company",
+                    "Sources of Business Finance",
+                    "Small Business",
+                    "Internal Trade",
+                    "International Business"
+                )
             )
 
-            "economics" -> listOf(
-                ChapterData("eco_1", subjectId, "National Income Accounting", 1, board, classLevel),
-                ChapterData("eco_2", subjectId, "Money and Banking", 2, board, classLevel),
-                ChapterData("eco_3", subjectId, "Determination of Income and Employment", 3, board, classLevel),
-                ChapterData("eco_4", subjectId, "Government Budget", 4, board, classLevel),
-                ChapterData("eco_5", subjectId, "Balance of Payments", 5, board, classLevel)
+            "economics" -> chapters(
+                subjectId,
+                board,
+                ClassLevel.CLASS_11,
+                listOf(
+                    "Introduction to Economics",
+                    "Theory of Consumer Behaviour",
+                    "Theory of Demand",
+                    "Theory of Production",
+                    "Cost and Revenue",
+                    "Perfect Competition",
+                    "Statistics for Economics",
+                    "Collection of Data",
+                    "Organisation of Data",
+                    "Presentation of Data",
+                    "Statistical Measures"
+                )
             )
 
-            "mathematics" -> listOf(
-                ChapterData("math_1", subjectId, "Relations and Functions", 1, board, classLevel),
-                ChapterData("math_2", subjectId, "Matrices", 2, board, classLevel),
-                ChapterData("math_3", subjectId, "Determinants", 3, board, classLevel),
-                ChapterData("math_4", subjectId, "Continuity and Differentiability", 4, board, classLevel),
-                ChapterData("math_5", subjectId, "Applications of Derivatives", 5, board, classLevel)
+            "mathematics" -> chapters(
+                subjectId,
+                board,
+                ClassLevel.CLASS_11,
+                listOf(
+                    "Sets",
+                    "Relations and Functions",
+                    "Trigonometric Functions",
+                    "Complex Numbers and Quadratic Equations",
+                    "Linear Inequalities",
+                    "Permutations and Combinations",
+                    "Binomial Theorem",
+                    "Sequences and Series",
+                    "Straight Lines",
+                    "Conic Sections",
+                    "Introduction to Three Dimensional Geometry",
+                    "Limits and Derivatives",
+                    "Statistics",
+                    "Probability"
+                )
             )
 
-            "english" -> listOf(
-                ChapterData("english_1", subjectId, "Reading Skills", 1, board, classLevel),
-                ChapterData("english_2", subjectId, "Writing Skills", 2, board, classLevel),
-                ChapterData("english_3", subjectId, "Literature", 3, board, classLevel)
+            "english" -> chapters(
+                subjectId,
+                board,
+                ClassLevel.CLASS_11,
+                listOf(
+                    "Reading Comprehension",
+                    "Grammar and Creative Writing",
+                    "Hornbill",
+                    "Snapshots"
+                )
             )
 
-            "hindi" -> listOf(
-                ChapterData("hindi_1", subjectId, "गद्य खंड", 1, board, classLevel),
-                ChapterData("hindi_2", subjectId, "काव्य खंड", 2, board, classLevel),
-                ChapterData("hindi_3", subjectId, "लेखन एवं अभिव्यक्ति", 3, board, classLevel)
+            "hindi" -> chapters(
+                subjectId,
+                board,
+                ClassLevel.CLASS_11,
+                listOf(
+                    "आरोह",
+                    "वितान",
+                    "अभिव्यक्ति और माध्यम"
+                )
             )
 
             else -> emptyList()
+        }
+    }
+
+    private fun getClass12Chapters(
+        subjectId: String,
+        board: Board
+    ): List<ChapterData> {
+
+        return when (subjectId) {
+
+            "accountancy" -> chapters(
+                subjectId,
+                board,
+                ClassLevel.CLASS_12,
+                listOf(
+                    "Accounting for Partnership Firms",
+                    "Accounting for Companies",
+                    "Analysis of Financial Statements",
+                    "Cash Flow Statement"
+                )
+            )
+
+            "business_studies" -> chapters(
+                subjectId,
+                board,
+                ClassLevel.CLASS_12,
+                listOf(
+                    "Nature and Significance of Management",
+                    "Principles of Management",
+                    "Business Environment",
+                    "Planning",
+                    "Organising",
+                    "Staffing",
+                    "Directing",
+                    "Controlling",
+                    "Financial Management",
+                    "Financial Markets",
+                    "Marketing Management",
+                    "Consumer Protection"
+                )
+            )
+
+            "economics" -> chapters(
+                subjectId,
+                board,
+                ClassLevel.CLASS_12,
+                listOf(
+                    "National Income Accounting",
+                    "Money and Banking",
+                    "Determination of Income and Employment",
+                    "Government Budget",
+                    "Balance of Payments",
+                    "Development Experience and Economic Reforms",
+                    "Current Challenges Facing Indian Economy",
+                    "Development Experience of India"
+                )
+            )
+
+            "mathematics" -> chapters(
+                subjectId,
+                board,
+                ClassLevel.CLASS_12,
+                listOf(
+                    "Relations and Functions",
+                    "Inverse Trigonometric Functions",
+                    "Matrices",
+                    "Determinants",
+                    "Continuity and Differentiability",
+                    "Application of Derivatives",
+                    "Integrals",
+                    "Application of Integrals",
+                    "Differential Equations",
+                    "Vector Algebra",
+                    "Three Dimensional Geometry",
+                    "Linear Programming",
+                    "Probability"
+                )
+            )
+
+            "english" -> chapters(
+                subjectId,
+                board,
+                ClassLevel.CLASS_12,
+                listOf(
+                    "Reading Comprehension",
+                    "Writing Skills",
+                    "Flamingo",
+                    "Vistas"
+                )
+            )
+
+            "hindi" -> chapters(
+                subjectId,
+                board,
+                ClassLevel.CLASS_12,
+                listOf(
+                    "आरोह",
+                    "वितान",
+                    "अभिव्यक्ति और माध्यम"
+                )
+            )
+
+            else -> emptyList()
+        }
+    }
+
+    private fun chapters(
+        subjectId: String,
+        board: Board,
+        classLevel: ClassLevel,
+        titles: List<String>
+    ): List<ChapterData> {
+
+        return titles.mapIndexed { index, title ->
+            ChapterData(
+                id = "${subjectId}_${classLevel.name.lowercase()}_${index + 1}",
+                subjectId = subjectId,
+                title = title,
+                chapterNumber = index + 1,
+                board = board,
+                classLevel = classLevel
+            )
         }
     }
 }
