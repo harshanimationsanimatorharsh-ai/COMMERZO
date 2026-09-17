@@ -6,65 +6,40 @@ import com.commerzo.app.data.model.SubjectData
 
 class SubjectRepository {
 
+    private val chapterRepository = ChapterRepository()
+
     fun getSubjects(
         board: Board = Board.MP_BOARD,
         classLevel: ClassLevel = ClassLevel.CLASS_12
     ): List<SubjectData> {
 
-        return listOf(
-            SubjectData(
-                id = "accountancy",
-                name = "Accountancy",
-                emoji = "📊",
-                board = board,
-                classLevel = classLevel,
-                chaptersCount = 0
-            ),
-
-            SubjectData(
-                id = "business_studies",
-                name = "Business Studies",
-                emoji = "💼",
-                board = board,
-                classLevel = classLevel,
-                chaptersCount = 0
-            ),
-
-            SubjectData(
-                id = "economics",
-                name = "Economics",
-                emoji = "📈",
-                board = board,
-                classLevel = classLevel,
-                chaptersCount = 0
-            ),
-
-            SubjectData(
-                id = "mathematics",
-                name = "Mathematics",
-                emoji = "🧮",
-                board = board,
-                classLevel = classLevel,
-                chaptersCount = 0
-            ),
-
-            SubjectData(
-                id = "english",
-                name = "English",
-                emoji = "📖",
-                board = board,
-                classLevel = classLevel,
-                chaptersCount = 0
-            ),
-
-            SubjectData(
-                id = "hindi",
-                name = "Hindi",
-                emoji = "📝",
-                board = board,
-                classLevel = classLevel,
-                chaptersCount = 0
-            )
+        val subjectDefinitions = listOf(
+            Triple("accountancy", "Accountancy", "📊"),
+            Triple("business_studies", "Business Studies", "💼"),
+            Triple("economics", "Economics", "📈"),
+            Triple("mathematics", "Mathematics", "🧮"),
+            Triple("english", "English", "📖"),
+            Triple("hindi", "Hindi", "📝")
         )
+
+        return subjectDefinitions.map { (id, name, emoji) ->
+
+            val chapterCount = chapterRepository
+                .getChapters(
+                    subjectId = id,
+                    board = board,
+                    classLevel = classLevel
+                )
+                .size
+
+            SubjectData(
+                id = id,
+                name = name,
+                emoji = emoji,
+                board = board,
+                classLevel = classLevel,
+                chaptersCount = chapterCount
+            )
+        }
     }
 }
