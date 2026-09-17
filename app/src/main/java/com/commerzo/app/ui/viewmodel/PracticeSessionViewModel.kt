@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.model.Question
+import com.commerzo.app.data.repository.CurriculumRepository
 import com.commerzo.app.data.repository.QuestionBankManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +22,9 @@ class PracticeSessionViewModel(
 
     private val questionBankManager =
         QuestionBankManager()
+
+    private val curriculumRepository =
+        CurriculumRepository()
 
     private val preferences =
         application.getSharedPreferences(
@@ -95,6 +99,16 @@ class PracticeSessionViewModel(
 
     val bookmarkedQuestions: StateFlow<Set<String>> =
         _bookmarkedQuestions.asStateFlow()
+
+    private val _bookmarkedQuestionDetails =
+        MutableStateFlow<List<Question>>(emptyList())
+
+    val bookmarkedQuestionDetails: StateFlow<List<Question>> =
+        _bookmarkedQuestionDetails.asStateFlow()
+
+    init {
+        refreshBookmarkedQuestionDetails()
+    }
 
     fun loadQuestions(
         subjectId: String,
@@ -266,6 +280,8 @@ class PracticeSessionViewModel(
         saveBookmarks(
             finalBookmarks
         )
+
+        refreshBookmarkedQuestionDetails()
     }
 
     fun removeBookmark(
@@ -296,6 +312,8 @@ class PracticeSessionViewModel(
         saveBookmarks(
             finalBookmarks
         )
+
+        refreshBookmarkedQuestionDetails()
     }
 
     fun clearAllBookmarks() {
@@ -306,6 +324,9 @@ class PracticeSessionViewModel(
         saveBookmarks(
             emptySet()
         )
+
+        _bookmarkedQuestionDetails.value =
+            emptyList()
     }
 
     fun isCurrentQuestionBookmarked(): Boolean {
@@ -406,7 +427,8 @@ class PracticeSessionViewModel(
             _currentIndex.value
 
         val states =
-            _answerStates.value.toMutableList()
+            _answerStates.value
+                .toMutableList()
 
         if (
             index !in states.indices
@@ -495,6 +517,91 @@ class PracticeSessionViewModel(
         _unattemptedAnswers.value =
             questionsList.size -
                 answered.size
+    }
+
+    private fun refreshBookmarkedQuestionDetails() {
+
+        val bookmarkIds =
+            _bookmarkedQuestions.value
+
+        if (bookmarkIds.isEmpty()) {
+            _bookmarkedQuestionDetails.value =
+                emptyList()
+            return
+        }
+
+        val foundQuestions =
+            mutableListOf<Question>()
+
+        val boards =
+            listOf(
+                Board.CBSE,
+                Board.MP_BOARD
+            )
+
+        val classLevels =
+            listOf(
+                ClassLevel.CLASS_11,
+                ClassLevel.CLASS_12
+            )
+
+        boards.forEach { board ->
+
+            classLevels.forEach { classLevel ->
+
+                val subjects =
+                    curriculumRepository
+                        .getSubjects(
+                            board = board,
+                            classLevel = classLevel
+                        )
+
+                subjects.forEach { subject ->
+
+                    val chapters =
+                        curriculumRepository
+                            .getChapters(
+                                subjectId = subject.id,
+                                board = board,
+                                classLevel = classLevel
+                            )
+
+                    chapters.forEach { chapter ->
+
+                        val questions =
+                            questionBankManager
+                                .getValidatedQuestions(
+                                    subjectId =
+                                        subject.id,
+                                    chapterId =
+                                        chapter.id,
+                                    board =
+                                        board,
+                                    classLevel =
+                                        classLevel
+                                )
+
+                        questions
+                            .filter {
+                                bookmarkIds
+                                    .contains(it.id)
+                            }
+                            .forEach {
+                                if (
+                                    foundQuestions.none { existing ->
+                                        existing.id == it.id
+                                    }
+                                ) {
+                                    foundQuestions.add(it)
+                                }
+                            }
+                    }
+                }
+            }
+        }
+
+        _bookmarkedQuestionDetails.value =
+            foundQuestions
     }
 
     private fun loadBookmarks(): Set<String> {
