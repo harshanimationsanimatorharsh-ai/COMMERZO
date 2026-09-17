@@ -1,6 +1,7 @@
 package com.commerzo.app.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.model.Question
@@ -9,9 +10,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class PracticeSessionViewModel : ViewModel() {
+class PracticeSessionViewModel(
+    application: Application
+) : AndroidViewModel(application) {
 
     private val questionBankManager = QuestionBankManager()
+
+    private val preferences =
+        application.getSharedPreferences(
+            PREFS_NAME,
+            Application.MODE_PRIVATE
+        )
 
     private val _questions =
         MutableStateFlow<List<Question>>(emptyList())
@@ -68,7 +77,9 @@ class PracticeSessionViewModel : ViewModel() {
         _isFinished.asStateFlow()
 
     private val _bookmarkedQuestions =
-        MutableStateFlow<Set<String>>(emptySet())
+        MutableStateFlow(
+            loadBookmarks()
+        )
 
     val bookmarkedQuestions: StateFlow<Set<String>> =
         _bookmarkedQuestions.asStateFlow()
@@ -100,8 +111,9 @@ class PracticeSessionViewModel : ViewModel() {
         }
 
         val currentQuestion =
-            _questions.value.getOrNull(_currentIndex.value)
-                ?: return
+            _questions.value.getOrNull(
+                _currentIndex.value
+            ) ?: return
 
         if (index !in currentQuestion.options.indices) {
             return
@@ -116,29 +128,28 @@ class PracticeSessionViewModel : ViewModel() {
             return
         }
 
-        val questionsList = _questions.value
-
-        if (questionsList.isEmpty()) {
-            return
-        }
-
         val selected =
-            _selectedAnswer.value
-                ?: return
+            _selectedAnswer.value ?: return
 
         val currentQuestion =
-            questionsList.getOrNull(_currentIndex.value)
-                ?: return
+            _questions.value.getOrNull(
+                _currentIndex.value
+            ) ?: return
 
         val updatedAnswered =
             _answeredQuestions.value.toMutableSet()
 
-        updatedAnswered.add(currentQuestion.id)
+        updatedAnswered.add(
+            currentQuestion.id
+        )
 
         _answeredQuestions.value =
             updatedAnswered
 
-        if (selected == currentQuestion.correctAnswer) {
+        if (
+            selected ==
+            currentQuestion.correctAnswer
+        ) {
             _correctAnswers.value += 1
         } else {
             _wrongAnswers.value += 1
@@ -156,7 +167,10 @@ class PracticeSessionViewModel : ViewModel() {
         val nextIndex =
             _currentIndex.value + 1
 
-        if (nextIndex >= _questions.value.size) {
+        if (
+            nextIndex >=
+            _questions.value.size
+        ) {
 
             _isFinished.value = true
 
@@ -177,38 +191,60 @@ class PracticeSessionViewModel : ViewModel() {
         _currentIndex.value -= 1
 
         val currentQuestion =
-            _questions.value.getOrNull(_currentIndex.value)
-                ?: return
+            _questions.value.getOrNull(
+                _currentIndex.value
+            ) ?: return
 
         _selectedAnswer.value = null
+
         _submitted.value =
-            _answeredQuestions.value.contains(currentQuestion.id)
+            _answeredQuestions.value
+                .contains(currentQuestion.id)
     }
 
     fun toggleBookmark() {
 
         val currentQuestion =
-            _questions.value.getOrNull(_currentIndex.value)
-                ?: return
+            _questions.value.getOrNull(
+                _currentIndex.value
+            ) ?: return
 
         val updatedBookmarks =
-            _bookmarkedQuestions.value.toMutableSet()
+            _bookmarkedQuestions.value
+                .toMutableSet()
 
-        if (updatedBookmarks.contains(currentQuestion.id)) {
-            updatedBookmarks.remove(currentQuestion.id)
+        if (
+            updatedBookmarks.contains(
+                currentQuestion.id
+            )
+        ) {
+
+            updatedBookmarks.remove(
+                currentQuestion.id
+            )
+
         } else {
-            updatedBookmarks.add(currentQuestion.id)
+
+            updatedBookmarks.add(
+                currentQuestion.id
+            )
         }
 
+        val finalBookmarks =
+            updatedBookmarks.toSet()
+
         _bookmarkedQuestions.value =
-            updatedBookmarks
+            finalBookmarks
+
+        saveBookmarks(finalBookmarks)
     }
 
     fun isCurrentQuestionBookmarked(): Boolean {
 
         val currentQuestion =
-            _questions.value.getOrNull(_currentIndex.value)
-                ?: return false
+            _questions.value.getOrNull(
+                _currentIndex.value
+            ) ?: return false
 
         return _bookmarkedQuestions.value
             .contains(currentQuestion.id)
@@ -220,7 +256,8 @@ class PracticeSessionViewModel : ViewModel() {
 
     fun getProgressPercent(): Int {
 
-        val total = _questions.value.size
+        val total =
+            _questions.value.size
 
         if (total == 0) {
             return 0
@@ -246,5 +283,38 @@ class PracticeSessionViewModel : ViewModel() {
 
     fun restart() {
         resetSession()
+    }
+
+    private fun loadBookmarks(): Set<String> {
+
+        return preferences
+            .getStringSet(
+                BOOKMARKS_KEY,
+                emptySet()
+            )
+            ?.toSet()
+            ?: emptySet()
+    }
+
+    private fun saveBookmarks(
+        bookmarks: Set<String>
+    ) {
+
+        preferences
+            .edit()
+            .putStringSet(
+                BOOKMARKS_KEY,
+                bookmarks
+            )
+            .apply()
+    }
+
+    companion object {
+
+        private const val PREFS_NAME =
+            "commerzo_practice_preferences"
+
+        private const val BOOKMARKS_KEY =
+            "bookmarked_questions"
     }
 }
