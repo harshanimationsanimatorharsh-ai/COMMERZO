@@ -1,130 +1,193 @@
 package com.commerzo.app.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.unit.sp
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
-import com.commerzo.app.ui.components.SectionTitle
-import com.commerzo.app.ui.components.SelectionChip
-import com.commerzo.app.ui.components.SubjectCard
-import com.commerzo.app.ui.viewmodel.SubjectSelectionViewModel
+import com.commerzo.app.data.model.SubjectData
+import com.commerzo.app.viewmodel.SubjectSelectionViewModel
 
 @Composable
 fun SubjectSelectionScreen(
-    onSubjectClick: (String) -> Unit,
-    viewModel: SubjectSelectionViewModel = viewModel()
+    viewModel: SubjectSelectionViewModel,
+    onSubjectClick: (SubjectData) -> Unit
 ) {
 
-    val board by viewModel.board.collectAsState()
-    val classLevel by viewModel.classLevel.collectAsState()
+    val selectedBoard by viewModel.selectedBoard.collectAsState()
+    val selectedClass by viewModel.selectedClass.collectAsState()
     val subjects by viewModel.subjects.collectAsState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color(0xFF0B0B0F))
             .padding(16.dp)
     ) {
 
         Text(
-            text = "Practice",
-            style = MaterialTheme.typography.headlineMedium
+            text = "Select Your Curriculum",
+            color = Color.White,
+            fontSize = 25.sp,
+            fontWeight = FontWeight.Bold
         )
+
+        Spacer(modifier = Modifier.height(18.dp))
 
         Text(
-            text = "Select your class and board.",
-            style = MaterialTheme.typography.bodyMedium
+            text = "Board",
+            color = Color.White,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold
         )
 
-        androidx.compose.foundation.layout.Spacer(
-            modifier = Modifier.padding(6.dp)
-        )
-
-        SectionTitle("Class")
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 10.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
 
-            SelectionChip(
-                text = "Class 11",
-                selected = classLevel == ClassLevel.CLASS_11,
-                onClick = {
-                    viewModel.setClassLevel(ClassLevel.CLASS_11)
-                }
-            )
-
-            SelectionChip(
-                text = "Class 12",
-                selected = classLevel == ClassLevel.CLASS_12,
-                onClick = {
-                    viewModel.setClassLevel(ClassLevel.CLASS_12)
-                }
-            )
-        }
-
-        SectionTitle("Board")
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-
-            SelectionChip(
-                text = "CBSE",
-                selected = board == Board.CBSE,
-                onClick = {
-                    viewModel.setBoard(Board.CBSE)
-                }
-            )
-
-            SelectionChip(
-                text = "MP Board",
-                selected = board == Board.MP_BOARD,
+            FilterChip(
+                selected = selectedBoard == Board.MP_BOARD,
                 onClick = {
                     viewModel.setBoard(Board.MP_BOARD)
+                },
+                label = {
+                    Text("MP Board")
+                }
+            )
+
+            FilterChip(
+                selected = selectedBoard == Board.CBSE,
+                onClick = {
+                    viewModel.setBoard(Board.CBSE)
+                },
+                label = {
+                    Text("CBSE")
                 }
             )
         }
 
-        SectionTitle("Subjects")
+        Spacer(modifier = Modifier.height(18.dp))
 
-        androidx.compose.foundation.lazy.LazyColumn(
-            modifier = Modifier.padding(top = 10.dp),
+        Text(
+            text = "Class",
+            color = Color.White,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+
+            FilterChip(
+                selected = selectedClass == ClassLevel.CLASS_11,
+                onClick = {
+                    viewModel.setClassLevel(ClassLevel.CLASS_11)
+                },
+                label = {
+                    Text("Class 11")
+                }
+            )
+
+            FilterChip(
+                selected = selectedClass == ClassLevel.CLASS_12,
+                onClick = {
+                    viewModel.setClassLevel(ClassLevel.CLASS_12)
+                },
+                label = {
+                    Text("Class 12")
+                }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(22.dp))
+
+        Text(
+            text = "Subjects",
+            color = Color.White,
+            fontSize = 19.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
 
             items(
-                count = subjects.size,
-                key = {
-                    subjects[it].id
-                }
-            ) { index ->
+                items = subjects,
+                key = { it.id }
+            ) { subject ->
 
-                val subject = subjects[index]
-
-                SubjectCard(
-                    subject = subject,
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
                     onClick = {
-                        onSubjectClick(subject.id)
+                        onSubjectClick(subject)
+                    },
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF17171D)
+                    )
+                ) {
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(18.dp),
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+
+                        Text(
+                            text = subject.emoji,
+                            fontSize = 27.sp
+                        )
+
+                        Column {
+
+                            Text(
+                                text = subject.name,
+                                color = Color.White,
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            Text(
+                                text = "${subject.chaptersCount} Chapters",
+                                color = Color(0xFFBDB9D9),
+                                fontSize = 13.sp
+                            )
+                        }
                     }
-                )
+                }
             }
         }
     }
