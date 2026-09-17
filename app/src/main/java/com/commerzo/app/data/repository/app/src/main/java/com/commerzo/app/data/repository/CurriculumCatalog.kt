@@ -13,40 +13,87 @@ data class CurriculumSubjectDefinition(
 
 object CurriculumCatalog {
 
-    private val subjects = listOf(
-        "accountancy" to "Accountancy",
-        "business_studies" to "Business Studies",
-        "economics" to "Economics",
-        "mathematics" to "Mathematics",
-        "english" to "English",
-        "hindi" to "Hindi"
-    )
-
     fun getSubjectDefinitions(
         board: Board,
         classLevel: ClassLevel
     ): List<CurriculumSubjectDefinition> {
 
-        return subjects.map { (id, name) ->
-            CurriculumSubjectDefinition(
-                id = id,
-                name = name,
-                emoji = emojiFor(id),
-                board = board,
-                classLevel = classLevel
-            )
+        return when (board) {
+
+            Board.CBSE -> getCbseSubjects(classLevel)
+
+            Board.MP_BOARD -> getMpBoardSubjects(classLevel)
         }
     }
 
-    private fun emojiFor(subjectId: String): String {
-        return when (subjectId) {
-            "accountancy" -> "📊"
-            "business_studies" -> "💼"
-            "economics" -> "📈"
-            "mathematics" -> "🧮"
-            "english" -> "📖"
-            "hindi" -> "📝"
-            else -> "📚"
-        }
+    private fun getCbseSubjects(
+        classLevel: ClassLevel
+    ): List<CurriculumSubjectDefinition> {
+
+        return commonSubjects(
+            board = Board.CBSE,
+            classLevel = classLevel
+        )
+    }
+
+    private fun getMpBoardSubjects(
+        classLevel: ClassLevel
+    ): List<CurriculumSubjectDefinition> {
+
+        return commonSubjects(
+            board = Board.MP_BOARD,
+            classLevel = classLevel
+        )
+    }
+
+    private fun commonSubjects(
+        board: Board,
+        classLevel: ClassLevel
+    ): List<CurriculumSubjectDefinition> {
+
+        return listOf(
+            CurriculumSubjectDefinition(
+                id = "accountancy",
+                name = "Accountancy",
+                emoji = "📊",
+                board = board,
+                classLevel = classLevel
+            ),
+            CurriculumSubjectDefinition(
+                id = "business_studies",
+                name = "Business Studies",
+                emoji = "💼",
+                board = board,
+                classLevel = classLevel
+            ),
+            CurriculumSubjectDefinition(
+                id = "economics",
+                name = "Economics",
+                emoji = "📈",
+                board = board,
+                classLevel = classLevel
+            ),
+            CurriculumSubjectDefinition(
+                id = "mathematics",
+                name = "Mathematics",
+                emoji = "🧮",
+                board = board,
+                classLevel = classLevel
+            ),
+            CurriculumSubjectDefinition(
+                id = "english",
+                name = "English",
+                emoji = "📖",
+                board = board,
+                classLevel = classLevel
+            ),
+            CurriculumSubjectDefinition(
+                id = "hindi",
+                name = "Hindi",
+                emoji = "📝",
+                board = board,
+                classLevel = classLevel
+            )
+        )
     }
 }
