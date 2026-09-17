@@ -10,11 +10,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+data class PracticeAnswerState(
+    val selectedAnswer: Int? = null,
+    val submitted: Boolean = false
+)
+
 class PracticeSessionViewModel(
     application: Application
 ) : AndroidViewModel(application) {
 
-    private val questionBankManager = QuestionBankManager()
+    private val questionBankManager =
+        QuestionBankManager()
 
     private val preferences =
         application.getSharedPreferences(
@@ -33,6 +39,12 @@ class PracticeSessionViewModel(
 
     val currentIndex: StateFlow<Int> =
         _currentIndex.asStateFlow()
+
+    private val _answerStates =
+        MutableStateFlow<List<PracticeAnswerState>>(emptyList())
+
+    val answerStates: StateFlow<List<PracticeAnswerState>> =
+        _answerStates.asStateFlow()
 
     private val _selectedAnswer =
         MutableStateFlow<Int?>(null)
@@ -92,21 +104,27 @@ class PracticeSessionViewModel(
     ) {
 
         val loadedQuestions =
-            questionBankManager.getRandomizedValidatedQuestions(
-                subjectId = subjectId,
-                chapterId = chapterId,
-                board = board,
-                classLevel = classLevel
-            )
+            questionBankManager
+                .getRandomizedValidatedQuestions(
+                    subjectId = subjectId,
+                    chapterId = chapterId,
+                    board = board,
+                    classLevel = classLevel
+                )
 
         _questions.value = loadedQuestions
 
         resetSession()
     }
 
-    fun selectAnswer(index: Int) {
+    fun selectAnswer(
+        index: Int
+    ) {
 
-        if (_submitted.value || _isFinished.value) {
+        if (
+            _submitted.value ||
+            _isFinished.value
+        ) {
             return
         }
 
@@ -115,16 +133,27 @@ class PracticeSessionViewModel(
                 _currentIndex.value
             ) ?: return
 
-        if (index !in currentQuestion.options.indices) {
+        if (
+            index !in
+            currentQuestion.options.indices
+        ) {
             return
         }
+
+        updateCurrentAnswerState(
+            selectedAnswer = index,
+            submitted = false
+        )
 
         _selectedAnswer.value = index
     }
 
     fun submitAnswer() {
 
-        if (_submitted.value || _isFinished.value) {
+        if (
+            _submitted.value ||
+            _isFinished.value
+        ) {
             return
         }
 
@@ -136,24 +165,12 @@ class PracticeSessionViewModel(
                 _currentIndex.value
             ) ?: return
 
-        val updatedAnswered =
-            _answeredQuestions.value.toMutableSet()
-
-        updatedAnswered.add(
-            currentQuestion.id
+        updateCurrentAnswerState(
+            selectedAnswer = selected,
+            submitted = true
         )
 
-        _answeredQuestions.value =
-            updatedAnswered
-
-        if (
-            selected ==
-            currentQuestion.correctAnswer
-        ) {
-            _correctAnswers.value += 1
-        } else {
-            _wrongAnswers.value += 1
-        }
+        recalculateResults()
 
         _submitted.value = true
     }
@@ -174,12 +191,15 @@ class PracticeSessionViewModel(
 
             _isFinished.value = true
 
-        } else {
+            recalculateResults()
 
-            _currentIndex.value = nextIndex
-            _selectedAnswer.value = null
-            _submitted.value = false
+            return
         }
+
+        _currentIndex.value =
+            nextIndex
+
+        restoreCurrentQuestionState()
     }
 
     fun previousQuestion() {
@@ -190,16 +210,23 @@ class PracticeSessionViewModel(
 
         _currentIndex.value -= 1
 
-        val currentQuestion =
-            _questions.value.getOrNull(
-                _currentIndex.value
-            ) ?: return
+        restoreCurrentQuestionState()
+    }
 
-        _selectedAnswer.value = null
+    fun goToQuestion(
+        index: Int
+    ) {
 
-        _submitted.value =
-            _answeredQuestions.value
-                .contains(currentQuestion.id)
+        if (
+            index !in
+            _questions.value.indices
+        ) {
+            return
+        }
+
+        _currentIndex.value = index
+
+        restoreCurrentQuestionState()
     }
 
     fun toggleBookmark() {
@@ -236,7 +263,9 @@ class PracticeSessionViewModel(
         _bookmarkedQuestions.value =
             finalBookmarks
 
-        saveBookmarks(finalBookmarks)
+        saveBookmarks(
+            finalBookmarks
+        )
     }
 
     fun removeBookmark(
@@ -264,7 +293,9 @@ class PracticeSessionViewModel(
         _bookmarkedQuestions.value =
             finalBookmarks
 
-        saveBookmarks(finalBookmarks)
+        saveBookmarks(
+            finalBookmarks
+        )
     }
 
     fun clearAllBookmarks() {
@@ -292,6 +323,19 @@ class PracticeSessionViewModel(
         return _answeredQuestions.value.size
     }
 
+    fun getUnattemptedCount(): Int {
+        return _questions.value.size -
+            _answeredQuestions.value.size
+    }
+
+    fun getCorrectCount(): Int {
+        return _correctAnswers.value
+    }
+
+    fun getWrongCount(): Int {
+        return _wrongAnswers.value
+    }
+
     fun getProgressPercent(): Int {
 
         val total =
@@ -307,20 +351,150 @@ class PracticeSessionViewModel(
             )
     }
 
+    fun getPercentage(): Int {
+
+        val total =
+            _questions.value.size
+
+        if (total == 0) {
+            return 0
+        }
+
+        return (
+            _correctAnswers.value * 100
+                / total
+            )
+    }
+
     fun resetSession() {
 
         _currentIndex.value = 0
+
         _selectedAnswer.value = null
+
         _submitted.value = false
+
         _correctAnswers.value = 0
+
         _wrongAnswers.value = 0
+
         _unattemptedAnswers.value = 0
-        _answeredQuestions.value = emptySet()
+
+        _answeredQuestions.value =
+            emptySet()
+
         _isFinished.value = false
+
+        _answerStates.value =
+            List(
+                _questions.value.size
+            ) {
+                PracticeAnswerState()
+            }
     }
 
     fun restart() {
         resetSession()
+    }
+
+    private fun updateCurrentAnswerState(
+        selectedAnswer: Int?,
+        submitted: Boolean
+    ) {
+
+        val index =
+            _currentIndex.value
+
+        val states =
+            _answerStates.value.toMutableList()
+
+        if (
+            index !in states.indices
+        ) {
+            return
+        }
+
+        states[index] =
+            PracticeAnswerState(
+                selectedAnswer =
+                    selectedAnswer,
+                submitted =
+                    submitted
+            )
+
+        _answerStates.value =
+            states
+    }
+
+    private fun restoreCurrentQuestionState() {
+
+        val state =
+            _answerStates.value.getOrNull(
+                _currentIndex.value
+            ) ?: PracticeAnswerState()
+
+        _selectedAnswer.value =
+            state.selectedAnswer
+
+        _submitted.value =
+            state.submitted
+    }
+
+    private fun recalculateResults() {
+
+        val questionsList =
+            _questions.value
+
+        val states =
+            _answerStates.value
+
+        var correct = 0
+        var wrong = 0
+
+        val answered =
+            mutableSetOf<String>()
+
+        questionsList.forEachIndexed { index, question ->
+
+            val state =
+                states.getOrNull(index)
+                    ?: return@forEachIndexed
+
+            val selected =
+                state.selectedAnswer
+
+            if (
+                selected != null &&
+                state.submitted
+            ) {
+
+                answered.add(
+                    question.id
+                )
+
+                if (
+                    selected ==
+                    question.correctAnswer
+                ) {
+                    correct++
+                } else {
+                    wrong++
+                }
+            }
+        }
+
+        _correctAnswers.value =
+            correct
+
+        _wrongAnswers.value =
+            wrong
+
+        _answeredQuestions.value =
+            answered
+
+        _unattemptedAnswers.value =
+            questionsList.size -
+                answered.size
     }
 
     private fun loadBookmarks(): Set<String> {
