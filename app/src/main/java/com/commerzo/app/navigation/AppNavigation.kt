@@ -67,6 +67,12 @@ fun AppNavigation(
                     )
                 },
 
+                onSubjectsClick = {
+                    navController.navigate(
+                        Screen.Subjects.route
+                    )
+                },
+
                 onPracticeClick = {
                     navController.navigate(
                         Screen.Practice.route
@@ -142,6 +148,7 @@ fun AppNavigation(
                         )
                     )
                 },
+
                 onBack = {
                     navController.popBackStack()
                 }
