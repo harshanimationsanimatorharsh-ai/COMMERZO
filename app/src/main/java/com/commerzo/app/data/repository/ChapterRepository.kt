@@ -10,7 +10,7 @@ class ChapterRepository {
 
             "accountancy" -> listOf(
                 ChapterData(
-                    "accountancy_1",
+                    "accounting_for_partnership",
                     subjectId,
                     "Accounting for Partnership Firms",
                     1
