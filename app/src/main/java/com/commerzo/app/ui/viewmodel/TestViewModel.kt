@@ -44,7 +44,6 @@ class TestViewModel : ViewModel() {
         board: Board = Board.MP_BOARD,
         classLevel: ClassLevel = ClassLevel.CLASS_12
     ) {
-
         val sourceQuestions =
             questionBankManager.getRandomizedValidatedQuestions(
                 subjectId = subjectId,
@@ -55,60 +54,48 @@ class TestViewModel : ViewModel() {
 
         if (sourceQuestions.isEmpty()) {
             _questions.value = emptyList()
+            _currentIndex.value = 0
+            _timeRemaining.value = TEST_DURATION_SECONDS
+            _isFinished.value = false
             return
         }
 
-        _questions.value = buildTestQuestions(sourceQuestions)
+        val selectedQuestions =
+            sourceQuestions
+                .distinctBy { it.id }
+                .take(TEST_SIZE)
+
+        _questions.value =
+            buildTestQuestions(selectedQuestions)
 
         _currentIndex.value = 0
-        _timeRemaining.value = TEST_DURATION_SECONDS
+        _timeRemaining.value =
+            calculateTestDuration(_questions.value.size)
         _isFinished.value = false
     }
 
     private fun buildTestQuestions(
         source: List<Question>
     ): List<TestQuestionState> {
-
-        val testQuestions = mutableListOf<TestQuestionState>()
-
-        if (source.isEmpty()) {
-            return emptyList()
-        }
-
-        var index = 0
-
-        while (testQuestions.size < TEST_SIZE) {
-
-            val question = source[index % source.size]
-
-            testQuestions.add(
-                TestQuestionState(
-                    question = question,
-                    selectedAnswer = null,
-                    markedForReview = false
-                )
+        return source.map { question ->
+            TestQuestionState(
+                question = question,
+                selectedAnswer = null,
+                markedForReview = false
             )
-
-            index++
         }
-
-        return testQuestions
     }
 
     fun selectAnswer(answer: Int) {
+        if (_isFinished.value) return
 
         val list = _questions.value.toMutableList()
+        val index = _currentIndex.value
+        val current = list.getOrNull(index) ?: return
 
-        val currentIndex = _currentIndex.value
+        if (answer !in current.question.options.indices) return
 
-        val current = list.getOrNull(currentIndex)
-            ?: return
-
-        if (answer !in current.question.options.indices) {
-            return
-        }
-
-        list[currentIndex] =
+        list[index] =
             current.copy(
                 selectedAnswer = answer
             )
@@ -116,13 +103,13 @@ class TestViewModel : ViewModel() {
         _questions.value = list
     }
 
-    fun getSelectedAnswer(index: Int): Int? {
-        return _questions.value
+    fun getSelectedAnswer(index: Int): Int? =
+        _questions.value
             .getOrNull(index)
             ?.selectedAnswer
-    }
 
     fun nextQuestion() {
+        if (_questions.value.isEmpty()) return
 
         if (_currentIndex.value < _questions.value.lastIndex) {
             _currentIndex.value++
@@ -132,29 +119,23 @@ class TestViewModel : ViewModel() {
     }
 
     fun previousQuestion() {
-
         if (_currentIndex.value > 0) {
             _currentIndex.value--
         }
     }
 
     fun goToQuestion(index: Int) {
-
         if (index in _questions.value.indices) {
             _currentIndex.value = index
         }
     }
 
     fun toggleMarkForReview() {
-
         val list = _questions.value.toMutableList()
+        val index = _currentIndex.value
+        val current = list.getOrNull(index) ?: return
 
-        val currentIndex = _currentIndex.value
-
-        val current = list.getOrNull(currentIndex)
-            ?: return
-
-        list[currentIndex] =
+        list[index] =
             current.copy(
                 markedForReview = !current.markedForReview
             )
@@ -162,19 +143,14 @@ class TestViewModel : ViewModel() {
         _questions.value = list
     }
 
-    fun isCurrentQuestionMarked(): Boolean {
-
-        return _questions.value
+    fun isCurrentQuestionMarked(): Boolean =
+        _questions.value
             .getOrNull(_currentIndex.value)
             ?.markedForReview
             ?: false
-    }
 
     fun decreaseTimer() {
-
-        if (_isFinished.value) {
-            return
-        }
+        if (_isFinished.value) return
 
         if (_timeRemaining.value > 0) {
             _timeRemaining.value--
@@ -184,78 +160,83 @@ class TestViewModel : ViewModel() {
     }
 
     fun finishTest() {
-        if (!_isFinished.value) {
-            _isFinished.value = true
-        }
+        if (_isFinished.value) return
+        _isFinished.value = true
     }
 
     fun restartTest() {
+        if (_questions.value.isEmpty()) return
 
-        val resetQuestions =
-            _questions.value.map { state ->
-                state.copy(
+        _questions.value =
+            _questions.value.map {
+                it.copy(
                     selectedAnswer = null,
                     markedForReview = false
                 )
             }
 
-        _questions.value = resetQuestions
         _currentIndex.value = 0
-        _timeRemaining.value = TEST_DURATION_SECONDS
+        _timeRemaining.value =
+            calculateTestDuration(_questions.value.size)
         _isFinished.value = false
     }
 
-    fun getAnsweredCount(): Int {
-        return _questions.value.count {
+    fun getAnsweredCount(): Int =
+        _questions.value.count {
             it.selectedAnswer != null
         }
-    }
 
-    fun getUnattemptedCount(): Int {
-        return _questions.value.count {
+    fun getUnattemptedCount(): Int =
+        _questions.value.count {
             it.selectedAnswer == null
         }
-    }
 
-    fun getMarkedCount(): Int {
-        return _questions.value.count {
+    fun getMarkedCount(): Int =
+        _questions.value.count {
             it.markedForReview
         }
-    }
 
-    fun getCorrectCount(): Int {
-        return _questions.value.count { state ->
-
-            val selected = state.selectedAnswer
-
+    fun getCorrectCount(): Int =
+        _questions.value.count {
+            val selected = it.selectedAnswer
             selected != null &&
-                selected == state.question.correctAnswer
+                selected == it.question.correctAnswer
         }
-    }
 
-    fun getWrongCount(): Int {
-        return _questions.value.count { state ->
-
-            val selected = state.selectedAnswer
-
+    fun getWrongCount(): Int =
+        _questions.value.count {
+            val selected = it.selectedAnswer
             selected != null &&
-                selected != state.question.correctAnswer
+                selected != it.question.correctAnswer
         }
-    }
 
     fun getPercentage(): Int {
-
         val total = _questions.value.size
 
-        if (total == 0) {
-            return 0
+        if (total == 0) return 0
+
+        return (
+            getCorrectCount() * 100
+        ) / total
+    }
+
+    fun getTotalQuestions(): Int =
+        _questions.value.size
+
+    private fun calculateTestDuration(
+        questionCount: Int
+    ): Int {
+        if (questionCount <= 0) {
+            return TEST_DURATION_SECONDS
         }
 
-        return ((getCorrectCount() * 100.0) / total).toInt()
+        return questionCount * SECONDS_PER_QUESTION
     }
 
     companion object {
         private const val TEST_SIZE = 50
-        private const val TEST_DURATION_SECONDS = 50 * 60
+        private const val SECONDS_PER_QUESTION = 60
+        private const val TEST_DURATION_SECONDS =
+            TEST_SIZE * SECONDS_PER_QUESTION
     }
 }
