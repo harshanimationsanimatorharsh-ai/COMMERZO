@@ -5,7 +5,8 @@ import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.model.Question
 
 class QuestionDataSource(
-    private val provider: QuestionProvider = QuestionProvider()
+    private val provider: QuestionProvider =
+        QuestionProvider()
 ) {
 
     fun getQuestions(
@@ -14,7 +15,23 @@ class QuestionDataSource(
         board: Board = Board.MP_BOARD,
         classLevel: ClassLevel = ClassLevel.CLASS_12
     ): List<Question> {
+
         return provider.getChapterQuestions(
+            subjectId = subjectId,
+            chapterId = chapterId,
+            board = board,
+            classLevel = classLevel
+        )
+    }
+
+    fun getValidatedQuestions(
+        subjectId: String,
+        chapterId: String,
+        board: Board = Board.MP_BOARD,
+        classLevel: ClassLevel = ClassLevel.CLASS_12
+    ): List<Question> {
+
+        return provider.getValidatedChapterQuestions(
             subjectId = subjectId,
             chapterId = chapterId,
             board = board,
@@ -28,6 +45,7 @@ class QuestionDataSource(
         board: Board = Board.MP_BOARD,
         classLevel: ClassLevel = ClassLevel.CLASS_12
     ): List<Question> {
+
         return provider.getPracticeQuestions(
             subjectId = subjectId,
             chapterId = chapterId,
