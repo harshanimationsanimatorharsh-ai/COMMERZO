@@ -12,22 +12,46 @@ class ChapterRepository {
         classLevel: ClassLevel = ClassLevel.CLASS_12
     ): List<ChapterData> {
 
-        return when (classLevel) {
-            ClassLevel.CLASS_11 -> getClass11Chapters(subjectId, board)
-            ClassLevel.CLASS_12 -> getClass12Chapters(subjectId, board)
+        return when (board) {
+            Board.MP_BOARD -> getMpBoardChapters(subjectId, classLevel)
+            Board.CBSE -> getCbseChapters(subjectId, classLevel)
         }
     }
 
-    private fun getClass11Chapters(
+    // ---------------------------------------------------------
+    // MP BOARD
+    // ---------------------------------------------------------
+
+    private fun getMpBoardChapters(
         subjectId: String,
-        board: Board
+        classLevel: ClassLevel
     ): List<ChapterData> {
+
+        return when (classLevel) {
+
+            ClassLevel.CLASS_11 -> getMpBoardClass11Chapters(subjectId)
+
+            ClassLevel.CLASS_12 -> getMpBoardClass12Chapters(subjectId)
+        }
+    }
+
+    private fun getMpBoardClass11Chapters(
+        subjectId: String
+    ): List<ChapterData> {
+
+        /*
+         * Class 11 MP Board structure currently retained from the
+         * existing COMMERZO curriculum until the exact 2026-27
+         * MPBSE Class 11 chapter PDF is available.
+         *
+         * Do not generate questions from unverified chapters.
+         */
 
         return when (subjectId) {
 
             "accountancy" -> chapters(
                 subjectId,
-                board,
+                Board.MP_BOARD,
                 ClassLevel.CLASS_11,
                 listOf(
                     "Introduction to Accounting",
@@ -43,7 +67,7 @@ class ChapterRepository {
 
             "business_studies" -> chapters(
                 subjectId,
-                board,
+                Board.MP_BOARD,
                 ClassLevel.CLASS_11,
                 listOf(
                     "Nature and Purpose of Business",
@@ -62,7 +86,7 @@ class ChapterRepository {
 
             "economics" -> chapters(
                 subjectId,
-                board,
+                Board.MP_BOARD,
                 ClassLevel.CLASS_11,
                 listOf(
                     "Introduction to Economics",
@@ -81,7 +105,7 @@ class ChapterRepository {
 
             "mathematics" -> chapters(
                 subjectId,
-                board,
+                Board.MP_BOARD,
                 ClassLevel.CLASS_11,
                 listOf(
                     "Sets",
@@ -103,7 +127,7 @@ class ChapterRepository {
 
             "english" -> chapters(
                 subjectId,
-                board,
+                Board.MP_BOARD,
                 ClassLevel.CLASS_11,
                 listOf(
                     "Reading Comprehension",
@@ -115,7 +139,7 @@ class ChapterRepository {
 
             "hindi" -> chapters(
                 subjectId,
-                board,
+                Board.MP_BOARD,
                 ClassLevel.CLASS_11,
                 listOf(
                     "आरोह",
@@ -128,16 +152,313 @@ class ChapterRepository {
         }
     }
 
-    private fun getClass12Chapters(
+    private fun getMpBoardClass12Chapters(
+        subjectId: String
+    ): List<ChapterData> {
+
+        return when (subjectId) {
+
+            // -------------------------------------------------
+            // ACCOUNTANCY - MP BOARD CLASS 12
+            // -------------------------------------------------
+
+            "accountancy" -> chapters(
+                subjectId,
+                Board.MP_BOARD,
+                ClassLevel.CLASS_12,
+                listOf(
+                    "Accounting for Partnership: Basic Concepts",
+                    "Reconstitution of a Partnership Firm—Admission of a Partner",
+                    "Reconstitution of a Partnership Firm—Retirement/Death of a Partner",
+                    "Dissolution of Partnership Firm",
+                    "Accounting for Share Capital",
+                    "Issue and Redemption of Debentures",
+                    "Financial Statements of a Company",
+                    "Accounting Ratios",
+                    "Cash Flow Statement"
+                )
+            )
+
+            // -------------------------------------------------
+            // BUSINESS STUDIES - MP BOARD CLASS 12
+            // -------------------------------------------------
+
+            "business_studies" -> chapters(
+                subjectId,
+                Board.MP_BOARD,
+                ClassLevel.CLASS_12,
+                listOf(
+                    "Nature and Significance of Management",
+                    "Principles of Management",
+                    "Business Environment",
+                    "Planning",
+                    "Organising",
+                    "Staffing",
+                    "Directing",
+                    "Controlling",
+                    "Financial Management",
+                    "Financial Market",
+                    "Marketing Management",
+                    "Consumer Protection"
+                )
+            )
+
+            // -------------------------------------------------
+            // ECONOMICS - MP BOARD CLASS 12
+            // -------------------------------------------------
+
+            "economics" -> chapters(
+                subjectId,
+                Board.MP_BOARD,
+                ClassLevel.CLASS_12,
+                listOf(
+                    // Introductory Microeconomics
+                    "Introduction",
+                    "Theory of Consumer Behaviour",
+                    "Production and Costs",
+                    "The Theory of the Firm Under Perfect Competition",
+                    "Market Equilibrium",
+
+                    // Introductory Macroeconomics
+                    "Introduction",
+                    "National Income Accounting",
+                    "Money and Banking",
+                    "Determination of Income and Employment",
+                    "Government Budget and The Economy",
+                    "Open Economy Macroeconomics",
+
+                    // Indian Economic Development
+                    "Indian Economy on the Eve of Independence",
+                    "Indian Economy (1950–1990)",
+                    "Economic Reforms Since 1991: New Economic Policy",
+                    "Human Capital Formation in India",
+                    "Rural Development",
+                    "Employment",
+                    "Environment and Sustainable Development",
+                    "Comparative Development Experiences of India and its Neighbours"
+                ),
+                chapterIds = listOf(
+                    "economics_class_12_micro_1",
+                    "economics_class_12_micro_2",
+                    "economics_class_12_micro_3",
+                    "economics_class_12_micro_4",
+                    "economics_class_12_micro_5",
+                    "economics_class_12_macro_1",
+                    "economics_class_12_macro_2",
+                    "economics_class_12_macro_3",
+                    "economics_class_12_macro_4",
+                    "economics_class_12_macro_5",
+                    "economics_class_12_macro_6",
+                    "economics_class_12_ied_1",
+                    "economics_class_12_ied_2",
+                    "economics_class_12_ied_3",
+                    "economics_class_12_ied_4",
+                    "economics_class_12_ied_5",
+                    "economics_class_12_ied_6",
+                    "economics_class_12_ied_7",
+                    "economics_class_12_ied_8"
+                )
+            )
+
+            // -------------------------------------------------
+            // MATHEMATICS - MP BOARD CLASS 12
+            // -------------------------------------------------
+
+            "mathematics" -> chapters(
+                subjectId,
+                Board.MP_BOARD,
+                ClassLevel.CLASS_12,
+                listOf(
+                    "Relations and Functions",
+                    "Inverse Trigonometric Functions",
+                    "Matrices",
+                    "Determinants",
+                    "Continuity and Differentiability",
+                    "Application of Derivatives",
+                    "Integrals",
+                    "Application of Integrals",
+                    "Differential Equations",
+                    "Vector Algebra",
+                    "Three-Dimensional Geometry",
+                    "Linear Programming",
+                    "Probability"
+                )
+            )
+
+            // -------------------------------------------------
+            // ENGLISH - MP BOARD CLASS 12
+            // -------------------------------------------------
+
+            "english" -> chapters(
+                subjectId,
+                Board.MP_BOARD,
+                ClassLevel.CLASS_12,
+                listOf(
+                    "Reading Skills",
+                    "Writing Skills",
+                    "Grammar",
+                    "Flamingo",
+                    "Vistas"
+                )
+            )
+
+            // -------------------------------------------------
+            // HINDI - MP BOARD CLASS 12
+            // -------------------------------------------------
+
+            "hindi" -> chapters(
+                subjectId,
+                Board.MP_BOARD,
+                ClassLevel.CLASS_12,
+                listOf(
+                    "आरोह — भाग 2 (काव्य खण्ड)",
+                    "काव्य बोध",
+                    "आरोह — भाग 2 (गद्य खण्ड)",
+                    "भाषा बोध",
+                    "वितान भाग — 2",
+                    "अभिव्यक्ति और माध्यम — जनसंचार माध्यम और लेखन",
+                    "अभिव्यक्ति और माध्यम — सृजनात्मक लेखन",
+                    "अपठित बोध",
+                    "पत्र एवं निबंध लेखन"
+                )
+            )
+
+            else -> emptyList()
+        }
+    }
+
+    // ---------------------------------------------------------
+    // CBSE
+    // ---------------------------------------------------------
+
+    private fun getCbseChapters(
         subjectId: String,
-        board: Board
+        classLevel: ClassLevel
+    ): List<ChapterData> {
+
+        return when (classLevel) {
+
+            ClassLevel.CLASS_11 -> getCbseClass11Chapters(subjectId)
+
+            ClassLevel.CLASS_12 -> getCbseClass12Chapters(subjectId)
+        }
+    }
+
+    private fun getCbseClass11Chapters(
+        subjectId: String
     ): List<ChapterData> {
 
         return when (subjectId) {
 
             "accountancy" -> chapters(
                 subjectId,
-                board,
+                Board.CBSE,
+                ClassLevel.CLASS_11,
+                listOf(
+                    "Introduction to Accounting",
+                    "Theory Base of Accounting",
+                    "Recording of Transactions",
+                    "Bank Reconciliation Statement",
+                    "Trial Balance and Rectification of Errors",
+                    "Depreciation",
+                    "Bills of Exchange",
+                    "Financial Statements of Sole Proprietorship"
+                )
+            )
+
+            "business_studies" -> chapters(
+                subjectId,
+                Board.CBSE,
+                ClassLevel.CLASS_11,
+                listOf(
+                    "Nature and Purpose of Business",
+                    "Forms of Business Organisations",
+                    "Public, Private and Global Enterprises",
+                    "Business Services",
+                    "Emerging Modes of Business",
+                    "Social Responsibility of Business and Business Ethics",
+                    "Sources of Business Finance",
+                    "Small Business",
+                    "Internal Trade",
+                    "International Business"
+                )
+            )
+
+            "economics" -> chapters(
+                subjectId,
+                Board.CBSE,
+                ClassLevel.CLASS_11,
+                listOf(
+                    "Introduction",
+                    "Collection, Organisation and Presentation of Data",
+                    "Statistical Tools and Interpretation",
+                    "Introduction to Microeconomics",
+                    "Consumer Behaviour and Demand",
+                    "Producer Behaviour and Supply",
+                    "Perfect Competition",
+                    "Market Equilibrium"
+                )
+            )
+
+            "mathematics" -> chapters(
+                subjectId,
+                Board.CBSE,
+                ClassLevel.CLASS_11,
+                listOf(
+                    "Sets",
+                    "Relations and Functions",
+                    "Trigonometric Functions",
+                    "Complex Numbers and Quadratic Equations",
+                    "Linear Inequalities",
+                    "Permutations and Combinations",
+                    "Binomial Theorem",
+                    "Sequences and Series",
+                    "Straight Lines",
+                    "Conic Sections",
+                    "Introduction to Three Dimensional Geometry",
+                    "Limits and Derivatives",
+                    "Statistics",
+                    "Probability"
+                )
+            )
+
+            "english" -> chapters(
+                subjectId,
+                Board.CBSE,
+                ClassLevel.CLASS_11,
+                listOf(
+                    "Reading Comprehension",
+                    "Grammar",
+                    "Creative Writing",
+                    "Hornbill",
+                    "Snapshots"
+                )
+            )
+
+            "hindi" -> chapters(
+                subjectId,
+                Board.CBSE,
+                ClassLevel.CLASS_11,
+                listOf(
+                    "आरोह",
+                    "वितान",
+                    "अभिव्यक्ति और माध्यम"
+                )
+            )
+
+            else -> emptyList()
+        }
+    }
+
+    private fun getCbseClass12Chapters(
+        subjectId: String
+    ): List<ChapterData> {
+
+        return when (subjectId) {
+
+            "accountancy" -> chapters(
+                subjectId,
+                Board.CBSE,
                 ClassLevel.CLASS_12,
                 listOf(
                     "Accounting for Partnership Firms",
@@ -149,7 +470,7 @@ class ChapterRepository {
 
             "business_studies" -> chapters(
                 subjectId,
-                board,
+                Board.CBSE,
                 ClassLevel.CLASS_12,
                 listOf(
                     "Nature and Significance of Management",
@@ -169,23 +490,23 @@ class ChapterRepository {
 
             "economics" -> chapters(
                 subjectId,
-                board,
+                Board.CBSE,
                 ClassLevel.CLASS_12,
                 listOf(
-                    "National Income Accounting",
+                    "National Income and Related Aggregates",
                     "Money and Banking",
                     "Determination of Income and Employment",
-                    "Government Budget",
+                    "Government Budget and the Economy",
                     "Balance of Payments",
-                    "Development Experience and Economic Reforms",
+                    "Development Experience (1947–90) and Economic Reforms since 1991",
                     "Current Challenges Facing Indian Economy",
-                    "Development Experience of India"
+                    "Development Experience of India – A Comparison with Neighbours"
                 )
             )
 
             "mathematics" -> chapters(
                 subjectId,
-                board,
+                Board.CBSE,
                 ClassLevel.CLASS_12,
                 listOf(
                     "Relations and Functions",
@@ -206,11 +527,11 @@ class ChapterRepository {
 
             "english" -> chapters(
                 subjectId,
-                board,
+                Board.CBSE,
                 ClassLevel.CLASS_12,
                 listOf(
                     "Reading Comprehension",
-                    "Writing Skills",
+                    "Creative Writing Skills",
                     "Flamingo",
                     "Vistas"
                 )
@@ -218,7 +539,7 @@ class ChapterRepository {
 
             "hindi" -> chapters(
                 subjectId,
-                board,
+                Board.CBSE,
                 ClassLevel.CLASS_12,
                 listOf(
                     "आरोह",
@@ -231,16 +552,23 @@ class ChapterRepository {
         }
     }
 
+    // ---------------------------------------------------------
+    // Common chapter builder
+    // ---------------------------------------------------------
+
     private fun chapters(
         subjectId: String,
         board: Board,
         classLevel: ClassLevel,
-        titles: List<String>
+        titles: List<String>,
+        chapterIds: List<String>? = null
     ): List<ChapterData> {
 
         return titles.mapIndexed { index, title ->
+
             ChapterData(
-                id = "${subjectId}_${classLevel.name.lowercase()}_${index + 1}",
+                id = chapterIds?.getOrNull(index)
+                    ?: "${subjectId}_${classLevel.name.lowercase()}_${index + 1}",
                 subjectId = subjectId,
                 title = title,
                 chapterNumber = index + 1,
