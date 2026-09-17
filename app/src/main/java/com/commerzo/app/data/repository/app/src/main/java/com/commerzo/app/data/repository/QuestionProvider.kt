@@ -5,7 +5,8 @@ import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.model.Question
 
 class QuestionProvider(
-    private val questionRepository: QuestionRepository = QuestionRepository()
+    private val questionRepository: QuestionRepository =
+        QuestionRepository()
 ) {
 
     fun getChapterQuestions(
@@ -15,18 +16,38 @@ class QuestionProvider(
         classLevel: ClassLevel = ClassLevel.CLASS_12
     ): List<Question> {
 
-        val questions = questionRepository.getQuestions(
+        return questionRepository
+            .getQuestions(
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel
+            )
+            .filter { question ->
+                question.subjectId == subjectId &&
+                    question.chapterId == chapterId &&
+                    question.board == board &&
+                    question.classLevel == classLevel
+            }
+            .distinctBy { it.id }
+    }
+
+    fun getValidatedChapterQuestions(
+        subjectId: String,
+        chapterId: String,
+        board: Board = Board.MP_BOARD,
+        classLevel: ClassLevel = ClassLevel.CLASS_12
+    ): List<Question> {
+
+        return getChapterQuestions(
             subjectId = subjectId,
             chapterId = chapterId,
             board = board,
             classLevel = classLevel
-        )
-
-        return questions.filter { question ->
-            question.subjectId == subjectId &&
-                question.chapterId == chapterId &&
-                question.board == board &&
-                question.classLevel == classLevel
+        ).filter { question ->
+            QuestionBankValidator
+                .validate(question)
+                .isValid
         }
     }
 
@@ -37,13 +58,13 @@ class QuestionProvider(
         classLevel: ClassLevel = ClassLevel.CLASS_12
     ): List<Question> {
 
-        val questions = getChapterQuestions(
-            subjectId = subjectId,
-            chapterId = chapterId,
-            board = board,
-            classLevel = classLevel
+        return QuestionRandomizer.prepareForTest(
+            getValidatedChapterQuestions(
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel
+            )
         )
-
-        return QuestionRandomizer.prepareForTest(questions)
     }
 }
