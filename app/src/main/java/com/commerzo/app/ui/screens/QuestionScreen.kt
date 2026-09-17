@@ -495,8 +495,7 @@ fun QuestionScreen(
                                                 ) {
                                                     Icons.Default.Check
                                                 } else {
-                                                    Icons.Default
-                                                        .Lightbulb
+                                                    Icons.Default.Lightbulb
                                                 },
                                             contentDescription =
                                                 null
@@ -559,7 +558,7 @@ fun QuestionScreen(
                                         vertical = 12.dp
                                     ),
                             horizontalArrangement =
-                                Arrangement.spacedBy(10.dp)
+                                Arrangement.spacedBy(8.dp)
                         ) {
 
                             OutlinedButton(
@@ -583,10 +582,22 @@ fun QuestionScreen(
 
                                 Spacer(
                                     modifier =
-                                        Modifier.width(4.dp)
+                                        Modifier.width(2.dp)
                                 )
 
                                 Text("Previous")
+                            }
+
+                            OutlinedButton(
+                                onClick = {
+                                    viewModel.skipQuestion()
+                                },
+                                enabled =
+                                    !submitted,
+                                modifier =
+                                    Modifier.weight(1f)
+                            ) {
+                                Text("Skip")
                             }
 
                             Button(
@@ -626,7 +637,7 @@ fun QuestionScreen(
 
                                     Spacer(
                                         modifier =
-                                            Modifier.width(4.dp)
+                                            Modifier.width(2.dp)
                                     )
 
                                     Icon(
