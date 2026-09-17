@@ -181,7 +181,7 @@ fun AppNavigation() {
                     marked ->
 
                     navController.navigate(
-                        "test_result/$total/$answered/$correct/$wrong/$unattempted/$marked"
+                        "test_result/$subjectId/$chapterId/$total/$answered/$correct/$wrong/$unattempted/$marked"
                     )
                 },
                 onBack = {
@@ -191,8 +191,14 @@ fun AppNavigation() {
         }
 
         composable(
-            route = "test_result/{total}/{answered}/{correct}/{wrong}/{unattempted}/{marked}",
+            route = "test_result/{subjectId}/{chapterId}/{total}/{answered}/{correct}/{wrong}/{unattempted}/{marked}",
             arguments = listOf(
+                navArgument("subjectId") {
+                    type = NavType.StringType
+                },
+                navArgument("chapterId") {
+                    type = NavType.StringType
+                },
                 navArgument("total") {
                     type = NavType.IntType
                 },
@@ -213,6 +219,14 @@ fun AppNavigation() {
                 }
             )
         ) { backStackEntry ->
+
+            val subjectId =
+                backStackEntry.arguments?.getString("subjectId")
+                    ?: return@composable
+
+            val chapterId =
+                backStackEntry.arguments?.getString("chapterId")
+                    ?: return@composable
 
             val total =
                 backStackEntry.arguments?.getInt("total") ?: 0
@@ -240,7 +254,19 @@ fun AppNavigation() {
                 unattempted = unattempted,
                 marked = marked,
                 onRestart = {
-                    navController.popBackStack()
+
+                    navController.navigate(
+                        Screen.Test.createRoute(
+                            subjectId,
+                            chapterId
+                        )
+                    ) {
+                        popUpTo(
+                            "test_result/$subjectId/$chapterId/$total/$answered/$correct/$wrong/$unattempted/$marked"
+                        ) {
+                            inclusive = true
+                        }
+                    }
                 },
                 onBackToTests = {
                     navController.navigate(
