@@ -16,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,10 +25,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.model.SubjectData
+import com.commerzo.app.ui.components.SubjectCard
 import com.commerzo.app.viewmodel.SubjectSelectionViewModel
 
 @Composable
@@ -43,10 +44,7 @@ fun SubjectSelectionScreen(
         mutableStateOf(ClassLevel.CLASS_12)
     }
 
-    val subjects = viewModel.getSubjects(
-        board = selectedBoard,
-        classLevel = selectedClass
-    )
+    val subjects by viewModel.subjects.collectAsState()
 
     Scaffold(
         topBar = {
@@ -70,7 +68,9 @@ fun SubjectSelectionScreen(
         ) {
 
             item {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
 
                 Text(
                     text = "Board",
@@ -78,16 +78,20 @@ fun SubjectSelectionScreen(
                     fontWeight = FontWeight.SemiBold
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+
                     FilterChip(
                         selected = selectedBoard == Board.MP_BOARD,
                         onClick = {
                             selectedBoard = Board.MP_BOARD
+                            viewModel.setBoard(Board.MP_BOARD)
                         },
                         label = {
                             Text("MP Board")
@@ -98,6 +102,7 @@ fun SubjectSelectionScreen(
                         selected = selectedBoard == Board.CBSE,
                         onClick = {
                             selectedBoard = Board.CBSE
+                            viewModel.setBoard(Board.CBSE)
                         },
                         label = {
                             Text("CBSE")
@@ -105,7 +110,9 @@ fun SubjectSelectionScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(
+                    modifier = Modifier.height(16.dp)
+                )
 
                 Text(
                     text = "Class",
@@ -113,16 +120,20 @@ fun SubjectSelectionScreen(
                     fontWeight = FontWeight.SemiBold
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+
                     FilterChip(
                         selected = selectedClass == ClassLevel.CLASS_11,
                         onClick = {
                             selectedClass = ClassLevel.CLASS_11
+                            viewModel.setClassLevel(ClassLevel.CLASS_11)
                         },
                         label = {
                             Text("Class 11")
@@ -133,6 +144,7 @@ fun SubjectSelectionScreen(
                         selected = selectedClass == ClassLevel.CLASS_12,
                         onClick = {
                             selectedClass = ClassLevel.CLASS_12
+                            viewModel.setClassLevel(ClassLevel.CLASS_12)
                         },
                         label = {
                             Text("Class 12")
@@ -140,7 +152,9 @@ fun SubjectSelectionScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(
+                    modifier = Modifier.height(12.dp)
+                )
 
                 Text(
                     text = "${selectedBoard.displayName()} • ${selectedClass.displayName()}",
@@ -148,10 +162,13 @@ fun SubjectSelectionScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
             }
 
             if (subjects.isEmpty()) {
+
                 item {
                     Text(
                         text = "No subjects available for this selection.",
@@ -159,7 +176,9 @@ fun SubjectSelectionScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+
             } else {
+
                 items(
                     items = subjects,
                     key = { it.id }
@@ -175,49 +194,8 @@ fun SubjectSelectionScreen(
             }
 
             item {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-        }
-    }
-}
-
-@Composable
-private fun SubjectCard(
-    subject: SubjectData,
-    onClick: () -> Unit
-) {
-    androidx.compose.material3.Card(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = onClick
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(18.dp)
-        ) {
-
-            Text(
-                text = subject.emoji,
-                style = MaterialTheme.typography.headlineSmall
-            )
-
-            Spacer(modifier = Modifier.padding(horizontal = 7.dp))
-
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = subject.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "${subject.chaptersCount} chapters",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                Spacer(
+                    modifier = Modifier.height(16.dp)
                 )
             }
         }
