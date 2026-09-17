@@ -1,8 +1,12 @@
 package com.commerzo.app.navigation
 
+import com.commerzo.app.data.model.Board
+import com.commerzo.app.data.model.ClassLevel
+
 sealed class Screen(
     val route: String
 ) {
+
     data object Home : Screen("home")
 
     data object Practice : Screen("practice")
@@ -15,31 +19,50 @@ sealed class Screen(
 
     data object Subjects : Screen("subjects")
 
-    data object Chapters : Screen(
-        "chapters/{subjectId}/{board}/{classLevel}"
-    )
+    data object Chapters :
+        Screen("chapters/{subjectId}/{board}/{classLevel}") {
 
-    data object Questions : Screen(
-        "questions/{subjectId}/{chapterId}/{board}/{classLevel}"
-    )
+        fun createRoute(
+            subjectId: String,
+            board: Board,
+            classLevel: ClassLevel
+        ): String {
+            return "chapters/" +
+                "$subjectId/" +
+                "${board.name}/" +
+                "${classLevel.name}"
+        }
+    }
 
-    data object TestResult : Screen(
-        "test_result"
-    )
+    data object Questions :
+        Screen("questions/{subjectId}/{chapterId}/{board}/{classLevel}") {
 
-    data object Bookmarks : Screen(
-        "bookmarks"
-    )
+        fun createRoute(
+            subjectId: String,
+            chapterId: String,
+            board: Board,
+            classLevel: ClassLevel
+        ): String {
+            return "questions/" +
+                "$subjectId/" +
+                "$chapterId/" +
+                "${board.name}/" +
+                "${classLevel.name}"
+        }
+    }
 
-    data object TestHistory : Screen(
-        "test_history"
-    )
+    data object TestResult :
+        Screen("test_result")
 
-    data object Achievements : Screen(
-        "achievements"
-    )
+    data object Bookmarks :
+        Screen("bookmarks")
 
-    data object Settings : Screen(
-        "settings"
-    )
+    data object TestHistory :
+        Screen("test_history")
+
+    data object Achievements :
+        Screen("achievements")
+
+    data object Settings :
+        Screen("settings")
 }
