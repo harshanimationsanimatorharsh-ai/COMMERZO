@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.History
@@ -20,7 +21,6 @@ import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SportsEsports
-import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -33,12 +33,14 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun HomeScreen(
     onSubjectClick: (String) -> Unit = {},
+    onSubjectsClick: () -> Unit = {},
     onPracticeClick: () -> Unit = {},
     onTestsClick: () -> Unit = {},
     onGamesClick: () -> Unit = {},
@@ -49,36 +51,12 @@ fun HomeScreen(
     onSettingsClick: () -> Unit = {}
 ) {
     val subjects = listOf(
-        HomeSubject(
-            id = "accountancy",
-            name = "Accountancy",
-            emoji = "📊"
-        ),
-        HomeSubject(
-            id = "business_studies",
-            name = "Business Studies",
-            emoji = "💼"
-        ),
-        HomeSubject(
-            id = "economics",
-            name = "Economics",
-            emoji = "📈"
-        ),
-        HomeSubject(
-            id = "mathematics",
-            name = "Mathematics",
-            emoji = "🧮"
-        ),
-        HomeSubject(
-            id = "english",
-            name = "English",
-            emoji = "📖"
-        ),
-        HomeSubject(
-            id = "hindi",
-            name = "Hindi",
-            emoji = "📝"
-        )
+        HomeSubject("accountancy", "Accountancy", "📊"),
+        HomeSubject("business_studies", "Business Studies", "💼"),
+        HomeSubject("economics", "Economics", "📈"),
+        HomeSubject("mathematics", "Mathematics", "🧮"),
+        HomeSubject("english", "English", "📖"),
+        HomeSubject("hindi", "Hindi", "📝")
     )
 
     Scaffold(
@@ -146,6 +124,12 @@ fun HomeScreen(
             }
 
             item {
+                CurriculumCard(
+                    onChangeClick = onSubjectsClick
+                )
+            }
+
+            item {
                 Text(
                     text = "Quick Actions",
                     style = MaterialTheme.typography.titleLarge,
@@ -184,7 +168,7 @@ fun HomeScreen(
 
             item {
                 Text(
-                    text = "Your Progress",
+                    text = "Your Learning",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -271,8 +255,7 @@ fun HomeScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor =
-                            MaterialTheme.colorScheme.surfaceVariant
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
                     )
                 ) {
                     Column(
@@ -298,8 +281,7 @@ fun HomeScreen(
                         Text(
                             text = "Founded by Mr.Harsh Shrivas",
                             style = MaterialTheme.typography.bodySmall,
-                            color =
-                                MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -317,10 +299,62 @@ private data class HomeSubject(
 )
 
 @Composable
+private fun CurriculumCard(
+    onChangeClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Current Curriculum",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "MP Board • Class 12",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+
+                Spacer(modifier = Modifier.height(3.dp))
+
+                Text(
+                    text = "Change your board or class",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+
+            Button(
+                onClick = onChangeClick
+            ) {
+                Text("Change")
+            }
+        }
+    }
+}
+
+@Composable
 private fun QuickActionCard(
     title: String,
     subtitle: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     onClick: () -> Unit
 ) {
     Card(
@@ -333,7 +367,6 @@ private fun QuickActionCard(
                 .padding(18.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Icon(
                 imageVector = icon,
                 contentDescription = title
@@ -355,8 +388,7 @@ private fun QuickActionCard(
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color =
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -372,7 +404,7 @@ private fun QuickActionCard(
 private fun SmallActionCard(
     modifier: Modifier = Modifier,
     title: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     onClick: () -> Unit
 ) {
     Card(
@@ -385,7 +417,6 @@ private fun SmallActionCard(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Icon(
                 imageVector = icon,
                 contentDescription = title
@@ -420,7 +451,6 @@ private fun HomeSubjectCard(
                 .padding(18.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Text(
                 text = subject.emoji,
                 style = MaterialTheme.typography.headlineSmall
@@ -442,8 +472,7 @@ private fun HomeSubjectCard(
                 Text(
                     text = "Open chapters and practice",
                     style = MaterialTheme.typography.bodySmall,
-                    color =
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
