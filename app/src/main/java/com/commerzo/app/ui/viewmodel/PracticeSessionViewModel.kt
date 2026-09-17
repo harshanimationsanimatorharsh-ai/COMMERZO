@@ -129,7 +129,6 @@ class PracticeSessionViewModel(
         board: Board = Board.MP_BOARD,
         classLevel: ClassLevel = ClassLevel.CLASS_12
     ) {
-
         currentSubjectId = subjectId
         currentChapterId = chapterId
         currentBoard = board
@@ -155,7 +154,6 @@ class PracticeSessionViewModel(
     fun selectAnswer(
         index: Int
     ) {
-
         if (
             _submitted.value ||
             _isFinished.value
@@ -185,7 +183,6 @@ class PracticeSessionViewModel(
     }
 
     fun submitAnswer() {
-
         if (
             _submitted.value ||
             _isFinished.value
@@ -213,8 +210,53 @@ class PracticeSessionViewModel(
         _submitted.value = true
     }
 
-    fun nextQuestion() {
+    fun skipQuestion() {
+        if (
+            _submitted.value ||
+            _isFinished.value
+        ) {
+            return
+        }
 
+        if (
+            _questions.value.getOrNull(
+                _currentIndex.value
+            ) == null
+        ) {
+            return
+        }
+
+        updateCurrentAnswerState(
+            selectedAnswer = null,
+            submitted = false
+        )
+
+        _selectedAnswer.value = null
+
+        recalculateResults()
+
+        saveCurrentProgress()
+
+        val nextIndex =
+            _currentIndex.value + 1
+
+        if (
+            nextIndex >=
+            _questions.value.size
+        ) {
+            _isFinished.value = true
+            recalculateResults()
+            saveCurrentProgress()
+            return
+        }
+
+        _currentIndex.value =
+            nextIndex
+
+        restoreCurrentQuestionState()
+    }
+
+    fun nextQuestion() {
         if (!_submitted.value) {
             return
         }
@@ -226,7 +268,6 @@ class PracticeSessionViewModel(
             nextIndex >=
             _questions.value.size
         ) {
-
             _isFinished.value = true
 
             recalculateResults()
@@ -242,7 +283,6 @@ class PracticeSessionViewModel(
     }
 
     fun previousQuestion() {
-
         if (_currentIndex.value <= 0) {
             return
         }
@@ -255,7 +295,6 @@ class PracticeSessionViewModel(
     fun goToQuestion(
         index: Int
     ) {
-
         if (
             index !in
             _questions.value.indices
@@ -270,7 +309,6 @@ class PracticeSessionViewModel(
     }
 
     fun toggleBookmark() {
-
         val currentQuestion =
             _questions.value.getOrNull(
                 _currentIndex.value
@@ -289,7 +327,6 @@ class PracticeSessionViewModel(
                 currentQuestion.id
             )
         ) {
-
             updatedBookmarks.remove(
                 currentQuestion.id
             )
@@ -297,9 +334,7 @@ class PracticeSessionViewModel(
             updatedDetails.removeAll {
                 it.id == currentQuestion.id
             }
-
         } else {
-
             updatedBookmarks.add(
                 currentQuestion.id
             )
@@ -338,7 +373,6 @@ class PracticeSessionViewModel(
     fun removeBookmark(
         questionId: String
     ) {
-
         if (
             !_bookmarkedQuestions.value
                 .contains(questionId)
@@ -379,7 +413,6 @@ class PracticeSessionViewModel(
     }
 
     fun clearAllBookmarks() {
-
         _bookmarkedQuestions.value =
             emptySet()
 
@@ -396,7 +429,6 @@ class PracticeSessionViewModel(
     }
 
     fun isCurrentQuestionBookmarked(): Boolean {
-
         val currentQuestion =
             _questions.value.getOrNull(
                 _currentIndex.value
@@ -427,7 +459,6 @@ class PracticeSessionViewModel(
     }
 
     fun getPercentage(): Int {
-
         val total =
             _questions.value.size
 
@@ -442,7 +473,6 @@ class PracticeSessionViewModel(
     }
 
     fun resetSession() {
-
         _currentIndex.value = 0
 
         _selectedAnswer.value = null
@@ -480,7 +510,6 @@ class PracticeSessionViewModel(
         selectedAnswer: Int?,
         submitted: Boolean
     ) {
-
         val index =
             _currentIndex.value
 
@@ -507,7 +536,6 @@ class PracticeSessionViewModel(
     }
 
     private fun restoreCurrentQuestionState() {
-
         val state =
             _answerStates.value.getOrNull(
                 _currentIndex.value
@@ -521,7 +549,6 @@ class PracticeSessionViewModel(
     }
 
     private fun recalculateResults() {
-
         val questionsList =
             _questions.value
 
@@ -547,7 +574,6 @@ class PracticeSessionViewModel(
                 selected != null &&
                 state.submitted
             ) {
-
                 answered.add(
                     question.id
                 )
@@ -590,7 +616,6 @@ class PracticeSessionViewModel(
     }
 
     private fun saveCurrentProgress() {
-
         val subjectId =
             currentSubjectId ?: return
 
@@ -618,7 +643,6 @@ class PracticeSessionViewModel(
     }
 
     private fun loadSavedProgressPercent() {
-
         val subjectId =
             currentSubjectId ?: return
 
@@ -642,7 +666,6 @@ class PracticeSessionViewModel(
     }
 
     private fun loadBookmarks(): Set<String> {
-
         return preferences
             .getStringSet(
                 BOOKMARKS_KEY,
@@ -655,7 +678,6 @@ class PracticeSessionViewModel(
     private fun saveBookmarks(
         bookmarks: Set<String>
     ) {
-
         preferences
             .edit()
             .putStringSet(
@@ -666,7 +688,6 @@ class PracticeSessionViewModel(
     }
 
     private fun loadBookmarkedQuestionDetails(): List<Question> {
-
         val stored =
             preferences.getString(
                 BOOKMARK_DETAILS_KEY,
@@ -674,7 +695,6 @@ class PracticeSessionViewModel(
             ) ?: return emptyList()
 
         return try {
-
             val array =
                 JSONArray(stored)
 
@@ -685,7 +705,6 @@ class PracticeSessionViewModel(
                 index in
                 0 until array.length()
             ) {
-
                 val json =
                     array.optJSONObject(index)
                         ?: continue
@@ -808,7 +827,6 @@ class PracticeSessionViewModel(
     private fun saveBookmarkedQuestionDetails(
         questions: List<Question>
     ) {
-
         val array =
             JSONArray()
 
