@@ -7,5 +7,15 @@ data class Question(
     val correctAnswer: Int,
     val explanation: String,
     val subjectId: String,
-    val chapterId: String
+    val chapterId: String,
+    val board: Board = Board.MP_BOARD,
+    val classLevel: ClassLevel = ClassLevel.CLASS_12,
+    val difficulty: QuestionDifficulty = QuestionDifficulty.MEDIUM,
+    val tags: List<String> = emptyList()
 )
+
+enum class QuestionDifficulty {
+    EASY,
+    MEDIUM,
+    HARD
+}
