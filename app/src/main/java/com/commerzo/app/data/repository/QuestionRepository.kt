@@ -14,292 +14,261 @@ class QuestionRepository {
         classLevel: ClassLevel = ClassLevel.CLASS_12
     ): List<Question> {
 
-        val questions = when (chapterId) {
-
-            "accountancy_class_12_1" ->
-                accountancyPartnership(
-                    subjectId,
-                    chapterId,
-                    board,
-                    classLevel
-                )
-
-            "business_studies_class_12_1" ->
-                businessManagement(
-                    subjectId,
-                    chapterId,
-                    board,
-                    classLevel
-                )
-
-            "economics_class_12_1" ->
-                nationalIncome(
-                    subjectId,
-                    chapterId,
-                    board,
-                    classLevel
-                )
-
-            "mathematics_class_12_3" ->
-                matrices(
-                    subjectId,
-                    chapterId,
-                    board,
-                    classLevel
-                )
-
-            else ->
-                emptyList()
-        }
-
-        return questions
+        return questionBank()
             .filter {
                 it.subjectId == subjectId &&
                     it.chapterId == chapterId &&
                     it.board == board &&
                     it.classLevel == classLevel
             }
-            .distinctBy { it.id }
     }
 
-    private fun accountancyPartnership(
+    /*
+     * Backward-compatible overload for older callers.
+     */
+    fun getQuestions(
         subjectId: String,
-        chapterId: String,
-        board: Board,
-        classLevel: ClassLevel
+        chapterId: String
     ): List<Question> {
+        return getQuestions(
+            subjectId = subjectId,
+            chapterId = chapterId,
+            board = Board.MP_BOARD,
+            classLevel = ClassLevel.CLASS_12
+        )
+    }
+
+    private fun questionBank(): List<Question> {
 
         return listOf(
+
+            // ---------------------------------------------------------
+            // ACCOUNTANCY — CLASS 12 — MP BOARD
+            // Chapter 1: Accounting for Partnership: Basic Concepts
+            // ---------------------------------------------------------
+
             Question(
-                id = "acc_partnership_001",
-                question = "A partnership is formed by an agreement between two or more persons to carry on a business and share its profits. Which account records the distribution of profit among partners?",
+                id = "acc_001",
+                question = "In a partnership firm, the ratio in which partners agree to share profits and losses is called:",
                 options = listOf(
-                    "Profit and Loss Appropriation Account",
-                    "Trading Account",
-                    "Cash Account",
-                    "Realisation Account"
-                ),
-                correctAnswer = 0,
-                explanation = "The Profit and Loss Appropriation Account records the distribution and appropriation of profit among partners.",
-                subjectId = subjectId,
-                chapterId = chapterId,
-                board = board,
-                classLevel = classLevel,
-                difficulty = QuestionDifficulty.MEDIUM,
-                tags = listOf("partnership", "appropriation")
-            ),
-            Question(
-                id = "acc_partnership_002",
-                question = "Which account is prepared to record interest on capital allowed to partners?",
-                options = listOf(
-                    "Profit and Loss Appropriation Account",
-                    "Trading Account",
-                    "Balance Sheet",
-                    "Cash Flow Statement"
-                ),
-                correctAnswer = 0,
-                explanation = "Interest on capital is an appropriation of profit and is therefore recorded through the Profit and Loss Appropriation Account.",
-                subjectId = subjectId,
-                chapterId = chapterId,
-                board = board,
-                classLevel = classLevel,
-                difficulty = QuestionDifficulty.EASY,
-                tags = listOf("interest", "capital", "appropriation")
-            ),
-            Question(
-                id = "acc_partnership_003",
-                question = "In the absence of an agreement, partners generally share profits and losses in which ratio?",
-                options = listOf(
-                    "Equal ratio",
                     "Capital ratio",
-                    "Sales ratio",
-                    "Asset ratio"
+                    "Profit-sharing ratio",
+                    "Current ratio",
+                    "Debt-equity ratio"
+                ),
+                correctAnswer = 1,
+                explanation = "The profit-sharing ratio is the ratio in which partners agree to share the profits and losses of the firm.",
+                subjectId = "accountancy",
+                chapterId = "accountancy_class_12_1",
+                board = Board.MP_BOARD,
+                classLevel = ClassLevel.CLASS_12,
+                difficulty = QuestionDifficulty.EASY,
+                tags = listOf("partnership", "profit-sharing-ratio")
+            ),
+
+            Question(
+                id = "acc_002",
+                question = "If there is no partnership agreement, profits and losses are generally shared by partners in:",
+                options = listOf(
+                    "Their capital ratio",
+                    "Their salary ratio",
+                    "Equal ratio",
+                    "Their drawings ratio"
+                ),
+                correctAnswer = 2,
+                explanation = "In the absence of an agreement, partners generally share profits and losses equally.",
+                subjectId = "accountancy",
+                chapterId = "accountancy_class_12_1",
+                board = Board.MP_BOARD,
+                classLevel = ClassLevel.CLASS_12,
+                difficulty = QuestionDifficulty.EASY,
+                tags = listOf("partnership", "partnership-act")
+            ),
+
+            Question(
+                id = "acc_003",
+                question = "Interest on partner's capital is allowed only when it is provided by:",
+                options = listOf(
+                    "The Partnership Deed",
+                    "The Cash Book",
+                    "The Balance Sheet",
+                    "The Trial Balance"
                 ),
                 correctAnswer = 0,
-                explanation = "Under the Partnership Act, in the absence of an agreement, profits and losses are shared equally among partners.",
-                subjectId = subjectId,
-                chapterId = chapterId,
-                board = board,
-                classLevel = classLevel,
+                explanation = "Interest on partners' capital is allowed when the partnership agreement or deed provides for it.",
+                subjectId = "accountancy",
+                chapterId = "accountancy_class_12_1",
+                board = Board.MP_BOARD,
+                classLevel = ClassLevel.CLASS_12,
                 difficulty = QuestionDifficulty.EASY,
-                tags = listOf("profit sharing", "partnership act")
+                tags = listOf("interest-on-capital", "partnership-deed")
             ),
+
             Question(
-                id = "acc_partnership_004",
-                question = "Interest on drawings is treated as what for the firm?",
+                id = "acc_004",
+                question = "A partner's salary is treated as an appropriation of:",
                 options = listOf(
-                    "Income",
-                    "Asset",
+                    "Gross profit",
+                    "Net profit",
                     "Capital",
-                    "Liability"
+                    "Assets"
                 ),
-                correctAnswer = 0,
-                explanation = "Interest on drawings is charged from partners and becomes an income for the firm.",
-                subjectId = subjectId,
-                chapterId = chapterId,
-                board = board,
-                classLevel = classLevel,
-                difficulty = QuestionDifficulty.EASY,
-                tags = listOf("drawings", "interest")
+                correctAnswer = 1,
+                explanation = "Partner's salary is an appropriation of profit and is recorded through the Profit and Loss Appropriation Account.",
+                subjectId = "accountancy",
+                chapterId = "accountancy_class_12_1",
+                board = Board.MP_BOARD,
+                classLevel = ClassLevel.CLASS_12,
+                difficulty = QuestionDifficulty.MEDIUM,
+                tags = listOf("partner-salary", "appropriation")
             ),
+
             Question(
-                id = "acc_partnership_005",
-                question = "Which account is credited when interest on capital is allowed to a partner?",
+                id = "acc_005",
+                question = "The account prepared to show the distribution of profit among partners is:",
                 options = listOf(
-                    "Partner's Capital or Current Account",
-                    "Cash Account",
                     "Trading Account",
-                    "Purchases Account"
+                    "Profit and Loss Account",
+                    "Profit and Loss Appropriation Account",
+                    "Revaluation Account"
                 ),
-                correctAnswer = 0,
-                explanation = "Interest on capital is credited to the concerned partner's Capital Account or Current Account, depending on the accounting system followed.",
-                subjectId = subjectId,
-                chapterId = chapterId,
-                board = board,
-                classLevel = classLevel,
-                difficulty = QuestionDifficulty.MEDIUM,
-                tags = listOf("interest", "capital account")
-            )
-        )
-    }
-
-    private fun businessManagement(
-        subjectId: String,
-        chapterId: String,
-        board: Board,
-        classLevel: ClassLevel
-    ): List<Question> {
-
-        return listOf(
-            Question(
-                id = "bst_management_001",
-                question = "Which function of management involves setting objectives and deciding in advance what is to be done?",
-                options = listOf(
-                    "Planning",
-                    "Staffing",
-                    "Directing",
-                    "Controlling"
-                ),
-                correctAnswer = 0,
-                explanation = "Planning involves setting objectives and deciding in advance the course of action to achieve them.",
-                subjectId = subjectId,
-                chapterId = chapterId,
-                board = board,
-                classLevel = classLevel,
+                correctAnswer = 2,
+                explanation = "The Profit and Loss Appropriation Account shows how the firm's profit is appropriated among partners.",
+                subjectId = "accountancy",
+                chapterId = "accountancy_class_12_1",
+                board = Board.MP_BOARD,
+                classLevel = ClassLevel.CLASS_12,
                 difficulty = QuestionDifficulty.EASY,
-                tags = listOf("management", "planning")
+                tags = listOf("appropriation-account", "partnership")
             ),
-            Question(
-                id = "bst_management_002",
-                question = "Which level of management is mainly responsible for implementing plans and supervising employees?",
-                options = listOf(
-                    "Middle-level management",
-                    "Top-level management",
-                    "Board of directors only",
-                    "External management"
-                ),
-                correctAnswer = 0,
-                explanation = "Middle-level managers implement plans and coordinate and supervise the activities of lower-level managers and employees.",
-                subjectId = subjectId,
-                chapterId = chapterId,
-                board = board,
-                classLevel = classLevel,
-                difficulty = QuestionDifficulty.MEDIUM,
-                tags = listOf("management levels", "middle management")
-            )
-        )
-    }
 
-    private fun nationalIncome(
-        subjectId: String,
-        chapterId: String,
-        board: Board,
-        classLevel: ClassLevel
-    ): List<Question> {
+            // ---------------------------------------------------------
+            // BUSINESS STUDIES — CLASS 12 — MP BOARD
+            // Chapter 1: Nature and Significance of Management
+            // ---------------------------------------------------------
 
-        return listOf(
             Question(
-                id = "eco_national_income_001",
-                question = "National income is generally defined as the net factor income earned by the normal residents of a country during a period of:",
+                id = "bst_001",
+                question = "Which of the following is a characteristic of management?",
                 options = listOf(
-                    "One accounting year",
-                    "One month",
-                    "One week",
-                    "One day"
+                    "Management is a one-time activity",
+                    "Management is a continuous process",
+                    "Management is performed only by owners",
+                    "Management has no specific objective"
                 ),
-                correctAnswer = 0,
-                explanation = "National income is measured over an accounting period, generally one financial or accounting year.",
-                subjectId = subjectId,
-                chapterId = chapterId,
-                board = board,
-                classLevel = classLevel,
+                correctAnswer = 1,
+                explanation = "Management is a continuous process because planning, organising, staffing, directing and controlling continue throughout the life of an organisation.",
+                subjectId = "business_studies",
+                chapterId = "business_studies_class_12_1",
+                board = Board.MP_BOARD,
+                classLevel = ClassLevel.CLASS_12,
                 difficulty = QuestionDifficulty.EASY,
-                tags = listOf("national income", "basic concepts")
+                tags = listOf("management", "characteristics")
             ),
+
             Question(
-                id = "eco_national_income_002",
-                question = "GDP measures the value of final goods and services produced within the domestic territory of a country during a given period.",
+                id = "bst_002",
+                question = "Coordination is often described as the:",
                 options = listOf(
-                    "True",
-                    "False",
-                    "Only for exports",
-                    "Only for agriculture"
+                    "First function of management",
+                    "Essence of management",
+                    "Final objective of business",
+                    "Source of finance"
                 ),
-                correctAnswer = 0,
-                explanation = "GDP measures the market value of final goods and services produced within the domestic territory during a specified period.",
-                subjectId = subjectId,
-                chapterId = chapterId,
-                board = board,
-                classLevel = classLevel,
-                difficulty = QuestionDifficulty.EASY,
-                tags = listOf("GDP", "national income")
-            )
-        )
-    }
+                correctAnswer = 1,
+                explanation = "Coordination integrates the efforts of different individuals and departments towards common organisational goals and is therefore called the essence of management.",
+                subjectId = "business_studies",
+                chapterId = "business_studies_class_12_1",
+                board = Board.MP_BOARD,
+                classLevel = ClassLevel.CLASS_12,
+                difficulty = QuestionDifficulty.MEDIUM,
+                tags = listOf("coordination", "management")
+            ),
 
-    private fun matrices(
-        subjectId: String,
-        chapterId: String,
-        board: Board,
-        classLevel: ClassLevel
-    ): List<Question> {
+            // ---------------------------------------------------------
+            // ECONOMICS — CLASS 12 — MP BOARD
+            // Macro Chapter 2: National Income Accounting
+            // ---------------------------------------------------------
 
-        return listOf(
             Question(
-                id = "math_matrices_001",
-                question = "A matrix having the same number of rows and columns is called:",
+                id = "eco_001",
+                question = "GDP measures the value of final goods and services produced within the domestic territory of a country during a:",
                 options = listOf(
-                    "Square matrix",
+                    "Financial transaction",
+                    "Specified period",
+                    "Single business day",
+                    "Only export cycle"
+                ),
+                correctAnswer = 1,
+                explanation = "Gross Domestic Product measures the market value of final goods and services produced within the domestic territory during a specified period, usually one year.",
+                subjectId = "economics",
+                chapterId = "economics_class_12_macro_2",
+                board = Board.MP_BOARD,
+                classLevel = ClassLevel.CLASS_12,
+                difficulty = QuestionDifficulty.EASY,
+                tags = listOf("GDP", "national-income")
+            ),
+
+            Question(
+                id = "eco_002",
+                question = "Which of the following is included while calculating national income?",
+                options = listOf(
+                    "Transfer payments",
+                    "Sale of second-hand goods",
+                    "Factor income from abroad",
+                    "Purchase of shares"
+                ),
+                correctAnswer = 2,
+                explanation = "Factor income from abroad is considered while moving from domestic product measures to national product measures.",
+                subjectId = "economics",
+                chapterId = "economics_class_12_macro_2",
+                board = Board.MP_BOARD,
+                classLevel = ClassLevel.CLASS_12,
+                difficulty = QuestionDifficulty.MEDIUM,
+                tags = listOf("national-income", "factor-income")
+            ),
+
+            // ---------------------------------------------------------
+            // MATHEMATICS — CLASS 12 — MP BOARD
+            // Chapter 3: Matrices
+            // ---------------------------------------------------------
+
+            Question(
+                id = "math_001",
+                question = "If a matrix has 3 rows and 2 columns, its order is:",
+                options = listOf(
+                    "2 × 3",
+                    "3 × 2",
+                    "3 × 3",
+                    "2 × 2"
+                ),
+                correctAnswer = 1,
+                explanation = "The order of a matrix is written as number of rows × number of columns. Therefore, the order is 3 × 2.",
+                subjectId = "mathematics",
+                chapterId = "mathematics_class_12_3",
+                board = Board.MP_BOARD,
+                classLevel = ClassLevel.CLASS_12,
+                difficulty = QuestionDifficulty.EASY,
+                tags = listOf("matrices", "order-of-matrix")
+            ),
+
+            Question(
+                id = "math_002",
+                question = "A matrix having the same number of rows and columns is called a:",
+                options = listOf(
                     "Row matrix",
                     "Column matrix",
-                    "Rectangular matrix"
+                    "Square matrix",
+                    "Null matrix"
                 ),
-                correctAnswer = 0,
+                correctAnswer = 2,
                 explanation = "A matrix with an equal number of rows and columns is called a square matrix.",
-                subjectId = subjectId,
-                chapterId = chapterId,
-                board = board,
-                classLevel = classLevel,
+                subjectId = "mathematics",
+                chapterId = "mathematics_class_12_3",
+                board = Board.MP_BOARD,
+                classLevel = ClassLevel.CLASS_12,
                 difficulty = QuestionDifficulty.EASY,
-                tags = listOf("matrices", "square matrix")
-            ),
-            Question(
-                id = "math_matrices_002",
-                question = "What is the order of a matrix having 3 rows and 4 columns?",
-                options = listOf(
-                    "3 × 4",
-                    "4 × 3",
-                    "3 + 4",
-                    "12 × 1"
-                ),
-                correctAnswer = 0,
-                explanation = "The order of a matrix is written as number of rows × number of columns. Therefore, its order is 3 × 4.",
-                subjectId = subjectId,
-                chapterId = chapterId,
-                board = board,
-                classLevel = classLevel,
-                difficulty = QuestionDifficulty.EASY,
-                tags = listOf("matrices", "order")
+                tags = listOf("matrices", "square-matrix")
             )
         )
     }
