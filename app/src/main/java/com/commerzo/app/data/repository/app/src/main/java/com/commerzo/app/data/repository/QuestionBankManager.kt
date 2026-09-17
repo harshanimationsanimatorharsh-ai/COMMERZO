@@ -5,7 +5,8 @@ import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.model.Question
 
 class QuestionBankManager(
-    private val dataSource: QuestionDataSource = QuestionDataSource()
+    private val dataSource: QuestionDataSource =
+        QuestionDataSource()
 ) {
 
     fun getValidatedQuestions(
@@ -15,21 +16,14 @@ class QuestionBankManager(
         classLevel: ClassLevel = ClassLevel.CLASS_12
     ): List<Question> {
 
-        val questions =
-            dataSource.getQuestions(
+        return dataSource
+            .getValidatedQuestions(
                 subjectId = subjectId,
                 chapterId = chapterId,
                 board = board,
                 classLevel = classLevel
             )
-
-        return questions
             .distinctBy { it.id }
-            .filter { question ->
-                QuestionBankValidator
-                    .validate(question)
-                    .isValid
-            }
     }
 
     fun getRandomizedValidatedQuestions(
@@ -39,26 +33,23 @@ class QuestionBankManager(
         classLevel: ClassLevel = ClassLevel.CLASS_12
     ): List<Question> {
 
-        val validatedQuestions =
+        return QuestionRandomizer.prepareForTest(
             getValidatedQuestions(
                 subjectId = subjectId,
                 chapterId = chapterId,
                 board = board,
                 classLevel = classLevel
             )
-
-        return QuestionRandomizer
-            .prepareForTest(
-                validatedQuestions
-            )
+        )
     }
 
     fun validateQuestionBank(
         questions: List<Question>
     ): QuestionBankValidator.ValidationResult {
 
-        return QuestionBankValidator
-            .validateAll(questions)
+        return QuestionBankValidator.validateAll(
+            questions
+        )
     }
 
     fun validateChapterBank(
@@ -68,16 +59,14 @@ class QuestionBankManager(
         classLevel: ClassLevel = ClassLevel.CLASS_12
     ): QuestionBankValidator.ValidationResult {
 
-        val questions =
-            dataSource.getQuestions(
-                subjectId = subjectId,
-                chapterId = chapterId,
-                board = board,
-                classLevel = classLevel
-            )
-
         return QuestionBankValidator.validateBank(
-            questions = questions,
+            questions =
+                dataSource.getQuestions(
+                    subjectId = subjectId,
+                    chapterId = chapterId,
+                    board = board,
+                    classLevel = classLevel
+                ),
             subjectId = subjectId,
             chapterId = chapterId,
             board = board,
