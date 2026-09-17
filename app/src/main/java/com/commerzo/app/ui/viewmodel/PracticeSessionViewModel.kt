@@ -1,15 +1,17 @@
 package com.commerzo.app.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
+import com.commerzo.app.data.model.Board
+import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.model.Question
-import com.commerzo.app.data.repository.QuestionRepository
+import com.commerzo.app.data.repository.QuestionBankManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class PracticeSessionViewModel : ViewModel() {
 
-    private val repository = QuestionRepository()
+    private val questionBankManager = QuestionBankManager()
 
     private val _questions =
         MutableStateFlow<List<Question>>(emptyList())
@@ -53,6 +55,12 @@ class PracticeSessionViewModel : ViewModel() {
     val unattemptedAnswers: StateFlow<Int> =
         _unattemptedAnswers.asStateFlow()
 
+    private val _answeredQuestions =
+        MutableStateFlow<Set<String>>(emptySet())
+
+    val answeredQuestions: StateFlow<Set<String>> =
+        _answeredQuestions.asStateFlow()
+
     private val _isFinished =
         MutableStateFlow(false)
 
@@ -67,41 +75,68 @@ class PracticeSessionViewModel : ViewModel() {
 
     fun loadQuestions(
         subjectId: String,
-        chapterId: String
+        chapterId: String,
+        board: Board = Board.MP_BOARD,
+        classLevel: ClassLevel = ClassLevel.CLASS_12
     ) {
 
-        _questions.value =
-            repository.getQuestions(
+        val loadedQuestions =
+            questionBankManager.getRandomizedValidatedQuestions(
                 subjectId = subjectId,
-                chapterId = chapterId
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel
             )
+
+        _questions.value = loadedQuestions
 
         resetSession()
     }
 
     fun selectAnswer(index: Int) {
 
-        if (!_submitted.value && !_isFinished.value) {
-            _selectedAnswer.value = index
+        if (_submitted.value || _isFinished.value) {
+            return
         }
+
+        val currentQuestion =
+            _questions.value.getOrNull(_currentIndex.value)
+                ?: return
+
+        if (index !in currentQuestion.options.indices) {
+            return
+        }
+
+        _selectedAnswer.value = index
     }
 
     fun submitAnswer() {
 
-        if (_submitted.value) return
-
-        val selected = _selectedAnswer.value
-            ?: run {
-                _unattemptedAnswers.value += 1
-                return
-            }
+        if (_submitted.value || _isFinished.value) {
+            return
+        }
 
         val questionsList = _questions.value
 
-        if (questionsList.isEmpty()) return
+        if (questionsList.isEmpty()) {
+            return
+        }
+
+        val selected =
+            _selectedAnswer.value
+                ?: return
 
         val currentQuestion =
-            questionsList[_currentIndex.value]
+            questionsList.getOrNull(_currentIndex.value)
+                ?: return
+
+        val updatedAnswered =
+            _answeredQuestions.value.toMutableSet()
+
+        updatedAnswered.add(currentQuestion.id)
+
+        _answeredQuestions.value =
+            updatedAnswered
 
         if (selected == currentQuestion.correctAnswer) {
             _correctAnswers.value += 1
@@ -114,7 +149,9 @@ class PracticeSessionViewModel : ViewModel() {
 
     fun nextQuestion() {
 
-        if (!_submitted.value) return
+        if (!_submitted.value) {
+            return
+        }
 
         val nextIndex =
             _currentIndex.value + 1
@@ -131,39 +168,68 @@ class PracticeSessionViewModel : ViewModel() {
         }
     }
 
-    fun toggleBookmark() {
+    fun previousQuestion() {
 
-        val questionsList = _questions.value
+        if (_currentIndex.value <= 0) {
+            return
+        }
 
-        if (questionsList.isEmpty()) return
+        _currentIndex.value -= 1
 
         val currentQuestion =
-            questionsList[_currentIndex.value]
+            _questions.value.getOrNull(_currentIndex.value)
+                ?: return
 
-        val currentBookmarks =
+        _selectedAnswer.value = null
+        _submitted.value =
+            _answeredQuestions.value.contains(currentQuestion.id)
+    }
+
+    fun toggleBookmark() {
+
+        val currentQuestion =
+            _questions.value.getOrNull(_currentIndex.value)
+                ?: return
+
+        val updatedBookmarks =
             _bookmarkedQuestions.value.toMutableSet()
 
-        if (currentBookmarks.contains(currentQuestion.id)) {
-            currentBookmarks.remove(currentQuestion.id)
+        if (updatedBookmarks.contains(currentQuestion.id)) {
+            updatedBookmarks.remove(currentQuestion.id)
         } else {
-            currentBookmarks.add(currentQuestion.id)
+            updatedBookmarks.add(currentQuestion.id)
         }
 
         _bookmarkedQuestions.value =
-            currentBookmarks
+            updatedBookmarks
     }
 
     fun isCurrentQuestionBookmarked(): Boolean {
 
-        val questionsList = _questions.value
-
-        if (questionsList.isEmpty()) return false
-
         val currentQuestion =
-            questionsList[_currentIndex.value]
+            _questions.value.getOrNull(_currentIndex.value)
+                ?: return false
 
         return _bookmarkedQuestions.value
             .contains(currentQuestion.id)
+    }
+
+    fun getAnsweredCount(): Int {
+        return _answeredQuestions.value.size
+    }
+
+    fun getProgressPercent(): Int {
+
+        val total = _questions.value.size
+
+        if (total == 0) {
+            return 0
+        }
+
+        return (
+            _answeredQuestions.value.size * 100
+                / total
+            )
     }
 
     fun resetSession() {
@@ -174,6 +240,7 @@ class PracticeSessionViewModel : ViewModel() {
         _correctAnswers.value = 0
         _wrongAnswers.value = 0
         _unattemptedAnswers.value = 0
+        _answeredQuestions.value = emptySet()
         _isFinished.value = false
     }
 
