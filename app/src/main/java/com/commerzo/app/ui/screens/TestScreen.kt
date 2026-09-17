@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.commerzo.app.data.repository.TestHistoryRepository
 import com.commerzo.app.ui.components.TestQuestionOption
 import com.commerzo.app.ui.viewmodel.TestViewModel
 import kotlinx.coroutines.delay
@@ -80,13 +81,32 @@ fun TestScreen(
 
     LaunchedEffect(isFinished) {
         if (isFinished && questions.isNotEmpty()) {
+
+            val total = questions.size
+            val answered = viewModel.getAnsweredCount()
+            val correct = viewModel.getCorrectCount()
+            val wrong = viewModel.getWrongCount()
+            val unattempted = viewModel.getUnattemptedCount()
+            val marked = viewModel.getMarkedCount()
+
+            TestHistoryRepository.saveTest(
+                subjectId = subjectId,
+                chapterId = chapterId,
+                totalQuestions = total,
+                answered = answered,
+                correct = correct,
+                wrong = wrong,
+                unattempted = unattempted,
+                marked = marked
+            )
+
             onTestFinished(
-                questions.size,
-                viewModel.getAnsweredCount(),
-                viewModel.getCorrectCount(),
-                viewModel.getWrongCount(),
-                viewModel.getUnattemptedCount(),
-                viewModel.getMarkedCount()
+                total,
+                answered,
+                correct,
+                wrong,
+                unattempted,
+                marked
             )
         }
     }
