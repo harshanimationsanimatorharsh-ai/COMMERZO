@@ -1,9 +1,6 @@
 package com.commerzo.app.ui.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,21 +11,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.repository.ChapterRepository
@@ -37,137 +35,173 @@ import com.commerzo.app.data.repository.ChapterRepository
 fun ChapterScreen(
     subjectId: String,
     subjectName: String,
-    board: Board = Board.MP_BOARD,
-    classLevel: ClassLevel = ClassLevel.CLASS_12,
+    board: Board,
+    classLevel: ClassLevel,
     onBack: () -> Unit,
     onChapterClick: (String, String) -> Unit
 ) {
+    val chapterRepository = ChapterRepository()
 
-    val repository = remember { ChapterRepository() }
+    val chapters = chapterRepository.getChapters(
+        subjectId = subjectId,
+        board = board,
+        classLevel = classLevel
+    )
 
-    val chapters = remember(subjectId, board, classLevel) {
-        repository.getChapters(
-            subjectId = subjectId,
-            board = board,
-            classLevel = classLevel
-        )
-    }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = subjectName,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = onBack
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF0B0B0F))
-    ) {
-
-        Row(
+        LazyColumn(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White
-                )
-            }
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
 
-            Column(
-                modifier = Modifier.padding(start = 4.dp)
-            ) {
                 Text(
-                    text = subjectName,
-                    color = Color.White,
-                    fontSize = 21.sp,
+                    text = "${board.displayName()} • ${classLevel.displayName()}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = "Choose a chapter",
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
 
+                Spacer(modifier = Modifier.height(4.dp))
+
                 Text(
-                    text = "${classLevel.displayName()} • ${board.displayName()}",
-                    color = Color(0xFFBDB9D9),
-                    fontSize = 13.sp
+                    text = "Select a chapter to start practicing MCQs.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
             }
-        }
 
-        Spacer(modifier = Modifier.height(4.dp))
+            if (chapters.isEmpty()) {
 
-        Text(
-            text = "Chapters",
-            color = Color.White,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
-        )
+                item {
+                    Text(
+                        text = "No chapters available for this subject.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                horizontal = 16.dp,
-                vertical = 8.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
+            } else {
 
-            items(
-                items = chapters,
-                key = { it.id }
-            ) { chapter ->
+                items(
+                    items = chapters,
+                    key = { it.id }
+                ) { chapter ->
 
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
+                    ChapterCard(
+                        chapterNumber = chapter.chapterNumber,
+                        title = chapter.title,
+                        onClick = {
                             onChapterClick(
                                 chapter.id,
                                 chapter.title
                             )
-                        },
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFF17171D)
-                    ),
-                    shape = MaterialTheme.shapes.large
-                ) {
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(18.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
-                        Box(
-                            modifier = Modifier
-                                .padding(end = 14.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = chapter.chapterNumber.toString(),
-                                color = Color(0xFFD6B36A),
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold
-                            )
                         }
-
-                        Text(
-                            text = chapter.title,
-                            color = Color.White,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+                    )
                 }
             }
+
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChapterCard(
+    chapterNumber: Int,
+    title: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Text(
+                text = chapterNumber.toString(),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "Practice chapter MCQs",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = "Open $title"
+            )
         }
     }
 }
 
 private fun Board.displayName(): String {
     return when (this) {
-        Board.CBSE -> "CBSE"
         Board.MP_BOARD -> "MP Board"
+        Board.CBSE -> "CBSE"
     }
 }
 
