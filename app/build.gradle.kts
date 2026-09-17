@@ -39,6 +39,10 @@ kotlin {
         jvmTarget.set(
             org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
         )
+
+        optIn.add(
+            "androidx.compose.material3.ExperimentalMaterial3Api"
+        )
     }
 }
 
