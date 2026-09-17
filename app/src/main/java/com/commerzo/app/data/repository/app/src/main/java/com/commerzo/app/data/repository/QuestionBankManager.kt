@@ -15,16 +15,21 @@ class QuestionBankManager(
         classLevel: ClassLevel = ClassLevel.CLASS_12
     ): List<Question> {
 
-        val questions = dataSource.getQuestions(
-            subjectId = subjectId,
-            chapterId = chapterId,
-            board = board,
-            classLevel = classLevel
-        )
+        val questions =
+            dataSource.getQuestions(
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel
+            )
 
-        return questions.filter { question ->
-            QuestionBankValidator.validate(question).isValid
-        }
+        return questions
+            .distinctBy { it.id }
+            .filter { question ->
+                QuestionBankValidator
+                    .validate(question)
+                    .isValid
+            }
     }
 
     fun getRandomizedValidatedQuestions(
@@ -34,19 +39,49 @@ class QuestionBankManager(
         classLevel: ClassLevel = ClassLevel.CLASS_12
     ): List<Question> {
 
-        val questions = getValidatedQuestions(
-            subjectId = subjectId,
-            chapterId = chapterId,
-            board = board,
-            classLevel = classLevel
-        )
+        val validatedQuestions =
+            getValidatedQuestions(
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel
+            )
 
-        return QuestionRandomizer.prepareForTest(questions)
+        return QuestionRandomizer
+            .prepareForTest(
+                validatedQuestions
+            )
     }
 
     fun validateQuestionBank(
         questions: List<Question>
     ): QuestionBankValidator.ValidationResult {
-        return QuestionBankValidator.validateAll(questions)
+
+        return QuestionBankValidator
+            .validateAll(questions)
+    }
+
+    fun validateChapterBank(
+        subjectId: String,
+        chapterId: String,
+        board: Board = Board.MP_BOARD,
+        classLevel: ClassLevel = ClassLevel.CLASS_12
+    ): QuestionBankValidator.ValidationResult {
+
+        val questions =
+            dataSource.getQuestions(
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel
+            )
+
+        return QuestionBankValidator.validateBank(
+            questions = questions,
+            subjectId = subjectId,
+            chapterId = chapterId,
+            board = board,
+            classLevel = classLevel
+        )
     }
 }
