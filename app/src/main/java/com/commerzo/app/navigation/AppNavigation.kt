@@ -1,11 +1,14 @@
 package com.commerzo.app.navigation
 
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.commerzo.app.ui.components.CommerzoBottomBar
 import com.commerzo.app.ui.screens.ChapterScreen
 import com.commerzo.app.ui.screens.GamesScreen
 import com.commerzo.app.ui.screens.HomeScreen
@@ -18,6 +21,7 @@ import com.commerzo.app.ui.screens.TestResultScreen
 import com.commerzo.app.ui.screens.TestScreen
 import com.commerzo.app.ui.screens.TestsScreen
 import com.commerzo.app.ui.screens.WelcomeScreen
+import kotlinx.coroutines.delay
 
 @Composable
 fun AppNavigation() {
@@ -30,10 +34,11 @@ fun AppNavigation() {
     ) {
 
         composable("welcome") {
+
             WelcomeScreen()
 
-            androidx.compose.runtime.LaunchedEffect(Unit) {
-                kotlinx.coroutines.delay(2500)
+            LaunchedEffect(Unit) {
+                delay(2500)
 
                 navController.navigate(Screen.Home.route) {
                     popUpTo("welcome") {
@@ -44,44 +49,86 @@ fun AppNavigation() {
         }
 
         composable(Screen.Home.route) {
-            HomeScreen(
-                onSubjectClick = { subjectId ->
-                    navController.navigate(
-                        Screen.Chapters.createRoute(subjectId)
-                    )
+
+            Scaffold(
+                bottomBar = {
+                    CommerzoBottomBar(navController)
                 }
-            )
+            ) { paddingValues ->
+
+                HomeScreen(
+                    onSubjectClick = { subjectId ->
+                        navController.navigate(
+                            Screen.Chapters.createRoute(subjectId)
+                        )
+                    }
+                )
+            }
         }
 
         composable(Screen.Practice.route) {
-            PracticeScreen()
+
+            Scaffold(
+                bottomBar = {
+                    CommerzoBottomBar(navController)
+                }
+            ) { paddingValues ->
+
+                PracticeScreen()
+            }
         }
 
         composable(Screen.Tests.route) {
-            TestsScreen(
-                onStartTest = { subjectId, chapterId ->
-                    navController.navigate(
-                        Screen.Test.createRoute(
-                            subjectId,
-                            chapterId
-                        )
-                    )
-                },
-                onOpenHistory = {
-                    navController.navigate("test_history")
+
+            Scaffold(
+                bottomBar = {
+                    CommerzoBottomBar(navController)
                 }
-            )
+            ) { paddingValues ->
+
+                TestsScreen(
+                    onStartTest = { subjectId, chapterId ->
+
+                        navController.navigate(
+                            Screen.Test.createRoute(
+                                subjectId,
+                                chapterId
+                            )
+                        )
+                    },
+                    onOpenHistory = {
+                        navController.navigate("test_history")
+                    }
+                )
+            }
         }
 
         composable(Screen.Games.route) {
-            GamesScreen()
+
+            Scaffold(
+                bottomBar = {
+                    CommerzoBottomBar(navController)
+                }
+            ) { paddingValues ->
+
+                GamesScreen()
+            }
         }
 
         composable(Screen.Profile.route) {
-            ProfileScreen()
+
+            Scaffold(
+                bottomBar = {
+                    CommerzoBottomBar(navController)
+                }
+            ) { paddingValues ->
+
+                ProfileScreen()
+            }
         }
 
         composable(Screen.SubjectSelection.route) {
+
             SubjectSelectionScreen(
                 onSubjectClick = { subjectId ->
                     navController.navigate(
@@ -110,6 +157,7 @@ fun AppNavigation() {
                     navController.popBackStack()
                 },
                 onChapterClick = { chapterId ->
+
                     navController.navigate(
                         Screen.Questions.createRoute(
                             subjectId,
@@ -261,6 +309,7 @@ fun AppNavigation() {
                             chapterId
                         )
                     ) {
+
                         popUpTo(
                             "test_result/$subjectId/$chapterId/$total/$answered/$correct/$wrong/$unattempted/$marked"
                         ) {
@@ -269,20 +318,23 @@ fun AppNavigation() {
                     }
                 },
                 onBackToTests = {
+
                     navController.navigate(
                         Screen.Tests.route
                     ) {
-                        popUpTo(
-                            Screen.Tests.route
-                        ) {
+
+                        popUpTo(Screen.Tests.route) {
                             inclusive = false
                         }
+
+                        launchSingleTop = true
                     }
                 }
             )
         }
 
         composable("test_history") {
+
             TestHistoryScreen()
         }
     }
