@@ -25,6 +25,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.commerzo.app.data.model.Board
+import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.repository.TestHistoryRepository
 import com.commerzo.app.ui.components.TestQuestionOption
 import com.commerzo.app.ui.viewmodel.TestViewModel
@@ -34,6 +36,8 @@ import kotlinx.coroutines.delay
 fun TestScreen(
     subjectId: String,
     chapterId: String,
+    board: Board = Board.MP_BOARD,
+    classLevel: ClassLevel = ClassLevel.CLASS_12,
     onTestFinished: (
         total: Int,
         answered: Int,
@@ -55,13 +59,23 @@ fun TestScreen(
         mutableStateOf(false)
     }
 
-    val currentState = questions.getOrNull(currentIndex)
-    val currentQuestion = currentState?.question
+    val currentState =
+        questions.getOrNull(currentIndex)
 
-    LaunchedEffect(subjectId, chapterId) {
+    val currentQuestion =
+        currentState?.question
+
+    LaunchedEffect(
+        subjectId,
+        chapterId,
+        board,
+        classLevel
+    ) {
         viewModel.loadTest(
             subjectId = subjectId,
-            chapterId = chapterId
+            chapterId = chapterId,
+            board = board,
+            classLevel = classLevel
         )
     }
 
@@ -82,12 +96,23 @@ fun TestScreen(
     LaunchedEffect(isFinished) {
         if (isFinished && questions.isNotEmpty()) {
 
-            val total = questions.size
-            val answered = viewModel.getAnsweredCount()
-            val correct = viewModel.getCorrectCount()
-            val wrong = viewModel.getWrongCount()
-            val unattempted = viewModel.getUnattemptedCount()
-            val marked = viewModel.getMarkedCount()
+            val total =
+                viewModel.getTotalQuestions()
+
+            val answered =
+                viewModel.getAnsweredCount()
+
+            val correct =
+                viewModel.getCorrectCount()
+
+            val wrong =
+                viewModel.getWrongCount()
+
+            val unattempted =
+                viewModel.getUnattemptedCount()
+
+            val marked =
+                viewModel.getMarkedCount()
 
             TestHistoryRepository.saveTest(
                 subjectId = subjectId,
@@ -109,6 +134,43 @@ fun TestScreen(
                 marked
             )
         }
+    }
+
+    if (questions.isEmpty() && !isFinished) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "No questions available",
+                style = MaterialTheme.typography.headlineSmall
+            )
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+
+            Text(
+                text = "This chapter does not have enough valid questions yet.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(
+                modifier = Modifier.height(20.dp)
+            )
+
+            OutlinedButton(
+                onClick = onBack,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Go Back")
+            }
+        }
+
+        return
     }
 
     if (currentQuestion == null || isFinished) {
@@ -150,8 +212,11 @@ fun TestScreen(
         )
     }
 
-    val minutes = timeRemaining / 60
-    val seconds = timeRemaining % 60
+    val minutes =
+        timeRemaining / 60
+
+    val seconds =
+        timeRemaining % 60
 
     Column(
         modifier = Modifier
@@ -164,15 +229,17 @@ fun TestScreen(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Question ${currentIndex + 1}/${questions.size}",
+                text =
+                    "Question ${currentIndex + 1}/${questions.size}",
                 style = MaterialTheme.typography.titleMedium
             )
 
             Text(
-                text = "%02d:%02d".format(
-                    minutes,
-                    seconds
-                ),
+                text =
+                    "%02d:%02d".format(
+                        minutes,
+                        seconds
+                    ),
                 style = MaterialTheme.typography.titleMedium
             )
         }
@@ -182,7 +249,8 @@ fun TestScreen(
         )
 
         Text(
-            text = "Answered: ${viewModel.getAnsweredCount()} / ${questions.size}",
+            text =
+                "Answered: ${viewModel.getAnsweredCount()} / ${questions.size}",
             style = MaterialTheme.typography.bodyMedium
         )
 
@@ -193,7 +261,6 @@ fun TestScreen(
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
-
             Column(
                 modifier = Modifier.padding(18.dp)
             ) {
@@ -207,7 +274,10 @@ fun TestScreen(
                     modifier = Modifier.height(16.dp)
                 )
 
-                currentQuestion.options.forEachIndexed { index, option ->
+                currentQuestion.options.forEachIndexed {
+                    index,
+                    option
+                    ->
 
                     TestQuestionOption(
                         index = index,
@@ -257,7 +327,9 @@ fun TestScreen(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    if (viewModel.isCurrentQuestionMarked()) {
+                    if (
+                        viewModel.isCurrentQuestionMarked()
+                    ) {
                         "Unmark"
                     } else {
                         "Mark Review"
@@ -278,7 +350,8 @@ fun TestScreen(
                 onClick = {
                     viewModel.nextQuestion()
                 },
-                enabled = currentIndex < questions.lastIndex,
+                enabled =
+                    currentIndex < questions.lastIndex,
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Next")
