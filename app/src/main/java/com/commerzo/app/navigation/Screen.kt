@@ -3,60 +3,43 @@ package com.commerzo.app.navigation
 sealed class Screen(
     val route: String
 ) {
+    data object Home : Screen("home")
 
-    data object Home :
-        Screen("home")
+    data object Practice : Screen("practice")
 
-    data object Practice :
-        Screen("practice")
+    data object Tests : Screen("tests")
 
-    data object Tests :
-        Screen("tests")
+    data object Games : Screen("games")
 
-    data object Games :
-        Screen("games")
+    data object Profile : Screen("profile")
 
-    data object Profile :
-        Screen("profile")
+    data object Subjects : Screen("subjects")
 
-    data object SubjectSelection :
-        Screen("subject_selection")
+    data object Chapters : Screen(
+        "chapters/{subjectId}/{board}/{classLevel}"
+    )
 
-    data object Chapters :
-        Screen("chapters/{subjectId}") {
+    data object Questions : Screen(
+        "questions/{subjectId}/{chapterId}/{board}/{classLevel}"
+    )
 
-        fun createRoute(
-            subjectId: String
-        ): String {
-            return "chapters/$subjectId"
-        }
-    }
+    data object TestResult : Screen(
+        "test_result"
+    )
 
-    data object Questions :
-        Screen(
-            "questions/{subjectId}/{chapterId}"
-        ) {
+    data object Bookmarks : Screen(
+        "bookmarks"
+    )
 
-        fun createRoute(
-            subjectId: String,
-            chapterId: String
-        ): String {
+    data object TestHistory : Screen(
+        "test_history"
+    )
 
-            return "questions/$subjectId/$chapterId"
-        }
-    }
+    data object Achievements : Screen(
+        "achievements"
+    )
 
-    data object Test :
-        Screen(
-            "test/{subjectId}/{chapterId}"
-        ) {
-
-        fun createRoute(
-            subjectId: String,
-            chapterId: String
-        ): String {
-
-            return "test/$subjectId/$chapterId"
-        }
-    }
+    data object Settings : Screen(
+        "settings"
+    )
 }
