@@ -1,40 +1,38 @@
 package com.commerzo.app.data.repository
 
-import com.commerzo.app.data.model.Board
-import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.model.SubjectData
 
 class SubjectRepository {
 
     fun getSubjects(
-        board: Board = Board.MP_BOARD,
-        classLevel: ClassLevel = ClassLevel.CLASS_12
+        board: String = "MP_BOARD",
+        classLevel: String = "CLASS_12"
     ): List<SubjectData> {
 
         return listOf(
             SubjectData(
                 id = "accountancy",
                 name = "Accountancy",
-                emoji = "📚",
+                emoji = "📊",
                 board = board,
                 classLevel = classLevel,
-                chaptersCount = 12
+                chaptersCount = 5
             ),
             SubjectData(
                 id = "business_studies",
                 name = "Business Studies",
-                emoji = "📈",
+                emoji = "💼",
                 board = board,
                 classLevel = classLevel,
-                chaptersCount = 12
+                chaptersCount = 5
             ),
             SubjectData(
                 id = "economics",
                 name = "Economics",
-                emoji = "💰",
+                emoji = "📈",
                 board = board,
                 classLevel = classLevel,
-                chaptersCount = 10
+                chaptersCount = 5
             ),
             SubjectData(
                 id = "mathematics",
@@ -42,7 +40,7 @@ class SubjectRepository {
                 emoji = "🧮",
                 board = board,
                 classLevel = classLevel,
-                chaptersCount = 13
+                chaptersCount = 5
             ),
             SubjectData(
                 id = "english",
@@ -50,7 +48,7 @@ class SubjectRepository {
                 emoji = "📖",
                 board = board,
                 classLevel = classLevel,
-                chaptersCount = 10
+                chaptersCount = 3
             ),
             SubjectData(
                 id = "hindi",
@@ -58,7 +56,7 @@ class SubjectRepository {
                 emoji = "📝",
                 board = board,
                 classLevel = classLevel,
-                chaptersCount = 10
+                chaptersCount = 3
             )
         )
     }
