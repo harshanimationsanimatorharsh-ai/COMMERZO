@@ -52,513 +52,591 @@ import com.commerzo.app.ui.viewmodel.PracticeSessionViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuestionScreen(
-subjectId: String,
-chapterId: String,
-board: Board = Board.MP_BOARD,
-classLevel: ClassLevel = ClassLevel.CLASS_12,
-onBack: () -> Unit,
-viewModel: PracticeSessionViewModel = viewModel()
+    subjectId: String,
+    chapterId: String,
+    board: Board = Board.MP_BOARD,
+    classLevel: ClassLevel = ClassLevel.CLASS_12,
+    onBack: () -> Unit,
+    viewModel: PracticeSessionViewModel = viewModel()
 ) {
-val questions by viewModel.questions.collectAsState()
-val currentIndex by viewModel.currentIndex.collectAsState()
-val selectedAnswer by viewModel.selectedAnswer.collectAsState()
-val submitted by viewModel.submitted.collectAsState()
-val correctAnswers by viewModel.correctAnswers.collectAsState()
-val wrongAnswers by viewModel.wrongAnswers.collectAsState()
-val answeredQuestions by viewModel.answeredQuestions.collectAsState()
-val isFinished by viewModel.isFinished.collectAsState()
-val bookmarkedQuestions by viewModel.bookmarkedQuestions.collectAsState()
+    val questions by
+        viewModel.questions.collectAsState()
 
-LaunchedEffect(
-    subjectId,
-    chapterId,
-    board,
-    classLevel
-) {
-    viewModel.loadQuestions(
-        subjectId = subjectId,
-        chapterId = chapterId,
-        board = board,
-        classLevel = classLevel
-    )
-}
+    val currentIndex by
+        viewModel.currentIndex.collectAsState()
 
-val currentQuestion =
-    questions.getOrNull(currentIndex)
+    val selectedAnswer by
+        viewModel.selectedAnswer.collectAsState()
 
-val totalQuestions =
-    questions.size
+    val submitted by
+        viewModel.submitted.collectAsState()
 
-val progress =
-    if (totalQuestions > 0) {
-        (currentIndex + 1).toFloat() / totalQuestions.toFloat()
-    } else {
-        0f
-    }
+    val correctAnswers by
+        viewModel.correctAnswers.collectAsState()
 
-Scaffold(
-    topBar = {
-        TopAppBar(
-            title = {
-                Text(
-                    text = "Practice",
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            navigationIcon = {
-                IconButton(
-                    onClick = onBack
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back"
-                    )
-                }
-            },
-            actions = {
-                if (currentQuestion != null) {
-                    IconButton(
-                        onClick = {
-                            viewModel.toggleBookmark()
-                        }
-                    ) {
-                        val isBookmarked =
-                            bookmarkedQuestions.contains(
-                                currentQuestion.id
-                            )
+    val wrongAnswers by
+        viewModel.wrongAnswers.collectAsState()
 
-                        Icon(
-                            imageVector =
-                                if (isBookmarked) {
-                                    Icons.Default.Bookmark
-                                } else {
-                                    Icons.Default.BookmarkBorder
-                                },
-                            contentDescription =
-                                if (isBookmarked) {
-                                    "Remove bookmark"
-                                } else {
-                                    "Bookmark question"
-                                }
-                        )
-                    }
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor =
-                    MaterialTheme.colorScheme.surface
-            )
+    val answeredQuestions by
+        viewModel.answeredQuestions.collectAsState()
+
+    val isFinished by
+        viewModel.isFinished.collectAsState()
+
+    val progressPercent by
+        viewModel.progressPercent.collectAsState()
+
+    LaunchedEffect(
+        subjectId,
+        chapterId,
+        board,
+        classLevel
+    ) {
+        viewModel.loadQuestions(
+            subjectId = subjectId,
+            chapterId = chapterId,
+            board = board,
+            classLevel = classLevel
         )
     }
-) { paddingValues ->
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .background(
-                MaterialTheme.colorScheme.background
-            )
-    ) {
+    val currentQuestion =
+        questions.getOrNull(currentIndex)
 
-        when {
+    val totalQuestions =
+        questions.size
 
-            isFinished -> {
+    val isCurrentBookmarked =
+        viewModel.isCurrentQuestionBookmarked()
 
-                PracticeResultContent(
-                    totalQuestions = totalQuestions,
-                    answeredQuestions =
-                        answeredQuestions.size,
-                    correctAnswers = correctAnswers,
-                    wrongAnswers = wrongAnswers,
-                    onRestart = {
-                        viewModel.restart()
-                    },
-                    onBack = onBack
-                )
-            }
-
-            currentQuestion == null -> {
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(24.dp),
-                    horizontalAlignment =
-                        Alignment.CenterHorizontally,
-                    verticalArrangement =
-                        Arrangement.Center
-                ) {
-
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
                     Text(
-                        text = "No questions available",
-                        style =
-                            MaterialTheme.typography.titleLarge,
+                        text = "Practice",
                         fontWeight = FontWeight.Bold
                     )
-
-                    Spacer(
-                        modifier = Modifier.height(8.dp)
-                    )
-
-                    Text(
-                        text =
-                            "This chapter does not have a valid question bank yet.",
-                        style =
-                            MaterialTheme.typography.bodyMedium,
-                        color =
-                            MaterialTheme.colorScheme
-                                .onSurfaceVariant
-                    )
-
-                    Spacer(
-                        modifier = Modifier.height(24.dp)
-                    )
-
-                    Button(
+                },
+                navigationIcon = {
+                    IconButton(
                         onClick = onBack
                     ) {
-                        Text("Go Back")
+                        Icon(
+                            imageVector =
+                                Icons.Default.ArrowBack,
+                            contentDescription =
+                                "Back"
+                        )
                     }
-                }
-            }
-
-            else -> {
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp)
-                ) {
-
-                    Spacer(
-                        modifier = Modifier.height(10.dp)
+                },
+                actions = {
+                    if (currentQuestion != null) {
+                        IconButton(
+                            onClick = {
+                                viewModel.toggleBookmark()
+                            }
+                        ) {
+                            Icon(
+                                imageVector =
+                                    if (isCurrentBookmarked) {
+                                        Icons.Default.Bookmark
+                                    } else {
+                                        Icons.Default.BookmarkBorder
+                                    },
+                                contentDescription =
+                                    if (isCurrentBookmarked) {
+                                        "Remove bookmark"
+                                    } else {
+                                        "Bookmark question"
+                                    }
+                            )
+                        }
+                    }
+                },
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor =
+                            MaterialTheme.colorScheme.surface
                     )
+            )
+        }
+    ) { paddingValues ->
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement =
-                            Arrangement.SpaceBetween,
-                        verticalAlignment =
-                            Alignment.CenterVertically
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(
+                    MaterialTheme.colorScheme.background
+                )
+        ) {
+
+            when {
+
+                isFinished -> {
+
+                    PracticeResultContent(
+                        totalQuestions =
+                            totalQuestions,
+                        answeredQuestions =
+                            answeredQuestions.size,
+                        correctAnswers =
+                            correctAnswers,
+                        wrongAnswers =
+                            wrongAnswers,
+                        progressPercent =
+                            progressPercent,
+                        onRestart = {
+                            viewModel.restart()
+                        },
+                        onBack = onBack
+                    )
+                }
+
+                currentQuestion == null -> {
+
+                    Column(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(24.dp),
+                        horizontalAlignment =
+                            Alignment.CenterHorizontally,
+                        verticalArrangement =
+                            Arrangement.Center
                     ) {
 
                         Text(
                             text =
-                                "Question ${currentIndex + 1} of $totalQuestions",
+                                "No questions available",
                             style =
-                                MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                                MaterialTheme
+                                    .typography
+                                    .titleLarge,
+                            fontWeight =
+                                FontWeight.Bold
+                        )
+
+                        Spacer(
+                            modifier =
+                                Modifier.height(8.dp)
                         )
 
                         Text(
                             text =
-                                "${answeredQuestions.size} answered",
+                                "This chapter does not have a valid question bank yet.",
                             style =
-                                MaterialTheme.typography.bodySmall,
+                                MaterialTheme
+                                    .typography
+                                    .bodyMedium,
                             color =
-                                MaterialTheme.colorScheme
+                                MaterialTheme
+                                    .colorScheme
                                     .onSurfaceVariant
                         )
+
+                        Spacer(
+                            modifier =
+                                Modifier.height(24.dp)
+                        )
+
+                        Button(
+                            onClick = onBack
+                        ) {
+                            Text("Go Back")
+                        }
                     }
+                }
 
-                    Spacer(
-                        modifier = Modifier.height(8.dp)
-                    )
+                else -> {
 
-                    LinearProgressIndicator(
-                        progress = {
-                            progress
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(6.dp)
-                    )
-
-                    Spacer(
-                        modifier = Modifier.height(6.dp)
-                    )
-
-                    Text(
-                        text =
-                            "${totalQuestions - answeredQuestions.size} remaining",
-                        style =
-                            MaterialTheme.typography.labelSmall,
-                        color =
-                            MaterialTheme.colorScheme
-                                .onSurfaceVariant
-                    )
-
-                    Spacer(
-                        modifier = Modifier.height(16.dp)
-                    )
-
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape =
-                            RoundedCornerShape(18.dp),
-                        colors =
-                            CardDefaults.cardColors(
-                                containerColor =
-                                    MaterialTheme.colorScheme
-                                        .surface
-                            )
+                    Column(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(
+                                    horizontal = 16.dp
+                                )
                     ) {
 
-                        Column(
+                        Spacer(
                             modifier =
-                                Modifier.padding(18.dp)
+                                Modifier.height(10.dp)
+                        )
+
+                        Row(
+                            modifier =
+                                Modifier.fillMaxWidth(),
+                            horizontalArrangement =
+                                Arrangement.SpaceBetween,
+                            verticalAlignment =
+                                Alignment.CenterVertically
                         ) {
 
-                            Row(
-                                modifier =
-                                    Modifier.fillMaxWidth(),
-                                horizontalArrangement =
-                                    Arrangement.SpaceBetween,
-                                verticalAlignment =
-                                    Alignment.Top
-                            ) {
-
-                                Text(
-                                    text =
-                                        currentQuestion.question,
-                                    modifier =
-                                        Modifier.weight(1f),
-                                    style =
-                                        MaterialTheme.typography
-                                            .titleMedium,
-                                    fontWeight =
-                                        FontWeight.SemiBold
-                                )
-
-                                if (
-                                    bookmarkedQuestions.contains(
-                                        currentQuestion.id
-                                    )
-                                ) {
-
-                                    Spacer(
-                                        modifier =
-                                            Modifier.width(8.dp)
-                                    )
-
-                                    Icon(
-                                        imageVector =
-                                            Icons.Default.Bookmark,
-                                        contentDescription =
-                                            "Bookmarked",
-                                        tint =
-                                            MaterialTheme.colorScheme
-                                                .primary
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(
-                        modifier = Modifier.height(16.dp)
-                    )
-
-                    currentQuestion.options
-                        .forEachIndexed { index, option ->
-
-                            val isSelected =
-                                selectedAnswer == index
-
-                            val isCorrect =
-                                submitted &&
-                                    index ==
-                                    currentQuestion.correctAnswer
-
-                            val isWrong =
-                                submitted &&
-                                    isSelected &&
-                                    index !=
-                                    currentQuestion.correctAnswer
-
-                            OptionCard(
-                                optionIndex = index,
-                                optionText = option,
-                                isSelected = isSelected,
-                                isCorrect = isCorrect,
-                                isWrong = isWrong,
-                                enabled = !submitted,
-                                onClick = {
-                                    viewModel.selectAnswer(
-                                        index
-                                    )
-                                }
+                            Text(
+                                text =
+                                    "Question ${currentIndex + 1} of $totalQuestions",
+                                style =
+                                    MaterialTheme
+                                        .typography
+                                        .titleMedium,
+                                fontWeight =
+                                    FontWeight.Bold
                             )
 
-                            Spacer(
-                                modifier =
-                                    Modifier.height(10.dp)
+                            Text(
+                                text =
+                                    "${answeredQuestions.size} answered",
+                                style =
+                                    MaterialTheme
+                                        .typography
+                                        .bodySmall,
+                                color =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .onSurfaceVariant
                             )
                         }
 
-                    if (submitted) {
+                        Spacer(
+                            modifier =
+                                Modifier.height(8.dp)
+                        )
+
+                        LinearProgressIndicator(
+                            progress = {
+                                if (totalQuestions > 0) {
+                                    progressPercent / 100f
+                                } else {
+                                    0f
+                                }
+                            },
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(6.dp)
+                        )
+
+                        Spacer(
+                            modifier =
+                                Modifier.height(6.dp)
+                        )
+
+                        Text(
+                            text =
+                                "$progressPercent% completed • " +
+                                    "${totalQuestions - answeredQuestions.size} remaining",
+                            style =
+                                MaterialTheme
+                                    .typography
+                                    .labelSmall,
+                            color =
+                                MaterialTheme
+                                    .colorScheme
+                                    .onSurfaceVariant
+                        )
+
+                        Spacer(
+                            modifier =
+                                Modifier.height(16.dp)
+                        )
 
                         Card(
                             modifier =
                                 Modifier.fillMaxWidth(),
                             shape =
-                                RoundedCornerShape(16.dp),
+                                RoundedCornerShape(18.dp),
                             colors =
                                 CardDefaults.cardColors(
                                     containerColor =
-                                        MaterialTheme.colorScheme
-                                            .surfaceVariant
+                                        MaterialTheme
+                                            .colorScheme
+                                            .surface
                                 )
                         ) {
 
                             Column(
                                 modifier =
-                                    Modifier.padding(16.dp)
+                                    Modifier.padding(18.dp)
                             ) {
 
                                 Row(
+                                    modifier =
+                                        Modifier.fillMaxWidth(),
+                                    horizontalArrangement =
+                                        Arrangement.SpaceBetween,
                                     verticalAlignment =
-                                        Alignment.CenterVertically
+                                        Alignment.Top
                                 ) {
 
-                                    Icon(
-                                        imageVector =
-                                            if (
-                                                selectedAnswer ==
-                                                currentQuestion
-                                                    .correctAnswer
-                                            ) {
-                                                Icons.Default.Check
-                                            } else {
-                                                Icons.Default
-                                                    .Lightbulb
-                                            },
-                                        contentDescription = null
+                                    Text(
+                                        text =
+                                            currentQuestion.question,
+                                        modifier =
+                                            Modifier.weight(1f),
+                                        style =
+                                            MaterialTheme
+                                                .typography
+                                                .titleMedium,
+                                        fontWeight =
+                                            FontWeight.SemiBold
                                     )
+
+                                    if (
+                                        isCurrentBookmarked
+                                    ) {
+
+                                        Spacer(
+                                            modifier =
+                                                Modifier.width(8.dp)
+                                        )
+
+                                        Icon(
+                                            imageVector =
+                                                Icons.Default.Bookmark,
+                                            contentDescription =
+                                                "Bookmarked",
+                                            tint =
+                                                MaterialTheme
+                                                    .colorScheme
+                                                    .primary
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(
+                            modifier =
+                                Modifier.height(16.dp)
+                        )
+
+                        currentQuestion.options
+                            .forEachIndexed {
+                                    index,
+                                    option ->
+
+                                val isSelected =
+                                    selectedAnswer == index
+
+                                val isCorrect =
+                                    submitted &&
+                                        index ==
+                                        currentQuestion
+                                            .correctAnswer
+
+                                val isWrong =
+                                    submitted &&
+                                        isSelected &&
+                                        index !=
+                                        currentQuestion
+                                            .correctAnswer
+
+                                OptionCard(
+                                    optionIndex =
+                                        index,
+                                    optionText =
+                                        option,
+                                    isSelected =
+                                        isSelected,
+                                    isCorrect =
+                                        isCorrect,
+                                    isWrong =
+                                        isWrong,
+                                    enabled =
+                                        !submitted,
+                                    onClick = {
+                                        viewModel
+                                            .selectAnswer(
+                                                index
+                                            )
+                                    }
+                                )
+
+                                Spacer(
+                                    modifier =
+                                        Modifier.height(10.dp)
+                                )
+                            }
+
+                        if (submitted) {
+
+                            Card(
+                                modifier =
+                                    Modifier.fillMaxWidth(),
+                                shape =
+                                    RoundedCornerShape(16.dp),
+                                colors =
+                                    CardDefaults.cardColors(
+                                        containerColor =
+                                            MaterialTheme
+                                                .colorScheme
+                                                .surfaceVariant
+                                    )
+                            ) {
+
+                                Column(
+                                    modifier =
+                                        Modifier.padding(16.dp)
+                                ) {
+
+                                    Row(
+                                        verticalAlignment =
+                                            Alignment.CenterVertically
+                                    ) {
+
+                                        Icon(
+                                            imageVector =
+                                                if (
+                                                    selectedAnswer ==
+                                                    currentQuestion
+                                                        .correctAnswer
+                                                ) {
+                                                    Icons.Default.Check
+                                                } else {
+                                                    Icons.Default
+                                                        .Lightbulb
+                                                },
+                                            contentDescription =
+                                                null
+                                        )
+
+                                        Spacer(
+                                            modifier =
+                                                Modifier.width(8.dp)
+                                        )
+
+                                        Text(
+                                            text =
+                                                if (
+                                                    selectedAnswer ==
+                                                    currentQuestion
+                                                        .correctAnswer
+                                                ) {
+                                                    "Correct!"
+                                                } else {
+                                                    "Correct answer: ${
+                                                        optionLetter(
+                                                            currentQuestion
+                                                                .correctAnswer
+                                                        )
+                                                    }"
+                                                },
+                                            fontWeight =
+                                                FontWeight.Bold
+                                        )
+                                    }
 
                                     Spacer(
                                         modifier =
-                                            Modifier.width(8.dp)
+                                            Modifier.height(8.dp)
                                     )
 
                                     Text(
                                         text =
-                                            if (
-                                                selectedAnswer ==
-                                                currentQuestion
-                                                    .correctAnswer
-                                            ) {
-                                                "Correct!"
-                                            } else {
-                                                "Correct answer: ${
-                                                    optionLetter(
-                                                        currentQuestion
-                                                            .correctAnswer
-                                                    )
-                                                }"
-                                            },
-                                        fontWeight =
-                                            FontWeight.Bold
+                                            currentQuestion
+                                                .explanation,
+                                        style =
+                                            MaterialTheme
+                                                .typography
+                                                .bodyMedium
                                     )
                                 }
-
-                                Spacer(
-                                    modifier =
-                                        Modifier.height(8.dp)
-                                )
-
-                                Text(
-                                    text =
-                                        currentQuestion.explanation,
-                                    style =
-                                        MaterialTheme.typography
-                                            .bodyMedium
-                                )
                             }
                         }
-                    }
 
-                    Spacer(
-                        modifier =
-                            Modifier.weight(1f)
-                    )
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 12.dp),
-                        horizontalArrangement =
-                            Arrangement.spacedBy(10.dp)
-                    ) {
-
-                        OutlinedButton(
-                            onClick = {
-                                viewModel.previousQuestion()
-                            },
-                            enabled =
-                                currentIndex > 0,
+                        Spacer(
                             modifier =
                                 Modifier.weight(1f)
+                        )
+
+                        Row(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        vertical = 12.dp
+                                    ),
+                            horizontalArrangement =
+                                Arrangement.spacedBy(10.dp)
                         ) {
 
-                            Icon(
-                                imageVector =
-                                    Icons.Default.NavigateBefore,
-                                contentDescription = null
-                            )
-
-                            Spacer(
-                                modifier =
-                                    Modifier.width(4.dp)
-                            )
-
-                            Text("Previous")
-                        }
-
-                        Button(
-                            onClick = {
-                                if (!submitted) {
-                                    viewModel.submitAnswer()
-                                } else {
-                                    viewModel.nextQuestion()
-                                }
-                            },
-                            enabled =
-                                if (submitted) {
-                                    true
-                                } else {
-                                    selectedAnswer != null
+                            OutlinedButton(
+                                onClick = {
+                                    viewModel
+                                        .previousQuestion()
                                 },
-                            modifier =
-                                Modifier.weight(1f)
-                        ) {
+                                enabled =
+                                    currentIndex > 0,
+                                modifier =
+                                    Modifier.weight(1f)
+                            ) {
 
-                            Text(
-                                if (!submitted) {
-                                    "Submit"
-                                } else if (
-                                    currentIndex ==
-                                    questions.lastIndex
-                                ) {
-                                    "Finish"
-                                } else {
-                                    "Next"
-                                }
-                            )
-
-                            if (submitted) {
+                                Icon(
+                                    imageVector =
+                                        Icons.Default
+                                            .NavigateBefore,
+                                    contentDescription =
+                                        null
+                                )
 
                                 Spacer(
                                     modifier =
                                         Modifier.width(4.dp)
                                 )
 
-                                Icon(
-                                    imageVector =
-                                        Icons.Default.NavigateNext,
-                                    contentDescription = null
+                                Text("Previous")
+                            }
+
+                            Button(
+                                onClick = {
+                                    if (!submitted) {
+                                        viewModel
+                                            .submitAnswer()
+                                    } else {
+                                        viewModel
+                                            .nextQuestion()
+                                    }
+                                },
+                                enabled =
+                                    if (submitted) {
+                                        true
+                                    } else {
+                                        selectedAnswer != null
+                                    },
+                                modifier =
+                                    Modifier.weight(1f)
+                            ) {
+
+                                Text(
+                                    if (!submitted) {
+                                        "Submit"
+                                    } else if (
+                                        currentIndex ==
+                                        questions.lastIndex
+                                    ) {
+                                        "Finish"
+                                    } else {
+                                        "Next"
+                                    }
                                 )
+
+                                if (submitted) {
+
+                                    Spacer(
+                                        modifier =
+                                            Modifier.width(4.dp)
+                                    )
+
+                                    Icon(
+                                        imageVector =
+                                            Icons.Default
+                                                .NavigateNext,
+                                        contentDescription =
+                                            null
+                                    )
+                                }
                             }
                         }
                     }
@@ -568,256 +646,331 @@ Scaffold(
     }
 }
 
-}
-
 @Composable
 private fun OptionCard(
-optionIndex: Int,
-optionText: String,
-isSelected: Boolean,
-isCorrect: Boolean,
-isWrong: Boolean,
-enabled: Boolean,
-onClick: () -> Unit
+    optionIndex: Int,
+    optionText: String,
+    isSelected: Boolean,
+    isCorrect: Boolean,
+    isWrong: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit
 ) {
 
-val containerColor =
-    when {
-        isCorrect ->
-            Color(0xFF1B5E20)
+    val containerColor =
+        when {
+            isCorrect ->
+                Color(0xFF1B5E20)
 
-        isWrong ->
-            Color(0xFFB71C1C)
+            isWrong ->
+                Color(0xFFB71C1C)
 
-        isSelected ->
-            MaterialTheme.colorScheme
-                .primaryContainer
+            isSelected ->
+                MaterialTheme
+                    .colorScheme
+                    .primaryContainer
 
-        else ->
-            MaterialTheme.colorScheme.surface
-    }
+            else ->
+                MaterialTheme
+                    .colorScheme
+                    .surface
+        }
 
-val contentColor =
-    when {
-        isCorrect || isWrong ->
-            Color.White
+    val contentColor =
+        when {
+            isCorrect || isWrong ->
+                Color.White
 
-        else ->
-            MaterialTheme.colorScheme.onSurface
-    }
+            else ->
+                MaterialTheme
+                    .colorScheme
+                    .onSurface
+        }
 
-Card(
-    modifier = Modifier.fillMaxWidth(),
-    onClick = onClick,
-    enabled = enabled,
-    shape = RoundedCornerShape(14.dp),
-    colors = CardDefaults.cardColors(
-        containerColor = containerColor,
-        contentColor = contentColor
-    ),
-    elevation =
-        CardDefaults.cardElevation(
-            defaultElevation = 1.dp
-        )
-) {
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(14.dp),
-        verticalAlignment =
-            Alignment.CenterVertically
+    Card(
+        modifier =
+            Modifier.fillMaxWidth(),
+        onClick =
+            onClick,
+        enabled =
+            enabled,
+        shape =
+            RoundedCornerShape(14.dp),
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    containerColor,
+                contentColor =
+                    contentColor
+            ),
+        elevation =
+            CardDefaults.cardElevation(
+                defaultElevation = 1.dp
+            )
     ) {
 
-        Text(
-            text = optionLetter(optionIndex),
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.width(32.dp)
-        )
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(14.dp),
+            verticalAlignment =
+                Alignment.CenterVertically
+        ) {
 
-        Text(
-            text = optionText,
-            modifier = Modifier.weight(1f),
-            style = MaterialTheme.typography.bodyLarge
-        )
-
-        if (isCorrect) {
-            Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = "Correct"
+            Text(
+                text =
+                    optionLetter(optionIndex),
+                fontWeight =
+                    FontWeight.Bold,
+                modifier =
+                    Modifier.width(32.dp)
             )
-        }
 
-        if (isWrong) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Wrong"
+            Text(
+                text =
+                    optionText,
+                modifier =
+                    Modifier.weight(1f),
+                style =
+                    MaterialTheme
+                        .typography
+                        .bodyLarge
             )
+
+            if (isCorrect) {
+
+                Icon(
+                    imageVector =
+                        Icons.Default.Check,
+                    contentDescription =
+                        "Correct"
+                )
+            }
+
+            if (isWrong) {
+
+                Icon(
+                    imageVector =
+                        Icons.Default.Close,
+                    contentDescription =
+                        "Wrong"
+                )
+            }
         }
     }
-}
-
 }
 
 @Composable
 private fun PracticeResultContent(
-totalQuestions: Int,
-answeredQuestions: Int,
-correctAnswers: Int,
-wrongAnswers: Int,
-onRestart: () -> Unit,
-onBack: () -> Unit
+    totalQuestions: Int,
+    answeredQuestions: Int,
+    correctAnswers: Int,
+    wrongAnswers: Int,
+    progressPercent: Int,
+    onRestart: () -> Unit,
+    onBack: () -> Unit
 ) {
 
-val percentage =
-    if (totalQuestions > 0) {
-        (correctAnswers * 100) / totalQuestions
-    } else {
-        0
-    }
+    val percentage =
+        if (totalQuestions > 0) {
+            (correctAnswers * 100) /
+                totalQuestions
+        } else {
+            0
+        }
 
-Column(
-    modifier = Modifier
-        .fillMaxSize()
-        .padding(24.dp),
-    horizontalAlignment =
-        Alignment.CenterHorizontally,
-    verticalArrangement =
-        Arrangement.Center
-) {
-
-    CircularProgressIndicator(
-        progress = {
-            percentage / 100f
-        },
-        modifier = Modifier.height(90.dp),
-        strokeWidth = 8.dp
-    )
-
-    Spacer(
-        modifier = Modifier.height(20.dp)
-    )
-
-    Text(
-        text = "Practice Complete",
-        style =
-            MaterialTheme.typography.headlineSmall,
-        fontWeight = FontWeight.Bold
-    )
-
-    Spacer(
-        modifier = Modifier.height(8.dp)
-    )
-
-    Text(
-        text = "$percentage%",
-        style =
-            MaterialTheme.typography.displaySmall,
-        fontWeight = FontWeight.Bold
-    )
-
-    Spacer(
-        modifier = Modifier.height(20.dp)
-    )
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp)
+    Column(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+        horizontalAlignment =
+            Alignment.CenterHorizontally,
+        verticalArrangement =
+            Arrangement.Center
     ) {
 
-        Column(
-            modifier = Modifier.padding(18.dp)
+        CircularProgressIndicator(
+            progress = {
+                percentage / 100f
+            },
+            modifier =
+                Modifier.height(90.dp),
+            strokeWidth = 8.dp
+        )
+
+        Spacer(
+            modifier =
+                Modifier.height(20.dp)
+        )
+
+        Text(
+            text =
+                "Practice Complete",
+            style =
+                MaterialTheme
+                    .typography
+                    .headlineSmall,
+            fontWeight =
+                FontWeight.Bold
+        )
+
+        Spacer(
+            modifier =
+                Modifier.height(8.dp)
+        )
+
+        Text(
+            text =
+                "$percentage%",
+            style =
+                MaterialTheme
+                    .typography
+                    .displaySmall,
+            fontWeight =
+                FontWeight.Bold
+        )
+
+        Spacer(
+            modifier =
+                Modifier.height(6.dp)
+        )
+
+        Text(
+            text =
+                "$progressPercent% questions attempted",
+            style =
+                MaterialTheme
+                    .typography
+                    .bodyMedium,
+            color =
+                MaterialTheme
+                    .colorScheme
+                    .onSurfaceVariant
+        )
+
+        Spacer(
+            modifier =
+                Modifier.height(20.dp)
+        )
+
+        Card(
+            modifier =
+                Modifier.fillMaxWidth(),
+            shape =
+                RoundedCornerShape(16.dp)
         ) {
 
-            Text(
-                text = "Practice Summary",
-                style =
-                    MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+            Column(
+                modifier =
+                    Modifier.padding(18.dp)
+            ) {
 
-            Spacer(
-                modifier = Modifier.height(10.dp)
-            )
+                Text(
+                    text =
+                        "Practice Summary",
+                    style =
+                        MaterialTheme
+                            .typography
+                            .titleMedium,
+                    fontWeight =
+                        FontWeight.Bold
+                )
 
-            Text(
-                text =
-                    "Total questions: $totalQuestions"
-            )
+                Spacer(
+                    modifier =
+                        Modifier.height(10.dp)
+                )
 
-            Spacer(
-                modifier = Modifier.height(6.dp)
-            )
+                Text(
+                    text =
+                        "Total questions: $totalQuestions"
+                )
 
-            Text(
-                text =
-                    "Answered: $answeredQuestions"
-            )
+                Spacer(
+                    modifier =
+                        Modifier.height(6.dp)
+                )
 
-            Spacer(
-                modifier = Modifier.height(6.dp)
-            )
+                Text(
+                    text =
+                        "Answered: $answeredQuestions"
+                )
 
-            Text(
-                text =
-                    "Correct: $correctAnswers"
-            )
+                Spacer(
+                    modifier =
+                        Modifier.height(6.dp)
+                )
 
-            Spacer(
-                modifier = Modifier.height(6.dp)
-            )
+                Text(
+                    text =
+                        "Correct: $correctAnswers"
+                )
 
-            Text(
-                text =
-                    "Wrong: $wrongAnswers"
-            )
+                Spacer(
+                    modifier =
+                        Modifier.height(6.dp)
+                )
 
-            Spacer(
-                modifier = Modifier.height(6.dp)
-            )
+                Text(
+                    text =
+                        "Wrong: $wrongAnswers"
+                )
 
-            Text(
-                text =
-                    "Unattempted: ${
-                        totalQuestions - answeredQuestions
-                    }"
-            )
+                Spacer(
+                    modifier =
+                        Modifier.height(6.dp)
+                )
+
+                Text(
+                    text =
+                        "Unattempted: ${
+                            totalQuestions -
+                                answeredQuestions
+                        }"
+                )
+            }
+        }
+
+        Spacer(
+            modifier =
+                Modifier.height(24.dp)
+        )
+
+        Button(
+            onClick =
+                onRestart,
+            modifier =
+                Modifier.fillMaxWidth()
+        ) {
+            Text("Practice Again")
+        }
+
+        Spacer(
+            modifier =
+                Modifier.height(10.dp)
+        )
+
+        OutlinedButton(
+            onClick =
+                onBack,
+            modifier =
+                Modifier.fillMaxWidth()
+        ) {
+            Text("Back")
         }
     }
-
-    Spacer(
-        modifier = Modifier.height(24.dp)
-    )
-
-    Button(
-        onClick = onRestart,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text("Practice Again")
-    }
-
-    Spacer(
-        modifier = Modifier.height(10.dp)
-    )
-
-    OutlinedButton(
-        onClick = onBack,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text("Back")
-    }
-}
-
 }
 
 private fun optionLetter(
-index: Int
+    index: Int
 ): String {
-return when (index) {
-0 -> "A"
-1 -> "B"
-2 -> "C"
-3 -> "D"
-else -> "?"
-}
+    return when (index) {
+        0 -> "A"
+        1 -> "B"
+        2 -> "C"
+        3 -> "D"
+        else -> "?"
+    }
 }
