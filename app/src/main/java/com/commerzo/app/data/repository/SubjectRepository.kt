@@ -13,33 +13,29 @@ class SubjectRepository {
         classLevel: ClassLevel = ClassLevel.CLASS_12
     ): List<SubjectData> {
 
-        val subjectDefinitions = listOf(
-            Triple("accountancy", "Accountancy", "📊"),
-            Triple("business_studies", "Business Studies", "💼"),
-            Triple("economics", "Economics", "📈"),
-            Triple("mathematics", "Mathematics", "🧮"),
-            Triple("english", "English", "📖"),
-            Triple("hindi", "Hindi", "📝")
-        )
-
-        return subjectDefinitions.map { (id, name, emoji) ->
-
-            val chapterCount = chapterRepository
-                .getChapters(
-                    subjectId = id,
-                    board = board,
-                    classLevel = classLevel
-                )
-                .size
-
-            SubjectData(
-                id = id,
-                name = name,
-                emoji = emoji,
+        return CurriculumCatalog
+            .getSubjectDefinitions(
                 board = board,
-                classLevel = classLevel,
-                chaptersCount = chapterCount
+                classLevel = classLevel
             )
-        }
+            .map { definition ->
+
+                val chapterCount = chapterRepository
+                    .getChapters(
+                        subjectId = definition.id,
+                        board = board,
+                        classLevel = classLevel
+                    )
+                    .size
+
+                SubjectData(
+                    id = definition.id,
+                    name = definition.name,
+                    emoji = definition.emoji,
+                    board = definition.board,
+                    classLevel = definition.classLevel,
+                    chaptersCount = chapterCount
+                )
+            }
     }
 }
