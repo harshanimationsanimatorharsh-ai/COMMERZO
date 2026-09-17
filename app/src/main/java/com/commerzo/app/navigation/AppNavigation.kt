@@ -65,6 +65,54 @@ fun AppNavigation(
                             classLevel = ClassLevel.CLASS_12
                         )
                     )
+                },
+
+                onPracticeClick = {
+                    navController.navigate(
+                        Screen.Practice.route
+                    )
+                },
+
+                onTestsClick = {
+                    navController.navigate(
+                        Screen.Tests.route
+                    )
+                },
+
+                onGamesClick = {
+                    navController.navigate(
+                        Screen.Games.route
+                    )
+                },
+
+                onProfileClick = {
+                    navController.navigate(
+                        Screen.Profile.route
+                    )
+                },
+
+                onBookmarksClick = {
+                    navController.navigate(
+                        Screen.Bookmarks.route
+                    )
+                },
+
+                onTestHistoryClick = {
+                    navController.navigate(
+                        Screen.TestHistory.route
+                    )
+                },
+
+                onAchievementsClick = {
+                    navController.navigate(
+                        Screen.Achievements.route
+                    )
+                },
+
+                onSettingsClick = {
+                    navController.navigate(
+                        Screen.Settings.route
+                    )
                 }
             )
         }
@@ -77,12 +125,6 @@ fun AppNavigation(
             )
         }
 
-        /*
-         * TEST SELECTION
-         *
-         * The Tests tab now opens the selection screen
-         * instead of starting a hardcoded test.
-         */
         composable(Screen.Tests.route) {
             TestSelectionScreen(
                 onStartTest = {
@@ -106,11 +148,6 @@ fun AppNavigation(
             )
         }
 
-        /*
-         * ACTUAL TEST SESSION
-         *
-         * Receives the selected curriculum from TestSelectionScreen.
-         */
         composable(Screen.TestSession.route) { backStackEntry ->
 
             val subjectId =
@@ -144,6 +181,7 @@ fun AppNavigation(
                 chapterId = chapterId,
                 board = board,
                 classLevel = classLevel,
+
                 onTestFinished = {
                     total,
                     answered,
@@ -166,6 +204,7 @@ fun AppNavigation(
                         Screen.TestResult.route
                     )
                 },
+
                 onBack = {
                     navController.popBackStack()
                 }
@@ -183,16 +222,19 @@ fun AppNavigation(
                         Screen.Bookmarks.route
                     )
                 },
+
                 onTestHistory = {
                     navController.navigate(
                         Screen.TestHistory.route
                     )
                 },
+
                 onAchievements = {
                     navController.navigate(
                         Screen.Achievements.route
                     )
                 },
+
                 onSettings = {
                     navController.navigate(
                         Screen.Settings.route
@@ -204,6 +246,7 @@ fun AppNavigation(
         composable(Screen.Subjects.route) {
             SubjectSelectionScreen(
                 viewModel = viewModel(),
+
                 onSubjectClick = { subject ->
 
                     navController.navigate(
@@ -257,9 +300,11 @@ fun AppNavigation(
                 subjectName = subjectName,
                 board = board,
                 classLevel = classLevel,
+
                 onBack = {
                     navController.popBackStack()
                 },
+
                 onChapterClick = {
                     chapterId,
                     _ ->
@@ -309,6 +354,7 @@ fun AppNavigation(
                 chapterId = chapterId,
                 board = board,
                 classLevel = classLevel,
+
                 onBack = {
                     navController.popBackStack()
                 }
@@ -318,18 +364,12 @@ fun AppNavigation(
         composable(Screen.TestResult.route) {
 
             TestResultScreen(
-                total =
-                    latestTestResult.total,
-                answered =
-                    latestTestResult.answered,
-                correct =
-                    latestTestResult.correct,
-                wrong =
-                    latestTestResult.wrong,
-                unattempted =
-                    latestTestResult.unattempted,
-                marked =
-                    latestTestResult.marked,
+                total = latestTestResult.total,
+                answered = latestTestResult.answered,
+                correct = latestTestResult.correct,
+                wrong = latestTestResult.wrong,
+                unattempted = latestTestResult.unattempted,
+                marked = latestTestResult.marked,
 
                 onRestart = {
 
