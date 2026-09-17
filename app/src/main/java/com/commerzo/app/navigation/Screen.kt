@@ -3,9 +3,7 @@ package com.commerzo.app.navigation
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
 
-sealed class Screen(
-    val route: String
-) {
+sealed class Screen(val route: String) {
 
     data object Home : Screen("home")
 
@@ -26,12 +24,8 @@ sealed class Screen(
             subjectId: String,
             board: Board,
             classLevel: ClassLevel
-        ): String {
-            return "chapters/" +
-                "$subjectId/" +
-                "${board.name}/" +
-                "${classLevel.name}"
-        }
+        ): String =
+            "chapters/$subjectId/${board.name}/${classLevel.name}"
     }
 
     data object Questions :
@@ -42,13 +36,20 @@ sealed class Screen(
             chapterId: String,
             board: Board,
             classLevel: ClassLevel
-        ): String {
-            return "questions/" +
-                "$subjectId/" +
-                "$chapterId/" +
-                "${board.name}/" +
-                "${classLevel.name}"
-        }
+        ): String =
+            "questions/$subjectId/$chapterId/${board.name}/${classLevel.name}"
+    }
+
+    data object TestSession :
+        Screen("test_session/{subjectId}/{chapterId}/{board}/{classLevel}") {
+
+        fun createRoute(
+            subjectId: String,
+            chapterId: String,
+            board: Board,
+            classLevel: ClassLevel
+        ): String =
+            "test_session/$subjectId/$chapterId/${board.name}/${classLevel.name}"
     }
 
     data object TestResult :
