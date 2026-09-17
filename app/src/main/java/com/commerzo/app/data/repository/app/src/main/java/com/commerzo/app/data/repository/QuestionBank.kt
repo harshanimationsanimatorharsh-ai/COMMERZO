@@ -13,6 +13,9 @@ data class QuestionBank(
 ) {
     val size: Int
         get() = questions.size
+
+    val isEmpty: Boolean
+        get() = questions.isEmpty()
 }
 
 object QuestionBankFactory {
@@ -25,12 +28,22 @@ object QuestionBankFactory {
         questions: List<Question>
     ): QuestionBank {
 
-        val validatedQuestions = questions.filter { question ->
-            question.subjectId == subjectId &&
-                question.chapterId == chapterId &&
-                question.board == board &&
-                question.classLevel == classLevel
-        }
+        val matchingQuestions =
+            questions
+                .filter { question ->
+                    question.subjectId == subjectId &&
+                        question.chapterId == chapterId &&
+                        question.board == board &&
+                        question.classLevel == classLevel
+                }
+                .distinctBy { it.id }
+
+        val validatedQuestions =
+            matchingQuestions.filter { question ->
+                QuestionBankValidator
+                    .validate(question)
+                    .isValid
+            }
 
         return QuestionBank(
             subjectId = subjectId,
