@@ -5,10 +5,16 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+
+import com.commerzo.app.data.model.Board
+import com.commerzo.app.data.model.ClassLevel
+
 import com.commerzo.app.ui.screens.AchievementsScreen
 import com.commerzo.app.ui.screens.BookmarksScreen
 import com.commerzo.app.ui.screens.ChapterScreen
+import com.commerzo.app.ui.screens.GamesScreen
 import com.commerzo.app.ui.screens.HomeScreen
+import com.commerzo.app.ui.screens.PracticeScreen
 import com.commerzo.app.ui.screens.ProfileScreen
 import com.commerzo.app.ui.screens.QuestionScreen
 import com.commerzo.app.ui.screens.SettingsScreen
@@ -16,8 +22,6 @@ import com.commerzo.app.ui.screens.SubjectSelectionScreen
 import com.commerzo.app.ui.screens.TestHistoryScreen
 import com.commerzo.app.ui.screens.TestResultScreen
 import com.commerzo.app.ui.screens.TestScreen
-import com.commerzo.app.ui.screens.GamesScreen
-import com.commerzo.app.ui.screens.PracticeScreen
 
 @Composable
 fun AppNavigation(
@@ -99,28 +103,32 @@ fun AppNavigation(
                     ?: return@composable
 
             val board =
-                backStackEntry.arguments
-                    ?.getString("board")
-                    ?: "MP_BOARD"
+                enumValueOrDefault(
+                    value = backStackEntry.arguments
+                        ?.getString("board")
+                        ?: "MP_BOARD",
+                    default = Board.MP_BOARD
+                )
 
             val classLevel =
-                backStackEntry.arguments
-                    ?.getString("classLevel")
-                    ?: "CLASS_12"
+                enumValueOrDefault(
+                    value = backStackEntry.arguments
+                        ?.getString("classLevel")
+                        ?: "CLASS_12",
+                    default = ClassLevel.CLASS_12
+                )
 
             ChapterScreen(
                 subjectId = subjectId,
-                board = enumValueOrDefault(
-                    value = board,
-                    default = com.commerzo.app.data.model.Board.MP_BOARD
-                ),
-                classLevel = enumValueOrDefault(
-                    value = classLevel,
-                    default = com.commerzo.app.data.model.ClassLevel.CLASS_12
-                ),
+                board = board,
+                classLevel = classLevel,
                 onChapterSelected = { chapter ->
                     navController.navigate(
-                        "questions/${chapter.subjectId}/${chapter.id}"
+                        "questions/" +
+                            "${chapter.subjectId}/" +
+                            "${chapter.id}/" +
+                            "${chapter.board.name}/" +
+                            "${chapter.classLevel.name}"
                     )
                 },
                 onBack = {
@@ -130,7 +138,7 @@ fun AppNavigation(
         }
 
         composable(
-            route = "questions/{subjectId}/{chapterId}"
+            route = "questions/{subjectId}/{chapterId}/{board}/{classLevel}"
         ) { backStackEntry ->
 
             val subjectId =
@@ -143,9 +151,27 @@ fun AppNavigation(
                     ?.getString("chapterId")
                     ?: return@composable
 
+            val board =
+                enumValueOrDefault(
+                    value = backStackEntry.arguments
+                        ?.getString("board")
+                        ?: "MP_BOARD",
+                    default = Board.MP_BOARD
+                )
+
+            val classLevel =
+                enumValueOrDefault(
+                    value = backStackEntry.arguments
+                        ?.getString("classLevel")
+                        ?: "CLASS_12",
+                    default = ClassLevel.CLASS_12
+                )
+
             QuestionScreen(
                 subjectId = subjectId,
                 chapterId = chapterId,
+                board = board,
+                classLevel = classLevel,
                 onBack = {
                     navController.popBackStack()
                 }
