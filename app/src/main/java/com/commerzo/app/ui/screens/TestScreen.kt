@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.commerzo.app.data.model.Board
@@ -48,6 +49,8 @@ fun TestScreen(
     ) -> Unit,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+
     val viewModel: TestViewModel = viewModel()
 
     val questions by viewModel.questions.collectAsState()
@@ -64,6 +67,10 @@ fun TestScreen(
 
     val currentQuestion =
         currentState?.question
+
+    LaunchedEffect(Unit) {
+        TestHistoryRepository.initialize(context)
+    }
 
     LaunchedEffect(
         subjectId,
@@ -115,8 +122,11 @@ fun TestScreen(
                 viewModel.getMarkedCount()
 
             TestHistoryRepository.saveTest(
+                context = context,
                 subjectId = subjectId,
                 chapterId = chapterId,
+                board = board,
+                classLevel = classLevel,
                 totalQuestions = total,
                 answered = answered,
                 correct = correct,
@@ -137,12 +147,14 @@ fun TestScreen(
     }
 
     if (questions.isEmpty() && !isFinished) {
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(24.dp),
             verticalArrangement = Arrangement.Center
         ) {
+
             Text(
                 text = "No questions available",
                 style = MaterialTheme.typography.headlineSmall
@@ -153,9 +165,12 @@ fun TestScreen(
             )
 
             Text(
-                text = "This chapter does not have enough valid questions yet.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text =
+                    "This chapter does not have enough valid questions yet.",
+                style =
+                    MaterialTheme.typography.bodyMedium,
+                color =
+                    MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(
@@ -178,6 +193,7 @@ fun TestScreen(
     }
 
     if (showSubmitDialog) {
+
         AlertDialog(
             onDismissRequest = {
                 showSubmitDialog = false
@@ -191,6 +207,7 @@ fun TestScreen(
                 )
             },
             confirmButton = {
+
                 Button(
                     onClick = {
                         showSubmitDialog = false
@@ -201,6 +218,7 @@ fun TestScreen(
                 }
             },
             dismissButton = {
+
                 OutlinedButton(
                     onClick = {
                         showSubmitDialog = false
@@ -226,12 +244,15 @@ fun TestScreen(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement =
+                Arrangement.SpaceBetween
         ) {
+
             Text(
                 text =
                     "Question ${currentIndex + 1}/${questions.size}",
-                style = MaterialTheme.typography.titleMedium
+                style =
+                    MaterialTheme.typography.titleMedium
             )
 
             Text(
@@ -240,7 +261,8 @@ fun TestScreen(
                         minutes,
                         seconds
                     ),
-                style = MaterialTheme.typography.titleMedium
+                style =
+                    MaterialTheme.typography.titleMedium
             )
         }
 
@@ -251,7 +273,8 @@ fun TestScreen(
         Text(
             text =
                 "Answered: ${viewModel.getAnsweredCount()} / ${questions.size}",
-            style = MaterialTheme.typography.bodyMedium
+            style =
+                MaterialTheme.typography.bodyMedium
         )
 
         Spacer(
@@ -259,25 +282,30 @@ fun TestScreen(
         )
 
         Card(
-            modifier = Modifier.fillMaxWidth()
+            modifier =
+                Modifier.fillMaxWidth()
         ) {
+
             Column(
-                modifier = Modifier.padding(18.dp)
+                modifier =
+                    Modifier.padding(18.dp)
             ) {
 
                 Text(
-                    text = currentQuestion.question,
-                    style = MaterialTheme.typography.titleMedium
+                    text =
+                        currentQuestion.question,
+                    style =
+                        MaterialTheme.typography.titleMedium
                 )
 
                 Spacer(
-                    modifier = Modifier.height(16.dp)
+                    modifier =
+                        Modifier.height(16.dp)
                 )
 
                 currentQuestion.options.forEachIndexed {
                     index,
-                    option
-                    ->
+                    option ->
 
                     TestQuestionOption(
                         index = index,
@@ -292,40 +320,48 @@ fun TestScreen(
                     )
 
                     Spacer(
-                        modifier = Modifier.height(8.dp)
+                        modifier =
+                            Modifier.height(8.dp)
                     )
                 }
             }
         }
 
         Spacer(
-            modifier = Modifier.height(16.dp)
+            modifier =
+                Modifier.height(16.dp)
         )
 
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier =
+                Modifier.fillMaxWidth()
         ) {
 
             OutlinedButton(
                 onClick = {
                     viewModel.previousQuestion()
                 },
-                enabled = currentIndex > 0,
-                modifier = Modifier.weight(1f)
+                enabled =
+                    currentIndex > 0,
+                modifier =
+                    Modifier.weight(1f)
             ) {
                 Text("Previous")
             }
 
             Spacer(
-                modifier = Modifier.width(8.dp)
+                modifier =
+                    Modifier.width(8.dp)
             )
 
             OutlinedButton(
                 onClick = {
                     viewModel.toggleMarkForReview()
                 },
-                modifier = Modifier.weight(1f)
+                modifier =
+                    Modifier.weight(1f)
             ) {
+
                 Text(
                     if (
                         viewModel.isCurrentQuestionMarked()
@@ -339,11 +375,13 @@ fun TestScreen(
         }
 
         Spacer(
-            modifier = Modifier.height(10.dp)
+            modifier =
+                Modifier.height(10.dp)
         )
 
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier =
+                Modifier.fillMaxWidth()
         ) {
 
             Button(
@@ -352,32 +390,37 @@ fun TestScreen(
                 },
                 enabled =
                     currentIndex < questions.lastIndex,
-                modifier = Modifier.weight(1f)
+                modifier =
+                    Modifier.weight(1f)
             ) {
                 Text("Next")
             }
 
             Spacer(
-                modifier = Modifier.width(8.dp)
+                modifier =
+                    Modifier.width(8.dp)
             )
 
             Button(
                 onClick = {
                     showSubmitDialog = true
                 },
-                modifier = Modifier.weight(1f)
+                modifier =
+                    Modifier.weight(1f)
             ) {
                 Text("Submit")
             }
         }
 
         Spacer(
-            modifier = Modifier.height(12.dp)
+            modifier =
+                Modifier.height(12.dp)
         )
 
         OutlinedButton(
             onClick = onBack,
-            modifier = Modifier.fillMaxWidth()
+            modifier =
+                Modifier.fillMaxWidth()
         ) {
             Text("Exit Test")
         }
