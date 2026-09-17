@@ -41,6 +41,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.commerzo.app.data.model.Board
+import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.model.Question
 import com.commerzo.app.ui.viewmodel.PracticeSessionViewModel
 
@@ -49,7 +51,6 @@ fun BookmarksScreen(
     onBack: () -> Unit,
     viewModel: PracticeSessionViewModel = viewModel()
 ) {
-
     val bookmarkedQuestions by
         viewModel.bookmarkedQuestions.collectAsState()
 
@@ -63,7 +64,6 @@ fun BookmarksScreen(
 
     Scaffold(
         topBar = {
-
             TopAppBar(
                 title = {
                     Text(
@@ -71,32 +71,23 @@ fun BookmarksScreen(
                         fontWeight = FontWeight.Bold
                     )
                 },
-
                 navigationIcon = {
-
                     IconButton(
                         onClick = onBack
                     ) {
-
                         Icon(
-                            imageVector =
-                                Icons.Default.ArrowBack,
-                            contentDescription =
-                                "Back"
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
                         )
                     }
                 },
-
                 actions = {
-
                     if (bookmarkedQuestions.isNotEmpty()) {
-
                         IconButton(
                             onClick = {
                                 showClearDialog = true
                             }
                         ) {
-
                             Icon(
                                 imageVector =
                                     Icons.Default.DeleteSweep,
@@ -106,110 +97,85 @@ fun BookmarksScreen(
                         }
                     }
                 },
-
                 colors =
                     TopAppBarDefaults.topAppBarColors(
                         containerColor =
-                            MaterialTheme
-                                .colorScheme
-                                .surface
+                            MaterialTheme.colorScheme.surface
                     )
             )
         }
     ) { paddingValues ->
 
         when {
-
             bookmarkedQuestions.isEmpty() -> {
-
                 EmptyBookmarksContent(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .padding(
-                                paddingValues
-                            )
+                            .padding(paddingValues)
                 )
             }
 
             questionDetails.isEmpty() -> {
-
                 MissingBookmarksContent(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .padding(
-                                paddingValues
-                            )
+                            .padding(paddingValues)
                 )
             }
 
             else -> {
-
                 LazyColumn(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .padding(
-                                paddingValues
-                            )
-                            .padding(
-                                horizontal = 16.dp
-                            ),
-
+                            .padding(paddingValues)
+                            .padding(horizontal = 16.dp),
                     verticalArrangement =
                         Arrangement.spacedBy(14.dp)
                 ) {
-
                     item {
-
                         Spacer(
                             modifier =
-                                Modifier.height(
-                                    8.dp
-                                )
+                                Modifier.height(8.dp)
                         )
 
                         Text(
                             text =
-                                "${bookmarkedQuestions.size} saved question" +
+                                "${bookmarkedQuestions.size} saved " +
                                     if (
                                         bookmarkedQuestions.size == 1
                                     ) {
-                                        ""
+                                        "question"
                                     } else {
-                                        "s"
+                                        "questions"
                                     },
-
                             style =
-                                MaterialTheme
-                                    .typography
-                                    .titleMedium,
-
+                                MaterialTheme.typography.titleMedium,
                             fontWeight =
                                 FontWeight.SemiBold
                         )
 
                         Spacer(
                             modifier =
-                                Modifier.height(
-                                    4.dp
-                                )
+                                Modifier.height(4.dp)
                         )
 
                         Text(
                             text =
                                 "Your saved questions for quick revision.",
-
                             style =
-                                MaterialTheme
-                                    .typography
-                                    .bodySmall,
-
+                                MaterialTheme.typography.bodySmall,
                             color =
                                 MaterialTheme
                                     .colorScheme
                                     .onSurfaceVariant
+                        )
+
+                        Spacer(
+                            modifier =
+                                Modifier.height(4.dp)
                         )
                     }
 
@@ -223,22 +189,17 @@ fun BookmarksScreen(
                         BookmarkQuestionCard(
                             question = question,
                             onRemove = {
-
-                                viewModel
-                                    .removeBookmark(
-                                        question.id
-                                    )
+                                viewModel.removeBookmark(
+                                    question.id
+                                )
                             }
                         )
                     }
 
                     item {
-
                         Spacer(
                             modifier =
-                                Modifier.height(
-                                    16.dp
-                                )
+                                Modifier.height(16.dp)
                         )
                     }
                 }
@@ -247,49 +208,37 @@ fun BookmarksScreen(
     }
 
     if (showClearDialog) {
-
         AlertDialog(
             onDismissRequest = {
                 showClearDialog = false
             },
-
             title = {
                 Text(
                     text = "Clear bookmarks?"
                 )
             },
-
             text = {
                 Text(
                     text =
                         "All saved questions will be removed from your bookmarks."
                 )
             },
-
             confirmButton = {
-
                 TextButton(
                     onClick = {
-
-                        viewModel
-                            .clearAllBookmarks()
-
+                        viewModel.clearAllBookmarks()
                         showClearDialog = false
                     }
                 ) {
-
                     Text("Clear")
                 }
             },
-
             dismissButton = {
-
                 TextButton(
                     onClick = {
                         showClearDialog = false
                     }
                 ) {
-
                     Text("Cancel")
                 }
             }
@@ -302,23 +251,17 @@ private fun BookmarkQuestionCard(
     question: Question,
     onRemove: () -> Unit
 ) {
-
     Card(
         modifier =
             Modifier.fillMaxWidth(),
-
         shape =
             RoundedCornerShape(18.dp),
-
         colors =
             CardDefaults.cardColors(
                 containerColor =
-                    MaterialTheme
-                        .colorScheme
-                        .surface
+                    MaterialTheme.colorScheme.surface
             )
     ) {
-
         Column(
             modifier =
                 Modifier.padding(16.dp)
@@ -327,11 +270,9 @@ private fun BookmarkQuestionCard(
             Row(
                 modifier =
                     Modifier.fillMaxWidth(),
-
                 verticalAlignment =
                     Alignment.CenterVertically
             ) {
-
                 Icon(
                     imageVector =
                         Icons.Default.Bookmark,
@@ -348,34 +289,50 @@ private fun BookmarkQuestionCard(
                     modifier =
                         Modifier.weight(1f)
                 ) {
-
                     Text(
                         text =
-                            "${question.subjectId} • ${question.chapterId}",
-
+                            subjectDisplayName(
+                                question.subjectId
+                            ),
                         style =
                             MaterialTheme
                                 .typography
-                                .labelMedium,
-
+                                .labelLarge,
                         color =
                             MaterialTheme
                                 .colorScheme
                                 .primary,
-
                         fontWeight =
                             FontWeight.SemiBold
+                    )
+
+                    Spacer(
+                        modifier =
+                            Modifier.height(2.dp)
+                    )
+
+                    Text(
+                        text =
+                            chapterDisplayName(
+                                question.chapterId
+                            ),
+                        style =
+                            MaterialTheme
+                                .typography
+                                .labelMedium,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onSurfaceVariant
                     )
                 }
 
                 IconButton(
                     onClick = onRemove
                 ) {
-
                     Icon(
                         imageVector =
                             Icons.Default.Delete,
-
                         contentDescription =
                             "Remove bookmark"
                     )
@@ -384,18 +341,35 @@ private fun BookmarkQuestionCard(
 
             Spacer(
                 modifier =
-                    Modifier.height(12.dp)
+                    Modifier.height(8.dp)
+            )
+
+            Text(
+                text =
+                    "${question.board.displayName()} • " +
+                        question.classLevel.displayName(),
+                style =
+                    MaterialTheme
+                        .typography
+                        .labelSmall,
+                color =
+                    MaterialTheme
+                        .colorScheme
+                        .onSurfaceVariant
+            )
+
+            Spacer(
+                modifier =
+                    Modifier.height(14.dp)
             )
 
             Text(
                 text =
                     question.question,
-
                 style =
                     MaterialTheme
                         .typography
                         .titleMedium,
-
                 fontWeight =
                     FontWeight.SemiBold
             )
@@ -410,8 +384,7 @@ private fun BookmarkQuestionCard(
                     option ->
 
                 val isCorrect =
-                    index ==
-                        question.correctAnswer
+                    index == question.correctAnswer
 
                 Card(
                     modifier =
@@ -420,12 +393,8 @@ private fun BookmarkQuestionCard(
                             .padding(
                                 vertical = 4.dp
                             ),
-
                     shape =
-                        RoundedCornerShape(
-                            12.dp
-                        ),
-
+                        RoundedCornerShape(12.dp),
                     colors =
                         CardDefaults.cardColors(
                             containerColor =
@@ -440,42 +409,27 @@ private fun BookmarkQuestionCard(
                                 }
                         )
                 ) {
-
                     Row(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .padding(
-                                    12.dp
-                                ),
-
+                                .padding(12.dp),
                         verticalAlignment =
                             Alignment.CenterVertically
                     ) {
-
                         Text(
                             text =
-                                optionLetter(
-                                    index
-                                ),
-
+                                optionLetter(index),
                             fontWeight =
                                 FontWeight.Bold,
-
                             modifier =
-                                Modifier.width(
-                                    28.dp
-                                )
+                                Modifier.width(28.dp)
                         )
 
                         Text(
                             text = option,
-
                             modifier =
-                                Modifier.weight(
-                                    1f
-                                ),
-
+                                Modifier.weight(1f),
                             style =
                                 MaterialTheme
                                     .typography
@@ -483,15 +437,12 @@ private fun BookmarkQuestionCard(
                         )
 
                         if (isCorrect) {
-
                             Text(
                                 text = "✓",
-
                                 color =
                                     MaterialTheme
                                         .colorScheme
                                         .primary,
-
                                 fontWeight =
                                     FontWeight.Bold
                             )
@@ -507,12 +458,10 @@ private fun BookmarkQuestionCard(
 
             Text(
                 text = "Explanation",
-
                 style =
                     MaterialTheme
                         .typography
                         .labelLarge,
-
                 fontWeight =
                     FontWeight.Bold
             )
@@ -525,12 +474,10 @@ private fun BookmarkQuestionCard(
             Text(
                 text =
                     question.explanation,
-
                 style =
                     MaterialTheme
                         .typography
                         .bodyMedium,
-
                 color =
                     MaterialTheme
                         .colorScheme
@@ -544,24 +491,18 @@ private fun BookmarkQuestionCard(
 private fun EmptyBookmarksContent(
     modifier: Modifier = Modifier
 ) {
-
     Column(
         modifier =
             modifier.padding(24.dp),
-
         horizontalAlignment =
             Alignment.CenterHorizontally,
-
         verticalArrangement =
             Arrangement.Center
     ) {
-
         Icon(
             imageVector =
                 Icons.Default.Bookmark,
-
             contentDescription = null,
-
             modifier =
                 Modifier.height(56.dp)
         )
@@ -573,12 +514,10 @@ private fun EmptyBookmarksContent(
 
         Text(
             text = "No Bookmarks Yet",
-
             style =
                 MaterialTheme
                     .typography
                     .headlineSmall,
-
             fontWeight =
                 FontWeight.Bold
         )
@@ -591,12 +530,10 @@ private fun EmptyBookmarksContent(
         Text(
             text =
                 "Save important questions while practicing. They will appear here.",
-
             style =
                 MaterialTheme
                     .typography
                     .bodyMedium,
-
             color =
                 MaterialTheme
                     .colorScheme
@@ -608,8 +545,9 @@ private fun EmptyBookmarksContent(
                 Modifier.height(20.dp)
         )
 
-        Button(
-            onClick = {}
+        OutlinedButton(
+            onClick = {},
+            enabled = false
         ) {
             Text("Start Practice")
         }
@@ -620,27 +558,21 @@ private fun EmptyBookmarksContent(
 private fun MissingBookmarksContent(
     modifier: Modifier = Modifier
 ) {
-
     Column(
         modifier =
             modifier.padding(24.dp),
-
         horizontalAlignment =
             Alignment.CenterHorizontally,
-
         verticalArrangement =
             Arrangement.Center
     ) {
-
         Text(
             text =
                 "Saved questions unavailable",
-
             style =
                 MaterialTheme
                     .typography
                     .titleLarge,
-
             fontWeight =
                 FontWeight.Bold
         )
@@ -653,12 +585,10 @@ private fun MissingBookmarksContent(
         Text(
             text =
                 "Some bookmarked questions are not currently available in the local question bank.",
-
             style =
                 MaterialTheme
                     .typography
                     .bodyMedium,
-
             color =
                 MaterialTheme
                     .colorScheme
@@ -667,10 +597,67 @@ private fun MissingBookmarksContent(
     }
 }
 
+private fun subjectDisplayName(
+    subjectId: String
+): String {
+    return when (subjectId) {
+        "accountancy" -> "Accountancy"
+        "business_studies" -> "Business Studies"
+        "economics" -> "Economics"
+        "mathematics" -> "Mathematics"
+        "english" -> "English"
+        "hindi" -> "Hindi"
+        else ->
+            subjectId
+                .replace("_", " ")
+                .replaceFirstChar {
+                    it.uppercase()
+                }
+    }
+}
+
+private fun chapterDisplayName(
+    chapterId: String
+): String {
+    return when (chapterId) {
+        "accountancy_class_12_1" ->
+            "Accounting for Partnership Firms"
+
+        "business_studies_class_12_1" ->
+            "Nature and Significance of Management"
+
+        "economics_class_12_1" ->
+            "National Income Accounting"
+
+        "mathematics_class_12_3" ->
+            "Matrices"
+
+        else ->
+            chapterId
+                .replace("_", " ")
+                .replaceFirstChar {
+                    it.uppercase()
+                }
+    }
+}
+
+private fun Board.displayName(): String {
+    return when (this) {
+        Board.MP_BOARD -> "MP Board"
+        Board.CBSE -> "CBSE"
+    }
+}
+
+private fun ClassLevel.displayName(): String {
+    return when (this) {
+        ClassLevel.CLASS_11 -> "Class 11"
+        ClassLevel.CLASS_12 -> "Class 12"
+    }
+}
+
 private fun optionLetter(
     index: Int
 ): String {
-
     return when (index) {
         0 -> "A"
         1 -> "B"
