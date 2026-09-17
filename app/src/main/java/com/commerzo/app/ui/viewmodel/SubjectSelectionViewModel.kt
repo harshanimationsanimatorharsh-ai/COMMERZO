@@ -1,4 +1,4 @@
-package com.commerzo.app.ui.viewmodel
+package com.commerzo.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.commerzo.app.data.model.Board
@@ -11,50 +11,45 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class SubjectSelectionViewModel : ViewModel() {
 
-    private val repository = SubjectRepository()
+    private val subjectRepository = SubjectRepository()
 
-    private val _board =
-        MutableStateFlow(Board.MP_BOARD)
+    private val _selectedBoard = MutableStateFlow(Board.MP_BOARD)
+    val selectedBoard: StateFlow<Board> = _selectedBoard.asStateFlow()
 
-    val board: StateFlow<Board> =
-        _board.asStateFlow()
+    private val _selectedClass = MutableStateFlow(ClassLevel.CLASS_12)
+    val selectedClass: StateFlow<ClassLevel> = _selectedClass.asStateFlow()
 
-    private val _classLevel =
-        MutableStateFlow(ClassLevel.CLASS_12)
-
-    val classLevel: StateFlow<ClassLevel> =
-        _classLevel.asStateFlow()
-
-    private val _subjects =
-        MutableStateFlow(
-            repository.getSubjects(
-                Board.MP_BOARD,
-                ClassLevel.CLASS_12
-            )
+    private val _subjects = MutableStateFlow(
+        subjectRepository.getSubjects(
+            board = Board.MP_BOARD,
+            classLevel = ClassLevel.CLASS_12
         )
+    )
+    val subjects: StateFlow<List<SubjectData>> = _subjects.asStateFlow()
 
-    val subjects: StateFlow<List<SubjectData>> =
-        _subjects.asStateFlow()
-
-    fun setBoard(newBoard: Board) {
-
-        _board.value = newBoard
-
+    fun setBoard(board: Board) {
+        _selectedBoard.value = board
         refreshSubjects()
     }
 
-    fun setClassLevel(newClass: ClassLevel) {
+    fun setClassLevel(classLevel: ClassLevel) {
+        _selectedClass.value = classLevel
+        refreshSubjects()
+    }
 
-        _classLevel.value = newClass
-
+    fun setSelection(
+        board: Board,
+        classLevel: ClassLevel
+    ) {
+        _selectedBoard.value = board
+        _selectedClass.value = classLevel
         refreshSubjects()
     }
 
     private fun refreshSubjects() {
-
-        _subjects.value = repository.getSubjects(
-            board = _board.value,
-            classLevel = _classLevel.value
+        _subjects.value = subjectRepository.getSubjects(
+            board = _selectedBoard.value,
+            classLevel = _selectedClass.value
         )
     }
 }
