@@ -10,7 +10,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.repository.SubjectRepository
@@ -27,6 +26,7 @@ import com.commerzo.app.ui.screens.SubjectSelectionScreen
 import com.commerzo.app.ui.screens.TestHistoryScreen
 import com.commerzo.app.ui.screens.TestResultScreen
 import com.commerzo.app.ui.screens.TestScreen
+import com.commerzo.app.ui.screens.TestSelectionScreen
 
 data class NavigationTestResult(
     val total: Int = 0,
@@ -45,9 +45,10 @@ fun AppNavigation(
         mutableStateOf(NavigationTestResult())
     }
 
-    val subjectRepository = remember {
-        SubjectRepository()
-    }
+    val subjectRepository =
+        remember {
+            SubjectRepository()
+        }
 
     NavHost(
         navController = navController,
@@ -76,20 +77,81 @@ fun AppNavigation(
             )
         }
 
+        /*
+         * TEST SELECTION
+         *
+         * The Tests tab now opens the selection screen
+         * instead of starting a hardcoded test.
+         */
         composable(Screen.Tests.route) {
+            TestSelectionScreen(
+                onStartTest = {
+                    subjectId,
+                    chapterId,
+                    board,
+                    classLevel ->
+
+                    navController.navigate(
+                        Screen.TestSession.createRoute(
+                            subjectId = subjectId,
+                            chapterId = chapterId,
+                            board = board,
+                            classLevel = classLevel
+                        )
+                    )
+                },
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        /*
+         * ACTUAL TEST SESSION
+         *
+         * Receives the selected curriculum from TestSelectionScreen.
+         */
+        composable(Screen.TestSession.route) { backStackEntry ->
+
+            val subjectId =
+                backStackEntry.arguments
+                    ?.getString("subjectId")
+                    ?: return@composable
+
+            val chapterId =
+                backStackEntry.arguments
+                    ?.getString("chapterId")
+                    ?: return@composable
+
+            val board =
+                enumValueOrDefault(
+                    backStackEntry.arguments
+                        ?.getString("board")
+                        ?: Board.MP_BOARD.name,
+                    Board.MP_BOARD
+                )
+
+            val classLevel =
+                enumValueOrDefault(
+                    backStackEntry.arguments
+                        ?.getString("classLevel")
+                        ?: ClassLevel.CLASS_12.name,
+                    ClassLevel.CLASS_12
+                )
+
             TestScreen(
-                subjectId = DEFAULT_TEST_SUBJECT_ID,
-                chapterId = DEFAULT_TEST_CHAPTER_ID,
-                board = DEFAULT_TEST_BOARD,
-                classLevel = DEFAULT_TEST_CLASS,
+                subjectId = subjectId,
+                chapterId = chapterId,
+                board = board,
+                classLevel = classLevel,
                 onTestFinished = {
                     total,
                     answered,
                     correct,
                     wrong,
                     unattempted,
-                    marked
-                    ->
+                    marked ->
+
                     latestTestResult =
                         NavigationTestResult(
                             total = total,
@@ -143,20 +205,19 @@ fun AppNavigation(
             SubjectSelectionScreen(
                 viewModel = viewModel(),
                 onSubjectClick = { subject ->
+
                     navController.navigate(
                         Screen.Chapters.createRoute(
-                            subjectId = subject.id,
-                            board = subject.board,
-                            classLevel = subject.classLevel
+                            subject.id,
+                            subject.board,
+                            subject.classLevel
                         )
                     )
                 }
             )
         }
 
-        composable(
-            route = Screen.Chapters.route
-        ) { backStackEntry ->
+        composable(Screen.Chapters.route) { backStackEntry ->
 
             val subjectId =
                 backStackEntry.arguments
@@ -165,27 +226,25 @@ fun AppNavigation(
 
             val board =
                 enumValueOrDefault(
-                    value =
-                        backStackEntry.arguments
-                            ?.getString("board")
-                            ?: Board.MP_BOARD.name,
-                    default = Board.MP_BOARD
+                    backStackEntry.arguments
+                        ?.getString("board")
+                        ?: Board.MP_BOARD.name,
+                    Board.MP_BOARD
                 )
 
             val classLevel =
                 enumValueOrDefault(
-                    value =
-                        backStackEntry.arguments
-                            ?.getString("classLevel")
-                            ?: ClassLevel.CLASS_12.name,
-                    default = ClassLevel.CLASS_12
+                    backStackEntry.arguments
+                        ?.getString("classLevel")
+                        ?: ClassLevel.CLASS_12.name,
+                    ClassLevel.CLASS_12
                 )
 
             val subjectName =
                 subjectRepository
                     .getSubjects(
-                        board = board,
-                        classLevel = classLevel
+                        board,
+                        classLevel
                     )
                     .firstOrNull {
                         it.id == subjectId
@@ -203,23 +262,21 @@ fun AppNavigation(
                 },
                 onChapterClick = {
                     chapterId,
-                    _
-                    ->
+                    _ ->
+
                     navController.navigate(
                         Screen.Questions.createRoute(
-                            subjectId = subjectId,
-                            chapterId = chapterId,
-                            board = board,
-                            classLevel = classLevel
+                            subjectId,
+                            chapterId,
+                            board,
+                            classLevel
                         )
                     )
                 }
             )
         }
 
-        composable(
-            route = Screen.Questions.route
-        ) { backStackEntry ->
+        composable(Screen.Questions.route) { backStackEntry ->
 
             val subjectId =
                 backStackEntry.arguments
@@ -233,20 +290,18 @@ fun AppNavigation(
 
             val board =
                 enumValueOrDefault(
-                    value =
-                        backStackEntry.arguments
-                            ?.getString("board")
-                            ?: Board.MP_BOARD.name,
-                    default = Board.MP_BOARD
+                    backStackEntry.arguments
+                        ?.getString("board")
+                        ?: Board.MP_BOARD.name,
+                    Board.MP_BOARD
                 )
 
             val classLevel =
                 enumValueOrDefault(
-                    value =
-                        backStackEntry.arguments
-                            ?.getString("classLevel")
-                            ?: ClassLevel.CLASS_12.name,
-                    default = ClassLevel.CLASS_12
+                    backStackEntry.arguments
+                        ?.getString("classLevel")
+                        ?: ClassLevel.CLASS_12.name,
+                    ClassLevel.CLASS_12
                 )
 
             QuestionScreen(
@@ -261,14 +316,23 @@ fun AppNavigation(
         }
 
         composable(Screen.TestResult.route) {
+
             TestResultScreen(
-                total = latestTestResult.total,
-                answered = latestTestResult.answered,
-                correct = latestTestResult.correct,
-                wrong = latestTestResult.wrong,
-                unattempted = latestTestResult.unattempted,
-                marked = latestTestResult.marked,
+                total =
+                    latestTestResult.total,
+                answered =
+                    latestTestResult.answered,
+                correct =
+                    latestTestResult.correct,
+                wrong =
+                    latestTestResult.wrong,
+                unattempted =
+                    latestTestResult.unattempted,
+                marked =
+                    latestTestResult.marked,
+
                 onRestart = {
+
                     latestTestResult =
                         NavigationTestResult()
 
@@ -282,7 +346,9 @@ fun AppNavigation(
                         }
                     }
                 },
+
                 onBackToTests = {
+
                     latestTestResult =
                         NavigationTestResult()
 
@@ -333,25 +399,15 @@ fun AppNavigation(
     }
 }
 
-private const val DEFAULT_TEST_SUBJECT_ID =
-    "accountancy"
-
-private const val DEFAULT_TEST_CHAPTER_ID =
-    "accountancy_class_12_1"
-
-private val DEFAULT_TEST_BOARD =
-    Board.MP_BOARD
-
-private val DEFAULT_TEST_CLASS =
-    ClassLevel.CLASS_12
-
-private inline fun <reified T : Enum<T>> enumValueOrDefault(
-    value: String,
-    default: T
-): T {
-    return try {
+private inline fun <reified T : Enum<T>>
+    enumValueOrDefault(
+        value: String,
+        default: T
+    ): T =
+    try {
         enumValueOf<T>(value)
-    } catch (_: IllegalArgumentException) {
+    } catch (
+        _: IllegalArgumentException
+    ) {
         default
     }
-}
