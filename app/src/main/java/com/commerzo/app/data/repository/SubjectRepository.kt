@@ -1,12 +1,14 @@
 package com.commerzo.app.data.repository
 
+import com.commerzo.app.data.model.Board
+import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.model.SubjectData
 
 class SubjectRepository {
 
     fun getSubjects(
-        board: String = "MP_BOARD",
-        classLevel: String = "CLASS_12"
+        board: Board = Board.MP_BOARD,
+        classLevel: ClassLevel = ClassLevel.CLASS_12
     ): List<SubjectData> {
 
         return listOf(
