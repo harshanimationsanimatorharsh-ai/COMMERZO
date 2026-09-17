@@ -14,11 +14,20 @@ object QuestionRandomizer {
             return question
         }
 
-        val correctOption = question.options.getOrNull(question.correctAnswer)
-            ?: return question
+        val correctOption =
+            question.options.getOrNull(
+                question.correctAnswer
+            ) ?: return question
 
-        val shuffledOptions = question.options.shuffled(random)
-        val newCorrectAnswer = shuffledOptions.indexOf(correctOption)
+        val shuffledOptions =
+            question.options.shuffled(random)
+
+        val newCorrectAnswer =
+            shuffledOptions.indexOf(correctOption)
+
+        if (newCorrectAnswer < 0) {
+            return question
+        }
 
         return question.copy(
             options = shuffledOptions,
@@ -30,16 +39,25 @@ object QuestionRandomizer {
         questions: List<Question>,
         random: Random = Random.Default
     ): List<Question> {
-        return questions.shuffled(random)
+
+        return questions
+            .distinctBy { it.id }
+            .shuffled(random)
     }
 
     fun prepareForTest(
         questions: List<Question>,
         random: Random = Random.Default
     ): List<Question> {
-        return shuffleQuestions(questions, random)
-            .map { question ->
-                shuffleOptions(question, random)
-            }
+
+        return shuffleQuestions(
+            questions = questions,
+            random = random
+        ).map { question ->
+            shuffleOptions(
+                question = question,
+                random = random
+            )
+        }
     }
 }
