@@ -3,23 +3,24 @@ package com.commerzo.app.data.repository.content
 /**
  * Central provider for the current remote-content status.
  *
- * Current state:
- * - Remote content is disabled by configuration.
- * - Therefore the initial status is DISABLED.
- *
- * Later this provider can be updated by the real
- * backend/API health-check layer.
+ * The status starts from configuration and can later be
+ * updated by the real backend/API health-check layer.
  */
 object ContentRemoteStatusProvider {
 
     private var status: ContentRemoteStatus =
-        if (
+        initialStatus()
+
+    private fun initialStatus(): ContentRemoteStatus {
+
+        return if (
             ContentSourceProvider.isRemoteContentEnabled()
         ) {
             ContentRemoteStatus.UNKNOWN
         } else {
             ContentRemoteStatus.DISABLED
         }
+    }
 
     fun getStatus(): ContentRemoteStatus {
         return status
@@ -31,7 +32,23 @@ object ContentRemoteStatusProvider {
         status = newStatus
     }
 
+    fun markAvailable() {
+        status = ContentRemoteStatus.AVAILABLE
+    }
+
+    fun markUnavailable() {
+        status = ContentRemoteStatus.UNAVAILABLE
+    }
+
+    fun reset() {
+        status = initialStatus()
+    }
+
     fun isAvailable(): Boolean {
         return status == ContentRemoteStatus.AVAILABLE
+    }
+
+    fun isEnabled(): Boolean {
+        return status != ContentRemoteStatus.DISABLED
     }
 }
