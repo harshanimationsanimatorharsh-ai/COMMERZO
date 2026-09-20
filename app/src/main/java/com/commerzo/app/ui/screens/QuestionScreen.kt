@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
+import com.commerzo.app.data.repository.content.CurriculumContentIds
 import com.commerzo.app.ui.viewmodel.PracticeSessionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -86,14 +88,43 @@ fun QuestionScreen(
     val progressPercent by
         viewModel.progressPercent.collectAsState()
 
+    /*
+     * Content architecture uses stable Economics IDs.
+     * The existing question system still uses the legacy
+     * "economics" subject ID.
+     *
+     * Keep the conversion at the question-system boundary.
+     */
+    val questionSubjectId =
+        remember(subjectId) {
+            when (subjectId) {
+
+                CurriculumContentIds
+                    .MP_BOARD_CLASS_12_ECONOMICS_MICRO,
+
+                CurriculumContentIds
+                    .MP_BOARD_CLASS_12_ECONOMICS_MACRO,
+
+                CurriculumContentIds
+                    .CBSE_CLASS_12_ECONOMICS_INDIAN,
+
+                CurriculumContentIds
+                    .CBSE_CLASS_12_ECONOMICS_MACRO -> {
+                    "economics"
+                }
+
+                else -> subjectId
+            }
+        }
+
     LaunchedEffect(
-        subjectId,
+        questionSubjectId,
         chapterId,
         board,
         classLevel
     ) {
         viewModel.loadQuestions(
-            subjectId = subjectId,
+            subjectId = questionSubjectId,
             chapterId = chapterId,
             board = board,
             classLevel = classLevel
