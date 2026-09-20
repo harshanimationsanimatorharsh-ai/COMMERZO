@@ -7,36 +7,38 @@ import com.commerzo.app.data.model.content.ContentSubject
 import com.commerzo.app.data.model.content.CurriculumContentIds
 
 /**
- * Maps the existing COMMERZO curriculum identity
- * to the new dynamic-content architecture.
+ * Maps existing COMMERZO curriculum identities into
+ * the dynamic-content architecture.
  *
- * This layer does not contain MCQs, notes or PDFs.
- * It only creates stable curriculum identities.
+ * Important:
+ * Class 12 Economics is intentionally separated into
+ * stable board-specific subject identities.
+ *
+ * MP Board:
+ * - Micro Economics
+ * - Macro Economics
+ *
+ * CBSE:
+ * - Indian Economics
+ * - Macro Economics
  */
 object CurriculumContentMapper {
-
-    /* ---------------------------------------------------------
-     * BOARD
-     * --------------------------------------------------------- */
 
     fun getBoardId(
         board: Board
     ): String {
-
         return when (board) {
-            Board.MP_BOARD -> CurriculumContentIds.MP_BOARD
-            Board.CBSE -> CurriculumContentIds.CBSE
+            Board.MP_BOARD ->
+                CurriculumContentIds.MP_BOARD
+
+            Board.CBSE ->
+                CurriculumContentIds.CBSE
         }
     }
-
-    /* ---------------------------------------------------------
-     * CLASS
-     * --------------------------------------------------------- */
 
     fun getClassId(
         classLevel: ClassLevel
     ): String {
-
         return when (classLevel) {
             ClassLevel.CLASS_11 ->
                 CurriculumContentIds.CLASS_11
@@ -46,54 +48,99 @@ object CurriculumContentMapper {
         }
     }
 
-    /* ---------------------------------------------------------
-     * SUBJECT ID
-     * --------------------------------------------------------- */
-
+    /**
+     * Returns the stable content subject ID.
+     *
+     * For normal subjects the original subject ID is retained.
+     *
+     * Economics requires special handling because the legacy
+     * curriculum currently uses "economics" as a single ID.
+     */
     fun getSubjectId(
         board: Board,
         classLevel: ClassLevel,
         subjectId: String
     ): String {
 
-        return when {
+        if (
+            classLevel != ClassLevel.CLASS_12 ||
+            subjectId != "economics"
+        ) {
+            return subjectId
+        }
 
-            board == Board.MP_BOARD &&
-                classLevel == ClassLevel.CLASS_12 &&
-                subjectId == "economics" -> {
+        return when (board) {
 
-                /*
-                 * Economics is intentionally NOT mapped to
-                 * one generic ID for the new architecture.
-                 *
-                 * Micro and Macro remain separate datasets.
-                 *
-                 * The actual selection between Micro and Macro
-                 * will happen from the chapter/content layer.
-                 */
-                "economics"
-            }
+            Board.MP_BOARD ->
+                CurriculumContentIds.MP_BOARD_CLASS_12_ECONOMICS_MACRO
 
-            board == Board.CBSE &&
-                classLevel == ClassLevel.CLASS_12 &&
-                subjectId == "economics" -> {
-
-                /*
-                 * CBSE Economics will later be split into:
-                 *
-                 * Indian Economics
-                 * Macro Economics
-                 */
-                "economics"
-            }
-
-            else -> subjectId
+            Board.CBSE ->
+                CurriculumContentIds.CBSE_CLASS_12_ECONOMICS_MACRO
         }
     }
 
-    /* ---------------------------------------------------------
-     * CONTENT SUBJECT
-     * --------------------------------------------------------- */
+    /**
+     * Maps a legacy Economics chapter ID to its new
+     * board-specific Economics subject ID.
+     *
+     * Legacy MP Board chapter IDs:
+     * economics_class_12_micro_1..5
+     * economics_class_12_macro_1..6
+     *
+     * Other Economics chapters remain part of the legacy
+     * curriculum until their final content structure is defined.
+     */
+    fun getEconomicsSubjectIdForChapter(
+        board: Board,
+        classLevel: ClassLevel,
+        chapterId: String
+    ): String? {
+
+        if (classLevel != ClassLevel.CLASS_12) {
+            return null
+        }
+
+        return when (board) {
+
+            Board.MP_BOARD -> {
+
+                when {
+                    chapterId.startsWith(
+                        "economics_class_12_micro_"
+                    ) -> {
+                        CurriculumContentIds
+                            .MP_BOARD_CLASS_12_ECONOMICS_MICRO
+                    }
+
+                    chapterId.startsWith(
+                        "economics_class_12_macro_"
+                    ) -> {
+                        CurriculumContentIds
+                            .MP_BOARD_CLASS_12_ECONOMICS_MACRO
+                    }
+
+                    else -> null
+                }
+            }
+
+            Board.CBSE -> {
+
+                when {
+                    chapterId.startsWith(
+                        "economics_class_12_macro_"
+                    ) -> {
+                        CurriculumContentIds
+                            .CBSE_CLASS_12_ECONOMICS_MACRO
+                    }
+
+                    else -> {
+                        CurriculumContentIds
+                            .CBSE_CLASS_12_ECONOMICS_INDIAN
+                    }
+                }
+            }
+        }
+    }
 
     fun toContentSubject(
         board: Board,
@@ -116,10 +163,6 @@ object CurriculumContentMapper {
         )
     }
 
-    /* ---------------------------------------------------------
-     * CONTENT CHAPTER
-     * --------------------------------------------------------- */
-
     fun toContentChapter(
         board: Board,
         classLevel: ClassLevel,
@@ -129,13 +172,31 @@ object CurriculumContentMapper {
         chapterNumber: Int
     ): ContentChapter {
 
+        val mappedSubjectId =
+            if (
+                subjectId == "economics" &&
+                classLevel == ClassLevel.CLASS_12
+            ) {
+                getEconomicsSubjectIdForChapter(
+                    board = board,
+                    classLevel = classLevel,
+                    chapterId = chapterId
+                ) ?: getSubjectId(
+                    board = board,
+                    classLevel = classLevel,
+                    subjectId = subjectId
+                )
+            } else {
+                getSubjectId(
+                    board = board,
+                    classLevel = classLevel,
+                    subjectId = subjectId
+                )
+            }
+
         return ContentChapter(
             id = chapterId,
-            subjectId = getSubjectId(
-                board = board,
-                classLevel = classLevel,
-                subjectId = subjectId
-            ),
+            subjectId = mappedSubjectId,
             title = title,
             chapterNumber = chapterNumber,
             boardId = getBoardId(board),
