@@ -7,6 +7,8 @@ import com.commerzo.app.data.model.content.ContentSubject
 import com.commerzo.app.data.model.content.PreviousYearPaper
 import com.commerzo.app.data.model.content.SamplePaper
 import com.commerzo.app.data.model.content.TestSeries
+import com.commerzo.app.data.repository.content.RemoteContentClient
+import com.commerzo.app.data.repository.content.RemoteContentResult
 
 class LocalRemoteContentClient : RemoteContentClient {
 
@@ -15,92 +17,85 @@ class LocalRemoteContentClient : RemoteContentClient {
     }
 
     override suspend fun getSubjects(
-        boardId: String,
-        classId: String
+        request: RemoteContentRequest
     ): RemoteContentResult<List<ContentSubject>> {
         return RemoteContentResult.Success(
-            networkClient.getSubjects(boardId, classId)
+            networkClient.getSubjects(
+                request.boardId,
+                request.classId
+            )
         )
     }
 
     override suspend fun getChapters(
-        boardId: String,
-        classId: String,
-        subjectId: String
+        request: RemoteContentRequest
     ): RemoteContentResult<List<ContentChapter>> {
         return RemoteContentResult.Success(
             networkClient.getChapters(
-                boardId = boardId,
-                classId = classId,
-                subjectId = subjectId
+                request.boardId,
+                request.classId,
+                request.subjectId.orEmpty()
             )
         )
     }
 
     override suspend fun getContent(
-        boardId: String,
-        classId: String,
-        subjectId: String,
-        chapterId: String
+        request: RemoteContentRequest
     ): RemoteContentResult<List<ContentItem>> {
         return RemoteContentResult.Success(
             networkClient.getContent(
-                boardId = boardId,
-                classId = classId,
-                subjectId = subjectId,
-                chapterId = chapterId
+                request.boardId,
+                request.classId,
+                request.subjectId.orEmpty(),
+                request.chapterId.orEmpty()
             )
         )
     }
 
     override suspend fun getPreviousYearPapers(
-        boardId: String,
-        classId: String,
-        subjectId: String?
+        request: RemoteContentRequest
     ): RemoteContentResult<List<PreviousYearPaper>> {
         return RemoteContentResult.Success(
             networkClient.getPreviousYearPapers(
-                boardId = boardId,
-                classId = classId,
-                subjectId = subjectId
+                request.boardId,
+                request.classId,
+                request.subjectId
             )
         )
     }
 
     override suspend fun getSamplePapers(
-        boardId: String,
-        classId: String,
-        subjectId: String?
+        request: RemoteContentRequest
     ): RemoteContentResult<List<SamplePaper>> {
         return RemoteContentResult.Success(
             networkClient.getSamplePapers(
-                boardId = boardId,
-                classId = classId,
-                subjectId = subjectId
+                request.boardId,
+                request.classId,
+                request.subjectId
             )
         )
     }
 
     override suspend fun getTestSeries(
-        boardId: String,
-        classId: String,
-        subjectId: String?
+        request: RemoteContentRequest
     ): RemoteContentResult<List<TestSeries>> {
         return RemoteContentResult.Success(
             networkClient.getTestSeries(
-                boardId = boardId,
-                classId = classId,
-                subjectId = subjectId
+                request.boardId,
+                request.classId,
+                request.subjectId
             )
         )
     }
 
     override suspend fun getModules(
-        boardId: String,
-        classId: String
+        request: RemoteContentRequest
     ): RemoteContentResult<List<ContentModule>> {
         return RemoteContentResult.Success(
-            networkClient.getModules(boardId, classId)
+            networkClient.getModules(
+                request.boardId,
+                request.classId
+            )
         )
     }
 }
