@@ -6,6 +6,7 @@ plugins {
 
 android {
     namespace = "com.commerzo.app"
+
     compileSdk = 36
 
     defaultConfig {
@@ -16,6 +17,30 @@ android {
         versionName = "5.2.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        create("release") {
+            val keystorePath = System.getenv("COMMERZO_KEYSTORE_FILE")
+
+            if (!keystorePath.isNullOrBlank()) {
+                storeFile = file(keystorePath)
+                storePassword = System.getenv("COMMERZO_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("COMMERZO_KEY_ALIAS")
+                keyPassword = System.getenv("COMMERZO_KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        getByName("debug") {
+            // Keep normal Android debug signing.
+        }
+
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false
+        }
     }
 
     compileOptions {
