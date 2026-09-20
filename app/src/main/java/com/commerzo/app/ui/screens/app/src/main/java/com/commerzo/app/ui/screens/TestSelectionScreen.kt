@@ -35,9 +35,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
-import com.commerzo.app.data.repository.ChapterRepository
 import com.commerzo.app.data.repository.QuestionBankManager
-import com.commerzo.app.data.repository.SubjectRepository
+import com.commerzo.app.data.repository.content.ContentManager
+import com.commerzo.app.data.repository.content.CurriculumContentIds
+import com.commerzo.app.data.repository.content.CurriculumContentMapper
 
 @Composable
 fun TestSelectionScreen(
@@ -49,14 +50,9 @@ fun TestSelectionScreen(
     ) -> Unit,
     onBack: () -> Unit
 ) {
-    val subjectRepository =
+    val contentManager =
         remember {
-            SubjectRepository()
-        }
-
-    val chapterRepository =
-        remember {
-            ChapterRepository()
+            ContentManager()
         }
 
     val questionBankManager =
@@ -80,30 +76,51 @@ fun TestSelectionScreen(
         mutableStateOf<String?>(null)
     }
 
+    val boardId =
+        remember(selectedBoard) {
+            CurriculumContentMapper.getBoardId(
+                selectedBoard
+            )
+        }
+
+    val classId =
+        remember(selectedClass) {
+            CurriculumContentMapper.getClassId(
+                selectedClass
+            )
+        }
+
     val subjects =
         remember(
-            selectedBoard,
-            selectedClass
+            boardId,
+            classId
         ) {
-            subjectRepository.getSubjects(
-                board = selectedBoard,
-                classLevel = selectedClass
+            contentManager.getSubjects(
+                boardId = boardId,
+                classId = classId
             )
         }
 
     val chapters =
         remember(
             selectedSubjectId,
-            selectedBoard,
-            selectedClass
+            boardId,
+            classId
         ) {
             selectedSubjectId?.let { subjectId ->
-                chapterRepository.getChapters(
-                    subjectId = subjectId,
-                    board = selectedBoard,
-                    classLevel = selectedClass
+                contentManager.getChapters(
+                    boardId = boardId,
+                    classId = classId,
+                    subjectId = subjectId
                 )
             } ?: emptyList()
+        }
+
+    val questionSubjectId =
+        remember(selectedSubjectId) {
+            toQuestionSubjectId(
+                selectedSubjectId
+            )
         }
 
     val selectedChapter =
@@ -116,7 +133,7 @@ fun TestSelectionScreen(
             questionBankManager
                 .getValidatedQuestions(
                     subjectId =
-                        selectedSubjectId ?: "",
+                        questionSubjectId ?: "",
                     chapterId =
                         chapter.id,
                     board =
@@ -339,7 +356,11 @@ fun TestSelectionScreen(
                     title =
                         "${subject.emoji} ${subject.name}",
                     subtitle =
-                        "${subject.chaptersCount} chapters",
+                        "${contentManager.getChapters(
+                            boardId = boardId,
+                            classId = classId,
+                            subjectId = subject.id
+                        ).size} chapters",
                     selected =
                         selectedSubjectId ==
                             subject.id,
@@ -379,7 +400,7 @@ fun TestSelectionScreen(
                         questionBankManager
                             .getValidatedQuestions(
                                 subjectId =
-                                    selectedSubjectId
+                                    questionSubjectId
                                         ?: "",
                                 chapterId =
                                     chapter.id,
@@ -560,6 +581,26 @@ fun TestSelectionScreen(
                 )
             }
         }
+    }
+}
+
+private fun toQuestionSubjectId(
+    subjectId: String?
+): String? {
+    return when (subjectId) {
+
+        CurriculumContentIds
+            .MP_BOARD_CLASS_12_ECONOMICS_MICRO,
+        CurriculumContentIds
+            .MP_BOARD_CLASS_12_ECONOMICS_MACRO,
+        CurriculumContentIds
+            .CBSE_CLASS_12_ECONOMICS_INDIAN,
+        CurriculumContentIds
+            .CBSE_CLASS_12_ECONOMICS_MACRO -> {
+            "economics"
+        }
+
+        else -> subjectId
     }
 }
 
