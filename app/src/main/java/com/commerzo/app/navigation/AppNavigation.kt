@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.repository.SubjectRepository
+import com.commerzo.app.data.repository.content.CurriculumContentIds
 import com.commerzo.app.ui.screens.AchievementsScreen
 import com.commerzo.app.ui.screens.BookmarksScreen
 import com.commerzo.app.ui.screens.ChapterScreen
@@ -141,7 +142,7 @@ fun AppNavigation(
 
                     navController.navigate(
                         Screen.TestSession.createRoute(
-                            subjectId = subjectId,
+                            subjectId = toQuestionSubjectId(subjectId),
                             chapterId = chapterId,
                             board = board,
                             classLevel = classLevel
@@ -157,10 +158,13 @@ fun AppNavigation(
 
         composable(Screen.TestSession.route) { backStackEntry ->
 
-            val subjectId =
+            val rawSubjectId =
                 backStackEntry.arguments
                     ?.getString("subjectId")
                     ?: return@composable
+
+            val subjectId =
+                toQuestionSubjectId(rawSubjectId)
 
             val chapterId =
                 backStackEntry.arguments
@@ -291,16 +295,12 @@ fun AppNavigation(
                 )
 
             val subjectName =
-                subjectRepository
-                    .getSubjects(
-                        board,
-                        classLevel
-                    )
-                    .firstOrNull {
-                        it.id == subjectId
-                    }
-                    ?.name
-                    ?: subjectId
+                getSubjectDisplayName(
+                    subjectRepository = subjectRepository,
+                    subjectId = subjectId,
+                    board = board,
+                    classLevel = classLevel
+                )
 
             ChapterScreen(
                 subjectId = subjectId,
@@ -318,10 +318,11 @@ fun AppNavigation(
 
                     navController.navigate(
                         Screen.Questions.createRoute(
-                            subjectId,
-                            chapterId,
-                            board,
-                            classLevel
+                            subjectId =
+                                toQuestionSubjectId(subjectId),
+                            chapterId = chapterId,
+                            board = board,
+                            classLevel = classLevel
                         )
                     )
                 }
@@ -330,10 +331,13 @@ fun AppNavigation(
 
         composable(Screen.Questions.route) { backStackEntry ->
 
-            val subjectId =
+            val rawSubjectId =
                 backStackEntry.arguments
                     ?.getString("subjectId")
                     ?: return@composable
+
+            val subjectId =
+                toQuestionSubjectId(rawSubjectId)
 
             val chapterId =
                 backStackEntry.arguments
@@ -443,6 +447,57 @@ fun AppNavigation(
                 }
             )
         }
+    }
+}
+
+private fun toQuestionSubjectId(
+    subjectId: String
+): String {
+    return when (subjectId) {
+
+        CurriculumContentIds.MP_BOARD_CLASS_12_ECONOMICS_MICRO,
+        CurriculumContentIds.MP_BOARD_CLASS_12_ECONOMICS_MACRO,
+        CurriculumContentIds.CBSE_CLASS_12_ECONOMICS_INDIAN,
+        CurriculumContentIds.CBSE_CLASS_12_ECONOMICS_MACRO -> {
+            "economics"
+        }
+
+        else -> subjectId
+    }
+}
+
+private fun getSubjectDisplayName(
+    subjectRepository: SubjectRepository,
+    subjectId: String,
+    board: Board,
+    classLevel: ClassLevel
+): String {
+
+    return when (subjectId) {
+
+        CurriculumContentIds.MP_BOARD_CLASS_12_ECONOMICS_MICRO ->
+            "Economics • Micro Economics"
+
+        CurriculumContentIds.MP_BOARD_CLASS_12_ECONOMICS_MACRO ->
+            "Economics • Macro Economics"
+
+        CurriculumContentIds.CBSE_CLASS_12_ECONOMICS_INDIAN ->
+            "Economics • Indian Economic Development"
+
+        CurriculumContentIds.CBSE_CLASS_12_ECONOMICS_MACRO ->
+            "Economics • Macroeconomics"
+
+        else ->
+            subjectRepository
+                .getSubjects(
+                    board,
+                    classLevel
+                )
+                .firstOrNull {
+                    it.id == subjectId
+                }
+                ?.name
+                ?: subjectId
     }
 }
 
