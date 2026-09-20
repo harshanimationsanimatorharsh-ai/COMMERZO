@@ -488,6 +488,58 @@ class ChapterRepository {
                 )
             )
 
+            // -------------------------------------------------
+            // CBSE CLASS 12 ECONOMICS
+            //
+            // Stable subject IDs are now supported:
+            //
+            // cbse_class_12_economics_macro
+            // cbse_class_12_economics_indian
+            //
+            // Legacy "economics" remains supported so existing
+            // legacy callers do not immediately break.
+            // -------------------------------------------------
+
+            "cbse_class_12_economics_macro" -> chapters(
+                subjectId,
+                Board.CBSE,
+                ClassLevel.CLASS_12,
+                listOf(
+                    "National Income and Related Aggregates",
+                    "Money and Banking",
+                    "Determination of Income and Employment",
+                    "Government Budget and the Economy",
+                    "Balance of Payments"
+                ),
+                chapterIds = listOf(
+                    "economics_class_12_macro_1",
+                    "economics_class_12_macro_2",
+                    "economics_class_12_macro_3",
+                    "economics_class_12_macro_4",
+                    "economics_class_12_macro_5"
+                )
+            )
+
+            "cbse_class_12_economics_indian" -> chapters(
+                subjectId,
+                Board.CBSE,
+                ClassLevel.CLASS_12,
+                listOf(
+                    "Development Experience (1947–90) and Economic Reforms since 1991",
+                    "Current Challenges Facing Indian Economy",
+                    "Development Experience of India – A Comparison with Neighbours"
+                ),
+                chapterIds = listOf(
+                    "economics_class_12_ied_1",
+                    "economics_class_12_ied_2",
+                    "economics_class_12_ied_3"
+                )
+            )
+
+            // Legacy subject ID.
+            //
+            // Kept temporarily for backward compatibility with
+            // existing screens/callers that still pass "economics".
             "economics" -> chapters(
                 subjectId,
                 Board.CBSE,
@@ -501,6 +553,16 @@ class ChapterRepository {
                     "Development Experience (1947–90) and Economic Reforms since 1991",
                     "Current Challenges Facing Indian Economy",
                     "Development Experience of India – A Comparison with Neighbours"
+                ),
+                chapterIds = listOf(
+                    "economics_class_12_macro_1",
+                    "economics_class_12_macro_2",
+                    "economics_class_12_macro_3",
+                    "economics_class_12_macro_4",
+                    "economics_class_12_macro_5",
+                    "economics_class_12_ied_1",
+                    "economics_class_12_ied_2",
+                    "economics_class_12_ied_3"
                 )
             )
 
