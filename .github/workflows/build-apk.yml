@@ -38,11 +38,23 @@ jobs:
         with:
           gradle-version: '8.13'
 
-      - name: Build Debug APK
-        run: gradle --no-daemon assembleDebug
+      - name: Decode release keystore
+        env:
+          COMMERZO_KEYSTORE_BASE64: ${{ secrets.COMMERZO_KEYSTORE_BASE64 }}
+        run: |
+          echo "$COMMERZO_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/commerzo-release.jks"
 
-      - name: Upload APK
+      - name: Build signed release APK
+        env:
+          COMMERZO_KEYSTORE_FILE: ${{ runner.temp }}/commerzo-release.jks
+          COMMERZO_KEYSTORE_PASSWORD: ${{ secrets.COMMERZO_KEYSTORE_PASSWORD }}
+          COMMERZO_KEY_ALIAS: ${{ secrets.COMMERZO_KEY_ALIAS }}
+          COMMERZO_KEY_PASSWORD: ${{ secrets.COMMERZO_KEY_PASSWORD }}
+        run: |
+          gradle --no-daemon assembleRelease
+
+      - name: Upload signed release APK
         uses: actions/upload-artifact@v4
         with:
-          name: COMMERZO-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: COMMERZO-release
+          path: app/build/outputs/apk/release/app-release.apk
