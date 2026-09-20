@@ -6,13 +6,15 @@ import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.model.Question
 import com.commerzo.app.data.model.TestQuestionState
 import com.commerzo.app.data.repository.QuestionBankManager
+import com.commerzo.app.data.repository.content.CurriculumContentIds
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class TestViewModel : ViewModel() {
 
-    private val questionBankManager = QuestionBankManager()
+    private val questionBankManager =
+        QuestionBankManager()
 
     private val _questions =
         MutableStateFlow<List<TestQuestionState>>(emptyList())
@@ -44,18 +46,23 @@ class TestViewModel : ViewModel() {
         board: Board = Board.MP_BOARD,
         classLevel: ClassLevel = ClassLevel.CLASS_12
     ) {
+        val questionSubjectId =
+            toQuestionSubjectId(subjectId)
+
         val sourceQuestions =
-            questionBankManager.getRandomizedValidatedQuestions(
-                subjectId = subjectId,
-                chapterId = chapterId,
-                board = board,
-                classLevel = classLevel
-            )
+            questionBankManager
+                .getRandomizedValidatedQuestions(
+                    subjectId = questionSubjectId,
+                    chapterId = chapterId,
+                    board = board,
+                    classLevel = classLevel
+                )
 
         if (sourceQuestions.isEmpty()) {
             _questions.value = emptyList()
             _currentIndex.value = 0
-            _timeRemaining.value = TEST_DURATION_SECONDS
+            _timeRemaining.value =
+                TEST_DURATION_SECONDS
             _isFinished.value = false
             return
         }
@@ -66,12 +73,41 @@ class TestViewModel : ViewModel() {
                 .take(TEST_SIZE)
 
         _questions.value =
-            buildTestQuestions(selectedQuestions)
+            buildTestQuestions(
+                selectedQuestions
+            )
 
         _currentIndex.value = 0
+
         _timeRemaining.value =
-            calculateTestDuration(_questions.value.size)
+            calculateTestDuration(
+                _questions.value.size
+            )
+
         _isFinished.value = false
+    }
+
+    private fun toQuestionSubjectId(
+        subjectId: String
+    ): String {
+        return when (subjectId) {
+
+            CurriculumContentIds
+                .MP_BOARD_CLASS_12_ECONOMICS_MICRO,
+
+            CurriculumContentIds
+                .MP_BOARD_CLASS_12_ECONOMICS_MACRO,
+
+            CurriculumContentIds
+                .CBSE_CLASS_12_ECONOMICS_INDIAN,
+
+            CurriculumContentIds
+                .CBSE_CLASS_12_ECONOMICS_MACRO -> {
+                "economics"
+            }
+
+            else -> subjectId
+        }
     }
 
     private fun buildTestQuestions(
@@ -89,11 +125,22 @@ class TestViewModel : ViewModel() {
     fun selectAnswer(answer: Int) {
         if (_isFinished.value) return
 
-        val list = _questions.value.toMutableList()
-        val index = _currentIndex.value
-        val current = list.getOrNull(index) ?: return
+        val list =
+            _questions.value.toMutableList()
 
-        if (answer !in current.question.options.indices) return
+        val index =
+            _currentIndex.value
+
+        val current =
+            list.getOrNull(index)
+                ?: return
+
+        if (
+            answer !in
+            current.question.options.indices
+        ) {
+            return
+        }
 
         list[index] =
             current.copy(
@@ -103,7 +150,9 @@ class TestViewModel : ViewModel() {
         _questions.value = list
     }
 
-    fun getSelectedAnswer(index: Int): Int? =
+    fun getSelectedAnswer(
+        index: Int
+    ): Int? =
         _questions.value
             .getOrNull(index)
             ?.selectedAnswer
@@ -111,7 +160,10 @@ class TestViewModel : ViewModel() {
     fun nextQuestion() {
         if (_questions.value.isEmpty()) return
 
-        if (_currentIndex.value < _questions.value.lastIndex) {
+        if (
+            _currentIndex.value <
+            _questions.value.lastIndex
+        ) {
             _currentIndex.value++
         } else {
             finishTest()
@@ -125,19 +177,29 @@ class TestViewModel : ViewModel() {
     }
 
     fun goToQuestion(index: Int) {
-        if (index in _questions.value.indices) {
+        if (
+            index in
+            _questions.value.indices
+        ) {
             _currentIndex.value = index
         }
     }
 
     fun toggleMarkForReview() {
-        val list = _questions.value.toMutableList()
-        val index = _currentIndex.value
-        val current = list.getOrNull(index) ?: return
+        val list =
+            _questions.value.toMutableList()
+
+        val index =
+            _currentIndex.value
+
+        val current =
+            list.getOrNull(index)
+                ?: return
 
         list[index] =
             current.copy(
-                markedForReview = !current.markedForReview
+                markedForReview =
+                    !current.markedForReview
             )
 
         _questions.value = list
@@ -145,7 +207,9 @@ class TestViewModel : ViewModel() {
 
     fun isCurrentQuestionMarked(): Boolean =
         _questions.value
-            .getOrNull(_currentIndex.value)
+            .getOrNull(
+                _currentIndex.value
+            )
             ?.markedForReview
             ?: false
 
@@ -161,6 +225,7 @@ class TestViewModel : ViewModel() {
 
     fun finishTest() {
         if (_isFinished.value) return
+
         _isFinished.value = true
     }
 
@@ -176,8 +241,12 @@ class TestViewModel : ViewModel() {
             }
 
         _currentIndex.value = 0
+
         _timeRemaining.value =
-            calculateTestDuration(_questions.value.size)
+            calculateTestDuration(
+                _questions.value.size
+            )
+
         _isFinished.value = false
     }
 
@@ -198,20 +267,27 @@ class TestViewModel : ViewModel() {
 
     fun getCorrectCount(): Int =
         _questions.value.count {
-            val selected = it.selectedAnswer
+            val selected =
+                it.selectedAnswer
+
             selected != null &&
-                selected == it.question.correctAnswer
+                selected ==
+                it.question.correctAnswer
         }
 
     fun getWrongCount(): Int =
         _questions.value.count {
-            val selected = it.selectedAnswer
+            val selected =
+                it.selectedAnswer
+
             selected != null &&
-                selected != it.question.correctAnswer
+                selected !=
+                it.question.correctAnswer
         }
 
     fun getPercentage(): Int {
-        val total = _questions.value.size
+        val total =
+            _questions.value.size
 
         if (total == 0) return 0
 
@@ -230,13 +306,18 @@ class TestViewModel : ViewModel() {
             return TEST_DURATION_SECONDS
         }
 
-        return questionCount * SECONDS_PER_QUESTION
+        return questionCount *
+            SECONDS_PER_QUESTION
     }
 
     companion object {
         private const val TEST_SIZE = 50
-        private const val SECONDS_PER_QUESTION = 60
+
+        private const val SECONDS_PER_QUESTION =
+            60
+
         private const val TEST_DURATION_SECONDS =
-            TEST_SIZE * SECONDS_PER_QUESTION
+            TEST_SIZE *
+                SECONDS_PER_QUESTION
     }
 }
