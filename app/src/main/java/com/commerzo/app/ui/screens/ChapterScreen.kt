@@ -31,9 +31,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
-import com.commerzo.app.data.repository.ChapterRepository
 import com.commerzo.app.data.repository.PracticeProgressRepository
 import com.commerzo.app.data.repository.QuestionBankManager
+import com.commerzo.app.data.repository.content.ContentManager
+import com.commerzo.app.data.repository.content.CurriculumContentIds
+import com.commerzo.app.data.repository.content.CurriculumContentMapper
 
 @Composable
 fun ChapterScreen(
@@ -44,28 +46,60 @@ fun ChapterScreen(
     onBack: () -> Unit,
     onChapterClick: (String, String) -> Unit
 ) {
-    val chapterRepository = remember {
-        ChapterRepository()
+    val contentManager = remember {
+        ContentManager()
     }
 
     val questionBankManager = remember {
         QuestionBankManager()
     }
 
+    val context =
+        androidx.compose.ui.platform.LocalContext.current
+
+    val boardId =
+        remember(board) {
+            CurriculumContentMapper.getBoardId(board)
+        }
+
+    val classId =
+        remember(classLevel) {
+            CurriculumContentMapper.getClassId(classLevel)
+        }
+
     val chapters = remember(
         subjectId,
-        board,
-        classLevel
+        boardId,
+        classId
     ) {
-        chapterRepository.getChapters(
-            subjectId = subjectId,
-            board = board,
-            classLevel = classLevel
+        contentManager.getChapters(
+            boardId = boardId,
+            classId = classId,
+            subjectId = subjectId
         )
     }
 
-    val context =
-        androidx.compose.ui.platform.LocalContext.current
+    /*
+     * The new Content architecture uses stable Economics
+     * subject IDs, while the existing question/progress
+     * system still uses the legacy "economics" subject ID.
+     *
+     * Keep that boundary here so QuestionRepository,
+     * QuestionBankManager and progress data remain untouched.
+     */
+    val questionSubjectId =
+        remember(subjectId) {
+            when (subjectId) {
+                CurriculumContentIds.MP_BOARD_CLASS_12_ECONOMICS_MICRO,
+                CurriculumContentIds.MP_BOARD_CLASS_12_ECONOMICS_MACRO,
+                CurriculumContentIds.CBSE_CLASS_12_ECONOMICS_INDIAN,
+                CurriculumContentIds.CBSE_CLASS_12_ECONOMICS_MACRO -> {
+                    "economics"
+                }
+
+                else -> subjectId
+            }
+        }
 
     Scaffold(
         topBar = {
@@ -176,14 +210,14 @@ fun ChapterScreen(
                     val questionCount =
                         remember(
                             chapter.id,
-                            subjectId,
+                            questionSubjectId,
                             board,
                             classLevel
                         ) {
                             questionBankManager
                                 .getValidatedQuestions(
                                     subjectId =
-                                        subjectId,
+                                        questionSubjectId,
                                     chapterId =
                                         chapter.id,
                                     board =
@@ -197,7 +231,7 @@ fun ChapterScreen(
                     val progressPercent =
                         remember(
                             chapter.id,
-                            subjectId,
+                            questionSubjectId,
                             board,
                             classLevel
                         ) {
@@ -206,7 +240,7 @@ fun ChapterScreen(
                                     context =
                                         context,
                                     subjectId =
-                                        subjectId,
+                                        questionSubjectId,
                                     chapterId =
                                         chapter.id,
                                     board =
