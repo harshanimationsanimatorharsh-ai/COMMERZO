@@ -4,14 +4,24 @@ package com.commerzo.app.data.repository.content
  * Central factory for creating the active COMMERZO
  * content repository.
  *
- * Current state:
- * - LOCAL -> LocalContentRepository
- * - REMOTE -> Remote-compatible repository
- * - CACHE -> Local repository for now
- * - AUTO -> Automatically selects the safest available source
+ * Source behaviour:
  *
- * The actual HTTP/backend implementation will be connected
- * later without changing ContentManager or the UI layer.
+ * LOCAL:
+ *      LocalContentRepository
+ *
+ * REMOTE:
+ *      ApiRemoteContentRepository
+ *
+ * CACHE:
+ *      LocalContentRepository for now.
+ *      A real cache will be connected later.
+ *
+ * AUTO:
+ *      HybridContentRepository when remote content is
+ *      enabled; otherwise LocalContentRepository.
+ *
+ * The current configuration keeps remote content disabled,
+ * so the existing local system remains the active source.
  */
 object ContentRepositoryFactory {
 
@@ -27,7 +37,7 @@ object ContentRepositoryFactory {
             }
 
             ContentSource.REMOTE -> {
-                LocalRemoteContentRepository()
+                ApiRemoteContentRepository()
             }
 
             ContentSource.CACHE -> {
@@ -36,10 +46,8 @@ object ContentRepositoryFactory {
 
             ContentSource.AUTO -> {
 
-                if (
-                    configuration.enableRemoteContent
-                ) {
-                    LocalRemoteContentRepository()
+                if (configuration.enableRemoteContent) {
+                    HybridContentRepository()
                 } else {
                     LocalContentRepository()
                 }
