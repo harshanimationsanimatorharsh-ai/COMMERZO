@@ -1,15 +1,49 @@
 package com.commerzo.app.data.repository.content
 
 /**
- * Central factory for creating the COMMERZO content repository.
+ * Central factory for creating the active COMMERZO
+ * content repository.
  *
- * Keeping repository creation here allows us to switch
- * from local content to remote/backend content later
- * without changing the UI or service layer.
+ * Current state:
+ * - LOCAL -> LocalContentRepository
+ * - REMOTE -> Remote-compatible repository
+ * - CACHE -> Local repository for now
+ * - AUTO -> Automatically selects the safest available source
+ *
+ * The actual HTTP/backend implementation will be connected
+ * later without changing ContentManager or the UI layer.
  */
 object ContentRepositoryFactory {
 
     fun create(): ContentRepository {
-        return LocalContentRepository()
+
+        val configuration =
+            ContentConfigurationProvider.getConfiguration()
+
+        return when (configuration.source) {
+
+            ContentSource.LOCAL -> {
+                LocalContentRepository()
+            }
+
+            ContentSource.REMOTE -> {
+                LocalRemoteContentRepository()
+            }
+
+            ContentSource.CACHE -> {
+                LocalContentRepository()
+            }
+
+            ContentSource.AUTO -> {
+
+                if (
+                    configuration.enableRemoteContent
+                ) {
+                    LocalRemoteContentRepository()
+                } else {
+                    LocalContentRepository()
+                }
+            }
+        }
     }
 }
