@@ -17,7 +17,10 @@ class LocalNetworkContentClient : NetworkContentClient {
         boardId: String,
         classId: String
     ): List<ContentSubject> {
-        return repository.getSubjects(boardId, classId)
+        return repository.getSubjects(
+            boardId = boardId,
+            classId = classId
+        )
     }
 
     override suspend fun getChapters(
@@ -54,7 +57,7 @@ class LocalNetworkContentClient : NetworkContentClient {
         return repository.getPreviousYearPapers(
             boardId = boardId,
             classId = classId,
-            subjectId = subjectId
+            subjectId = subjectId.orEmpty()
         )
     }
 
@@ -66,7 +69,7 @@ class LocalNetworkContentClient : NetworkContentClient {
         return repository.getSamplePapers(
             boardId = boardId,
             classId = classId,
-            subjectId = subjectId
+            subjectId = subjectId.orEmpty()
         )
     }
 
