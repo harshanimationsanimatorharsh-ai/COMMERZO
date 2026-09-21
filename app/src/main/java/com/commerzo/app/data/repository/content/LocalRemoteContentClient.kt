@@ -8,6 +8,7 @@ import com.commerzo.app.data.model.content.PreviousYearPaper
 import com.commerzo.app.data.model.content.SamplePaper
 import com.commerzo.app.data.model.content.TestSeries
 import com.commerzo.app.data.repository.content.RemoteContentClient
+import com.commerzo.app.data.repository.content.RemoteContentRequest
 import com.commerzo.app.data.repository.content.RemoteContentResult
 
 class LocalRemoteContentClient : RemoteContentClient {
@@ -59,7 +60,7 @@ class LocalRemoteContentClient : RemoteContentClient {
             networkClient.getPreviousYearPapers(
                 request.boardId,
                 request.classId,
-                request.subjectId
+                request.subjectId.orEmpty()
             )
         )
     }
@@ -71,7 +72,7 @@ class LocalRemoteContentClient : RemoteContentClient {
             networkClient.getSamplePapers(
                 request.boardId,
                 request.classId,
-                request.subjectId
+                request.subjectId.orEmpty()
             )
         )
     }
@@ -83,7 +84,7 @@ class LocalRemoteContentClient : RemoteContentClient {
             networkClient.getTestSeries(
                 request.boardId,
                 request.classId,
-                request.subjectId
+                request.subjectId.orEmpty()
             )
         )
     }
