@@ -85,7 +85,7 @@ interface ContentRepository {
     suspend fun getTestSeries(
         boardId: String,
         classId: String,
-        subjectId: String? = null
+        subjectId: String?
     ): List<TestSeries>
 
     /* ---------------------------------------------------------
