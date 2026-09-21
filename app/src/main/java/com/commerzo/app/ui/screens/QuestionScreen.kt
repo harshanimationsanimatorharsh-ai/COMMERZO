@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
-import com.commerzo.app.data.repository.content.CurriculumContentIds
+import com.commerzo.app.data.model.content.CurriculumContentIds
 import com.commerzo.app.ui.viewmodel.PracticeSessionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1015,4 +1015,4 @@ private fun optionLetter(
         3 -> "D"
         else -> "?"
     }
-}
+}           
