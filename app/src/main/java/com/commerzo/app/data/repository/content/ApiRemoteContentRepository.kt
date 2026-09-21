@@ -7,41 +7,22 @@ import com.commerzo.app.data.model.content.ContentSubject
 import com.commerzo.app.data.model.content.PreviousYearPaper
 import com.commerzo.app.data.model.content.SamplePaper
 import com.commerzo.app.data.model.content.TestSeries
+import com.commerzo.app.data.remote.content.RemoteContentClientProvider
 
-/**
- * RemoteContentRepository implementation backed by
- * RemoteContentClient.
- *
- * The client is responsible for communication with the
- * actual backend/API.
- *
- * This repository converts RemoteContentResult into the
- * ContentRepository contract.
- */
 class ApiRemoteContentRepository(
-    private val client: RemoteContentClient =
-        RemoteContentClientProvider.getClient()
-) : RemoteContentRepository {
+    private val client: RemoteContentClient = RemoteContentClientProvider.getClient()
+) : ContentRepository {
 
     override suspend fun getSubjects(
         boardId: String,
         classId: String
     ): List<ContentSubject> {
-
-        return when (
-            val result = client.getSubjects(
-                RemoteContentRequest(
-                    boardId = boardId,
-                    classId = classId
-                )
+        return client.getSubjects(
+            RemoteContentRequest(
+                boardId = boardId,
+                classId = classId
             )
-        ) {
-            is RemoteContentResult.Success ->
-                result.data
-
-            is RemoteContentResult.Failure ->
-                emptyList()
-        }
+        ).getOrElse { emptyList() }
     }
 
     override suspend fun getChapters(
@@ -49,22 +30,13 @@ class ApiRemoteContentRepository(
         classId: String,
         subjectId: String
     ): List<ContentChapter> {
-
-        return when (
-            val result = client.getChapters(
-                RemoteContentRequest(
-                    boardId = boardId,
-                    classId = classId,
-                    subjectId = subjectId
-                )
+        return client.getChapters(
+            RemoteContentRequest(
+                boardId = boardId,
+                classId = classId,
+                subjectId = subjectId
             )
-        ) {
-            is RemoteContentResult.Success ->
-                result.data
-
-            is RemoteContentResult.Failure ->
-                emptyList()
-        }
+        ).getOrElse { emptyList() }
     }
 
     override suspend fun getContent(
@@ -73,23 +45,14 @@ class ApiRemoteContentRepository(
         subjectId: String,
         chapterId: String
     ): List<ContentItem> {
-
-        return when (
-            val result = client.getContent(
-                RemoteContentRequest(
-                    boardId = boardId,
-                    classId = classId,
-                    subjectId = subjectId,
-                    chapterId = chapterId
-                )
+        return client.getContent(
+            RemoteContentRequest(
+                boardId = boardId,
+                classId = classId,
+                subjectId = subjectId,
+                chapterId = chapterId
             )
-        ) {
-            is RemoteContentResult.Success ->
-                result.data
-
-            is RemoteContentResult.Failure ->
-                emptyList()
-        }
+        ).getOrElse { emptyList() }
     }
 
     override suspend fun getPreviousYearPapers(
@@ -97,22 +60,13 @@ class ApiRemoteContentRepository(
         classId: String,
         subjectId: String
     ): List<PreviousYearPaper> {
-
-        return when (
-            val result = client.getPreviousYearPapers(
-                RemoteContentRequest(
-                    boardId = boardId,
-                    classId = classId,
-                    subjectId = subjectId
-                )
+        return client.getPreviousYearPapers(
+            RemoteContentRequest(
+                boardId = boardId,
+                classId = classId,
+                subjectId = subjectId
             )
-        ) {
-            is RemoteContentResult.Success ->
-                result.data
-
-            is RemoteContentResult.Failure ->
-                emptyList()
-        }
+        ).getOrElse { emptyList() }
     }
 
     override suspend fun getSamplePapers(
@@ -120,65 +74,38 @@ class ApiRemoteContentRepository(
         classId: String,
         subjectId: String
     ): List<SamplePaper> {
-
-        return when (
-            val result = client.getSamplePapers(
-                RemoteContentRequest(
-                    boardId = boardId,
-                    classId = classId,
-                    subjectId = subjectId
-                )
+        return client.getSamplePapers(
+            RemoteContentRequest(
+                boardId = boardId,
+                classId = classId,
+                subjectId = subjectId
             )
-        ) {
-            is RemoteContentResult.Success ->
-                result.data
-
-            is RemoteContentResult.Failure ->
-                emptyList()
-        }
+        ).getOrElse { emptyList() }
     }
 
     override suspend fun getTestSeries(
         boardId: String,
         classId: String,
-        subjectId: String?
+        subjectId: String
     ): List<TestSeries> {
-
-        return when (
-            val result = client.getTestSeries(
-                RemoteContentRequest(
-                    boardId = boardId,
-                    classId = classId,
-                    subjectId = subjectId
-                )
+        return client.getTestSeries(
+            RemoteContentRequest(
+                boardId = boardId,
+                classId = classId,
+                subjectId = subjectId
             )
-        ) {
-            is RemoteContentResult.Success ->
-                result.data
-
-            is RemoteContentResult.Failure ->
-                emptyList()
-        }
+        ).getOrElse { emptyList() }
     }
 
     override suspend fun getModules(
         boardId: String,
         classId: String
     ): List<ContentModule> {
-
-        return when (
-            val result = client.getModules(
-                RemoteContentRequest(
-                    boardId = boardId,
-                    classId = classId
-                )
+        return client.getModules(
+            RemoteContentRequest(
+                boardId = boardId,
+                classId = classId
             )
-        ) {
-            is RemoteContentResult.Success ->
-                result.data
-
-            is RemoteContentResult.Failure ->
-                emptyList()
-        }
+        ).getOrElse { emptyList() }
     }
 }
