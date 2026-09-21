@@ -7,16 +7,24 @@ import com.commerzo.app.data.model.content.ContentSubject
 import com.commerzo.app.data.model.content.PreviousYearPaper
 import com.commerzo.app.data.model.content.SamplePaper
 import com.commerzo.app.data.model.content.TestSeries
-import com.commerzo.app.data.remote.content.RemoteContentClientProvider
 
+/**
+ * RemoteContentRepository implementation backed by
+ * RemoteContentClient.
+ *
+ * This repository converts RemoteContentResult into
+ * the RemoteContentRepository contract.
+ */
 class ApiRemoteContentRepository(
-    private val client: RemoteContentClient = RemoteContentClientProvider.getClient()
-) : ContentRepository {
+    private val client: RemoteContentClient =
+        RemoteContentClientProvider.getClient()
+) : RemoteContentRepository, ContentRepository {
 
     override suspend fun getSubjects(
         boardId: String,
         classId: String
     ): List<ContentSubject> {
+
         return when (
             val result = client.getSubjects(
                 RemoteContentRequest(
@@ -35,6 +43,7 @@ class ApiRemoteContentRepository(
         classId: String,
         subjectId: String
     ): List<ContentChapter> {
+
         return when (
             val result = client.getChapters(
                 RemoteContentRequest(
@@ -55,6 +64,7 @@ class ApiRemoteContentRepository(
         subjectId: String,
         chapterId: String
     ): List<ContentItem> {
+
         return when (
             val result = client.getContent(
                 RemoteContentRequest(
@@ -75,6 +85,7 @@ class ApiRemoteContentRepository(
         classId: String,
         subjectId: String
     ): List<PreviousYearPaper> {
+
         return when (
             val result = client.getPreviousYearPapers(
                 RemoteContentRequest(
@@ -94,6 +105,7 @@ class ApiRemoteContentRepository(
         classId: String,
         subjectId: String
     ): List<SamplePaper> {
+
         return when (
             val result = client.getSamplePapers(
                 RemoteContentRequest(
@@ -111,8 +123,9 @@ class ApiRemoteContentRepository(
     override suspend fun getTestSeries(
         boardId: String,
         classId: String,
-        subjectId: String
+        subjectId: String?
     ): List<TestSeries> {
+
         return when (
             val result = client.getTestSeries(
                 RemoteContentRequest(
@@ -131,6 +144,7 @@ class ApiRemoteContentRepository(
         boardId: String,
         classId: String
     ): List<ContentModule> {
+
         return when (
             val result = client.getModules(
                 RemoteContentRequest(
