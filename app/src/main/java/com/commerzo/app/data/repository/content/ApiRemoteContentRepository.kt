@@ -17,12 +17,17 @@ class ApiRemoteContentRepository(
         boardId: String,
         classId: String
     ): List<ContentSubject> {
-        return client.getSubjects(
-            RemoteContentRequest(
-                boardId = boardId,
-                classId = classId
+        return when (
+            val result = client.getSubjects(
+                RemoteContentRequest(
+                    boardId = boardId,
+                    classId = classId
+                )
             )
-        ).getOrElse { emptyList() }
+        ) {
+            is RemoteContentResult.Success -> result.data
+            is RemoteContentResult.Failure -> emptyList()
+        }
     }
 
     override suspend fun getChapters(
@@ -30,13 +35,18 @@ class ApiRemoteContentRepository(
         classId: String,
         subjectId: String
     ): List<ContentChapter> {
-        return client.getChapters(
-            RemoteContentRequest(
-                boardId = boardId,
-                classId = classId,
-                subjectId = subjectId
+        return when (
+            val result = client.getChapters(
+                RemoteContentRequest(
+                    boardId = boardId,
+                    classId = classId,
+                    subjectId = subjectId
+                )
             )
-        ).getOrElse { emptyList() }
+        ) {
+            is RemoteContentResult.Success -> result.data
+            is RemoteContentResult.Failure -> emptyList()
+        }
     }
 
     override suspend fun getContent(
@@ -45,14 +55,19 @@ class ApiRemoteContentRepository(
         subjectId: String,
         chapterId: String
     ): List<ContentItem> {
-        return client.getContent(
-            RemoteContentRequest(
-                boardId = boardId,
-                classId = classId,
-                subjectId = subjectId,
-                chapterId = chapterId
+        return when (
+            val result = client.getContent(
+                RemoteContentRequest(
+                    boardId = boardId,
+                    classId = classId,
+                    subjectId = subjectId,
+                    chapterId = chapterId
+                )
             )
-        ).getOrElse { emptyList() }
+        ) {
+            is RemoteContentResult.Success -> result.data
+            is RemoteContentResult.Failure -> emptyList()
+        }
     }
 
     override suspend fun getPreviousYearPapers(
@@ -60,13 +75,18 @@ class ApiRemoteContentRepository(
         classId: String,
         subjectId: String
     ): List<PreviousYearPaper> {
-        return client.getPreviousYearPapers(
-            RemoteContentRequest(
-                boardId = boardId,
-                classId = classId,
-                subjectId = subjectId
+        return when (
+            val result = client.getPreviousYearPapers(
+                RemoteContentRequest(
+                    boardId = boardId,
+                    classId = classId,
+                    subjectId = subjectId
+                )
             )
-        ).getOrElse { emptyList() }
+        ) {
+            is RemoteContentResult.Success -> result.data
+            is RemoteContentResult.Failure -> emptyList()
+        }
     }
 
     override suspend fun getSamplePapers(
@@ -74,13 +94,18 @@ class ApiRemoteContentRepository(
         classId: String,
         subjectId: String
     ): List<SamplePaper> {
-        return client.getSamplePapers(
-            RemoteContentRequest(
-                boardId = boardId,
-                classId = classId,
-                subjectId = subjectId
+        return when (
+            val result = client.getSamplePapers(
+                RemoteContentRequest(
+                    boardId = boardId,
+                    classId = classId,
+                    subjectId = subjectId
+                )
             )
-        ).getOrElse { emptyList() }
+        ) {
+            is RemoteContentResult.Success -> result.data
+            is RemoteContentResult.Failure -> emptyList()
+        }
     }
 
     override suspend fun getTestSeries(
@@ -88,24 +113,34 @@ class ApiRemoteContentRepository(
         classId: String,
         subjectId: String
     ): List<TestSeries> {
-        return client.getTestSeries(
-            RemoteContentRequest(
-                boardId = boardId,
-                classId = classId,
-                subjectId = subjectId
+        return when (
+            val result = client.getTestSeries(
+                RemoteContentRequest(
+                    boardId = boardId,
+                    classId = classId,
+                    subjectId = subjectId
+                )
             )
-        ).getOrElse { emptyList() }
+        ) {
+            is RemoteContentResult.Success -> result.data
+            is RemoteContentResult.Failure -> emptyList()
+        }
     }
 
     override suspend fun getModules(
         boardId: String,
         classId: String
     ): List<ContentModule> {
-        return client.getModules(
-            RemoteContentRequest(
-                boardId = boardId,
-                classId = classId
+        return when (
+            val result = client.getModules(
+                RemoteContentRequest(
+                    boardId = boardId,
+                    classId = classId
+                )
             )
-        ).getOrElse { emptyList() }
+        ) {
+            is RemoteContentResult.Success -> result.data
+            is RemoteContentResult.Failure -> emptyList()
+        }
     }
 }
