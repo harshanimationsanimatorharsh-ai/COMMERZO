@@ -24,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,10 +32,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
+import com.commerzo.app.data.model.content.CurriculumContentIds
 import com.commerzo.app.data.repository.PracticeProgressRepository
 import com.commerzo.app.data.repository.QuestionBankManager
 import com.commerzo.app.data.repository.content.ContentManager
-import com.commerzo.app.data.repository.content.CurriculumContentIds
 import com.commerzo.app.data.repository.content.CurriculumContentMapper
 
 @Composable
@@ -67,17 +68,29 @@ fun ChapterScreen(
             CurriculumContentMapper.getClassId(classLevel)
         }
 
-    val chapters = remember(
-        subjectId,
-        boardId,
-        classId
-    ) {
-        contentManager.getChapters(
-            boardId = boardId,
-            classId = classId,
-            subjectId = subjectId
-        )
-    }
+    /*
+     * ContentManager.getChapters() is a suspend function.
+     *
+     * Load it from Compose using produceState so the
+     * chapter data is fetched inside a coroutine and
+     * the UI automatically recomposes when the result arrives.
+     */
+    val chaptersState =
+        produceState(
+            initialValue = emptyList<com.commerzo.app.data.model.content.ContentChapter>(),
+            subjectId,
+            boardId,
+            classId
+        ) {
+            value =
+                contentManager.getChapters(
+                    boardId = boardId,
+                    classId = classId,
+                    subjectId = subjectId
+                )
+        }
+
+    val chapters = chaptersState.value
 
     /*
      * The new Content architecture uses stable Economics
