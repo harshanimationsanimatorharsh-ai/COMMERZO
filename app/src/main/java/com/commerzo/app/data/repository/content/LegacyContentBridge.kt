@@ -57,7 +57,7 @@ object LegacyContentBridge {
             classLevel = classLevel
         )
 
-        val chapters = ChapterRepository.getChapters(
+        val chapters = ChapterRepository().getChapters(
             subjectId = legacySubjectId,
             board = board,
             classLevel = classLevel
