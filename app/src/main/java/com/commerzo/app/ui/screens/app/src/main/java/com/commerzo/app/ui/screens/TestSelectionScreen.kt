@@ -27,6 +27,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -35,10 +36,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
+import com.commerzo.app.data.model.content.ContentChapter
+import com.commerzo.app.data.model.content.ContentSubject
 import com.commerzo.app.data.repository.QuestionBankManager
 import com.commerzo.app.data.repository.content.ContentManager
-import com.commerzo.app.data.repository.content.CurriculumContentIds
 import com.commerzo.app.data.repository.content.CurriculumContentMapper
+import com.commerzo.app.data.model.content.CurriculumContentIds
 
 @Composable
 fun TestSelectionScreen(
@@ -90,23 +93,25 @@ fun TestSelectionScreen(
             )
         }
 
-    val subjects =
-        remember(
-            boardId,
-            classId
-        ) {
+    val subjects by produceState<List<ContentSubject>>(
+        initialValue = emptyList(),
+        boardId,
+        classId
+    ) {
+        value =
             contentManager.getSubjects(
                 boardId = boardId,
                 classId = classId
             )
-        }
+    }
 
-    val chapters =
-        remember(
-            selectedSubjectId,
-            boardId,
-            classId
-        ) {
+    val chapters by produceState<List<ContentChapter>>(
+        initialValue = emptyList(),
+        selectedSubjectId,
+        boardId,
+        classId
+    ) {
+        value =
             selectedSubjectId?.let { subjectId ->
                 contentManager.getChapters(
                     boardId = boardId,
@@ -114,7 +119,7 @@ fun TestSelectionScreen(
                     subjectId = subjectId
                 )
             } ?: emptyList()
-        }
+    }
 
     val questionSubjectId =
         remember(selectedSubjectId) {
@@ -352,15 +357,22 @@ fun TestSelectionScreen(
                 key = { it.id }
             ) { subject ->
 
+                val chapterCount =
+                    if (selectedSubjectId == subject.id) {
+                        chapters.size
+                    } else {
+                        0
+                    }
+
                 SelectionCard(
                     title =
                         "${subject.emoji} ${subject.name}",
                     subtitle =
-                        "${contentManager.getChapters(
-                            boardId = boardId,
-                            classId = classId,
-                            subjectId = subject.id
-                        ).size} chapters",
+                        if (selectedSubjectId == subject.id) {
+                            "$chapterCount chapters"
+                        } else {
+                            "Select to view chapters"
+                        },
                     selected =
                         selectedSubjectId ==
                             subject.id,
