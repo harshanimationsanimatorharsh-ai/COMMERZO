@@ -11,27 +11,12 @@ import com.commerzo.app.data.model.content.TestSeries
 /**
  * Hybrid content repository for COMMERZO.
  *
- * Current architecture:
- *
- * UI
- *  ↓
- * ContentManager
- *  ↓
- * ContentDataSource
- *  ↓
- * HybridContentRepository
- *  ├── RemoteContentRepository
- *  └── LocalContentRepository
- *
- * Future behaviour:
- * 1. Try remote content.
- * 2. If remote content is unavailable, use local/cache data.
- *
- * This allows COMMERZO to remain usable while the backend
- * is unavailable.
+ * Remote content is tried first.
+ * If remote content is unavailable or empty,
+ * local content is used as fallback.
  */
 class HybridContentRepository(
-    private val remoteRepository: RemoteContentRepository =
+    private val remoteRepository: ContentRepository =
         ApiRemoteContentRepository(),
     private val localRepository: ContentRepository =
         LocalContentRepository()
