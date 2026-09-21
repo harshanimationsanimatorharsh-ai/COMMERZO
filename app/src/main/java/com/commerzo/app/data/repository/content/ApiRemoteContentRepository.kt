@@ -7,13 +7,15 @@ import com.commerzo.app.data.model.content.ContentSubject
 import com.commerzo.app.data.model.content.PreviousYearPaper
 import com.commerzo.app.data.model.content.SamplePaper
 import com.commerzo.app.data.model.content.TestSeries
+import com.commerzo.app.data.remote.content.RemoteContentClientProvider
 
 /**
  * RemoteContentRepository implementation backed by
  * RemoteContentClient.
  *
  * This repository converts RemoteContentResult into
- * the RemoteContentRepository contract.
+ * the RemoteContentRepository and ContentRepository
+ * contracts.
  */
 class ApiRemoteContentRepository(
     private val client: RemoteContentClient =
