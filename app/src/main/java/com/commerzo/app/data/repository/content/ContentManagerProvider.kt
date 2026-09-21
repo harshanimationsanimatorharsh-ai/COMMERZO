@@ -6,11 +6,11 @@ package com.commerzo.app.data.repository.content
  */
 object ContentManagerProvider {
 
-    private val manager: ContentManager by lazy {
+    private val contentManager: ContentManager by lazy {
         ContentManager()
     }
 
     fun getManager(): ContentManager {
-        return manager
+        return contentManager
     }
 }
