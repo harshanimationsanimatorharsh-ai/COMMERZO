@@ -15,11 +15,11 @@ package com.commerzo.app.data.repository.content
  */
 object ContentRepositoryProvider {
 
-    private val repository: ContentRepository by lazy {
+    private val contentRepository: ContentRepository by lazy {
         ContentRepositoryFactory.create()
     }
 
     fun getRepository(): ContentRepository {
-        return repository
+        return contentRepository
     }
 }
