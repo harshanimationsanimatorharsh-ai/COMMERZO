@@ -6,11 +6,11 @@ package com.commerzo.app.data.repository.content
  */
 object ContentDataSourceProvider {
 
-    private val dataSource: ContentDataSource by lazy {
+    private val contentDataSource: ContentDataSource by lazy {
         ContentDataSource()
     }
 
     fun getDataSource(): ContentDataSource {
-        return dataSource
+        return contentDataSource
     }
 }
