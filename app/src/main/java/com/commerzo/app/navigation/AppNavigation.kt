@@ -12,8 +12,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
+import com.commerzo.app.data.model.content.CurriculumContentIds
 import com.commerzo.app.data.repository.SubjectRepository
-import com.commerzo.app.data.repository.content.CurriculumContentIds
 import com.commerzo.app.ui.screens.AchievementsScreen
 import com.commerzo.app.ui.screens.BookmarksScreen
 import com.commerzo.app.ui.screens.ChapterScreen
