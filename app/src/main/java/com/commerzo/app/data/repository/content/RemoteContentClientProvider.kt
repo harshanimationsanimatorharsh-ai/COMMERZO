@@ -4,9 +4,9 @@ import com.commerzo.app.data.repository.content.RemoteContentClient
 
 object RemoteContentClientProvider {
 
-    private val client: RemoteContentClient by lazy {
+    private val remoteClient: RemoteContentClient by lazy {
         LocalRemoteContentClient()
     }
 
-    fun getClient(): RemoteContentClient = client
+    fun getClient(): RemoteContentClient = remoteClient
 }
