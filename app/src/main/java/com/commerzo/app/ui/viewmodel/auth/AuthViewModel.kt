@@ -1,5 +1,6 @@
 package com.commerzo.app.ui.viewmodel.auth
 
+import android.app.Activity
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -65,9 +66,11 @@ class AuthViewModel(
         }
     }
 
-    fun signInWithGoogle() {
+    fun signInWithGoogle(
+        activity: Activity
+    ) {
         executeAuthAction {
-            repository.signInWithGoogle()
+            repository.signInWithGoogle(activity)
         }
     }
 
