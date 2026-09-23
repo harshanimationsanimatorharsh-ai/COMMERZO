@@ -1,5 +1,6 @@
 package com.commerzo.app.ui.screens.auth
 
+import android.app.Activity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -36,6 +38,8 @@ fun LoginScreen(
     onCreateAccount: () -> Unit,
     viewModel: AuthViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+
     var email by remember {
         mutableStateOf("")
     }
@@ -167,7 +171,15 @@ fun LoginScreen(
 
         OutlinedButton(
             onClick = {
-                viewModel.signInWithGoogle()
+                val activity = context as? Activity
+
+                if (activity != null) {
+                    localError = null
+                    viewModel.signInWithGoogle(activity)
+                } else {
+                    localError =
+                        "Unable to open Google Sign-In."
+                }
             },
             modifier = Modifier.fillMaxWidth(),
             enabled = authState !is AuthState.Loading
