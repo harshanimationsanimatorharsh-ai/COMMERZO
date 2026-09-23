@@ -1,9 +1,17 @@
 package com.commerzo.app.data.repository.auth
 
+import android.app.Activity
 import com.commerzo.app.data.model.auth.AuthState
 import com.commerzo.app.data.model.auth.AuthUser
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
@@ -77,12 +85,80 @@ class FirebaseAuthRepository(
         }
     }
 
-    override suspend fun signInWithGoogle(): Result<AuthUser> {
-        return Result.failure(
-            UnsupportedOperationException(
-                "Google Sign-In is not connected yet."
+    override suspend fun signInWithGoogle(
+        activity: Activity
+    ): Result<AuthUser> {
+        return try {
+            val credentialManager =
+                CredentialManager.create(activity)
+
+            val googleIdOption =
+                GetGoogleIdOption.Builder()
+                    .setFilterByAuthorizedAccounts(false)
+                    .setServerClientId(
+                        activity.getString(
+                            com.commerzo.app.R.string.default_web_client_id
+                        )
+                    )
+                    .setAutoSelectEnabled(false)
+                    .build()
+
+            val request =
+                GetCredentialRequest.Builder()
+                    .addCredentialOption(
+                        googleIdOption
+                    )
+                    .build()
+
+            val result =
+                credentialManager.getCredential(
+                    activity,
+                    request
+                )
+
+            val credential =
+                GoogleIdTokenCredential
+                    .createFrom(
+                        result.credential.data
+                    )
+
+            val firebaseCredential =
+                GoogleAuthProvider.getCredential(
+                    credential.idToken,
+                    null
+                )
+
+            val authResult =
+                firebaseAuth
+                    .signInWithCredential(
+                        firebaseCredential
+                    )
+                    .awaitResult()
+
+            val firebaseUser =
+                authResult.user
+                    ?: return Result.failure(
+                        IllegalStateException(
+                            "Google sign-in succeeded but user data is unavailable."
+                        )
+                    )
+
+            val authUser =
+                firebaseUser.toAuthUser()
+
+            sessionStore.saveUser(authUser)
+
+            Result.success(authUser)
+        } catch (exception: GetCredentialException) {
+            Result.failure(
+                IllegalStateException(
+                    "Google Sign-In was cancelled or unavailable.",
+                    exception
+                )
             )
-        )
+        } catch (exception: Exception) {
+            Result.failure(exception)
+        }
     }
 
     override suspend fun signInWithEmail(
@@ -179,9 +255,8 @@ private fun com.google.firebase.auth.FirebaseUser.toAuthUser(): AuthUser {
     )
 }
 
-private suspend fun <T> com.google.android.gms.tasks.Task<T>.awaitResult(): T {
+private suspend fun <T> Task<T>.awaitResult(): T {
     return suspendCancellableCoroutine { continuation ->
-
         addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 continuation.resume(task.result)
@@ -199,9 +274,8 @@ private suspend fun <T> com.google.android.gms.tasks.Task<T>.awaitResult(): T {
     }
 }
 
-private suspend fun com.google.android.gms.tasks.Task<Void>.awaitCompletion() {
+private suspend fun Task<Void>.awaitCompletion() {
     suspendCancellableCoroutine<Unit> { continuation ->
-
         addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 continuation.resume(Unit)
