@@ -40,12 +40,33 @@ fun CreateAccountScreen(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var localError by remember { mutableStateOf<String?>(null) }
+    var verificationMessage by remember { mutableStateOf<String?>(null) }
 
     val authState by viewModel.authState.collectAsState()
 
     LaunchedEffect(authState) {
         if (authState is AuthState.LoggedIn) {
             onAccountCreated()
+        }
+    }
+
+    val authError =
+        (authState as? AuthState.Error)?.message
+
+    val isVerificationRequired =
+        authError?.contains(
+            "verify your email",
+            ignoreCase = true
+        ) == true ||
+        authError?.contains(
+            "verification",
+            ignoreCase = true
+        ) == true
+
+    LaunchedEffect(authState) {
+        if (isVerificationRequired) {
+            verificationMessage =
+                "Account created successfully. A verification email has been sent to ${email.trim()}."
         }
     }
 
@@ -70,6 +91,53 @@ fun CreateAccountScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        if (verificationMessage != null) {
+            Text(
+                text = "Email Verification Required",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = verificationMessage.orEmpty(),
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Open that email, verify your email address, then return to the Login screen and sign in.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Button(
+                onClick = onBack,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Go to Login")
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            TextButton(
+                onClick = {
+                    verificationMessage = null
+                    localError = null
+                    viewModel.refreshSession()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Create Another Account")
+            }
+
+            return@Column
+        }
+
         OutlinedTextField(
             value = name,
             onValueChange = {
@@ -80,7 +148,8 @@ fun CreateAccountScreen(
             label = {
                 Text("Full Name")
             },
-            singleLine = true
+            singleLine = true,
+            enabled = authState !is AuthState.Loading
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -95,7 +164,8 @@ fun CreateAccountScreen(
             label = {
                 Text("Email")
             },
-            singleLine = true
+            singleLine = true,
+            enabled = authState !is AuthState.Loading
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -111,7 +181,8 @@ fun CreateAccountScreen(
                 Text("Password")
             },
             singleLine = true,
-            visualTransformation = PasswordVisualTransformation()
+            visualTransformation = PasswordVisualTransformation(),
+            enabled = authState !is AuthState.Loading
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -127,7 +198,8 @@ fun CreateAccountScreen(
                 Text("Confirm Password")
             },
             singleLine = true,
-            visualTransformation = PasswordVisualTransformation()
+            visualTransformation = PasswordVisualTransformation(),
+            enabled = authState !is AuthState.Loading
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -142,9 +214,9 @@ fun CreateAccountScreen(
             Spacer(modifier = Modifier.height(12.dp))
         }
 
-        if (authState is AuthState.Error) {
+        if (authError != null && !isVerificationRequired) {
             Text(
-                text = (authState as AuthState.Error).message,
+                text = authError,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodyMedium
             )
@@ -163,8 +235,11 @@ fun CreateAccountScreen(
                         localError = "Please enter your email."
                     }
 
-                    !email.contains("@") -> {
-                        localError = "Please enter a valid email."
+                    !android.util.Patterns.EMAIL_ADDRESS
+                        .matcher(email.trim())
+                        .matches() -> {
+                        localError =
+                            "Please enter a valid email address."
                     }
 
                     password.length < 6 -> {
@@ -179,6 +254,7 @@ fun CreateAccountScreen(
 
                     else -> {
                         localError = null
+                        verificationMessage = null
 
                         viewModel.createAccountWithEmail(
                             email = email.trim(),
@@ -192,7 +268,9 @@ fun CreateAccountScreen(
             enabled = authState !is AuthState.Loading
         ) {
             if (authState is AuthState.Loading) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(
+                    modifier = Modifier.height(20.dp)
+                )
             } else {
                 Text("Create Account")
             }
@@ -202,7 +280,8 @@ fun CreateAccountScreen(
 
         TextButton(
             onClick = onBack,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = authState !is AuthState.Loading
         ) {
             Text("Back to Login")
         }
