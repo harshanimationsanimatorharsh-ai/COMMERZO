@@ -25,6 +25,10 @@ interface AuthRepository {
         password: String
     ): Result<AuthUser>
 
+    suspend fun sendPasswordResetEmail(
+        email: String
+    ): Result<Unit>
+
     suspend fun sendPhoneOtp(
         phoneNumber: String
     ): Result<Unit>
