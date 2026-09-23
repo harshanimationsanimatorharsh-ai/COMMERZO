@@ -30,11 +30,11 @@ interface AuthRepository {
     ): Result<Unit>
 
     suspend fun sendPhoneOtp(
+        activity: Activity,
         phoneNumber: String
     ): Result<Unit>
 
     suspend fun verifyPhoneOtp(
-        phoneNumber: String,
         otp: String
     ): Result<AuthUser>
 
