@@ -21,6 +21,18 @@ class LocalAuthRepository(
         return sessionStore.getUser()
     }
 
+    override suspend fun createAccountWithEmail(
+        email: String,
+        password: String,
+        displayName: String
+    ): Result<AuthUser> {
+        return Result.failure(
+            UnsupportedOperationException(
+                "Email account registration is not connected yet."
+            )
+        )
+    }
+
     override suspend fun signInWithGoogle(): Result<AuthUser> {
         return Result.failure(
             UnsupportedOperationException(
