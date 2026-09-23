@@ -10,16 +10,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -48,7 +48,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.commerzo.app.data.model.auth.AuthState
 import com.commerzo.app.data.model.profile.StudentProfile
+import com.commerzo.app.ui.viewmodel.auth.AuthViewModel
 import com.commerzo.app.ui.viewmodel.profile.ProfileState
 import com.commerzo.app.ui.viewmodel.profile.ProfileViewModel
 
@@ -58,11 +60,17 @@ fun ProfileScreen(
     onTestHistory: () -> Unit = {},
     onAchievements: () -> Unit = {},
     onSettings: () -> Unit = {},
-    viewModel: ProfileViewModel = viewModel()
+    viewModel: ProfileViewModel = viewModel(),
+    authViewModel: AuthViewModel = viewModel()
 ) {
     val profileState by viewModel.profileState.collectAsState()
+    val authState by authViewModel.authState.collectAsState()
 
     var showEditDialog by remember {
+        mutableStateOf(false)
+    }
+
+    var showLogoutDialog by remember {
         mutableStateOf(false)
     }
 
@@ -71,8 +79,13 @@ fun ProfileScreen(
     }
 
     LaunchedEffect(profileState) {
-        val profile = (profileState as? ProfileState.Success)?.profile
-        if (profile != null && displayNameInput.isBlank()) {
+        val profile =
+            (profileState as? ProfileState.Success)?.profile
+
+        if (
+            profile != null &&
+            displayNameInput.isBlank()
+        ) {
             displayNameInput = profile.displayName
         }
     }
@@ -87,7 +100,8 @@ fun ProfileScreen(
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor =
+                        MaterialTheme.colorScheme.surface
                 )
             )
         }
@@ -96,10 +110,13 @@ fun ProfileScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(
+                    rememberScrollState()
+                )
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement =
+                Arrangement.spacedBy(12.dp)
         ) {
 
             Spacer(
@@ -129,7 +146,9 @@ fun ProfileScreen(
                     StudentProfileCard(
                         profile = state.profile,
                         onEdit = {
-                            displayNameInput = state.profile.displayName
+                            displayNameInput =
+                                state.profile.displayName
+
                             showEditDialog = true
                         }
                     )
@@ -169,6 +188,33 @@ fun ProfileScreen(
             )
 
             Spacer(
+                modifier = Modifier.height(4.dp)
+            )
+
+            ProfileMenuCard(
+                icon = Icons.Default.ExitToApp,
+                title = "Logout",
+                subtitle = "Sign out from your COMMERZO account",
+                onClick = {
+                    showLogoutDialog = true
+                }
+            )
+
+            if (authState is AuthState.Error) {
+                Spacer(
+                    modifier = Modifier.height(4.dp)
+                )
+
+                Text(
+                    text =
+                        (authState as AuthState.Error).message,
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            Spacer(
                 modifier = Modifier.height(20.dp)
             )
 
@@ -183,7 +229,8 @@ fun ProfileScreen(
                 text = "Learn. Practice. Score.",
                 modifier = Modifier.fillMaxWidth(),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color =
+                    MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(
@@ -216,14 +263,21 @@ fun ProfileScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        val name = displayNameInput.trim()
+                        val name =
+                            displayNameInput.trim()
 
                         if (name.isNotBlank()) {
-                            viewModel.updateDisplayName(name)
+                            viewModel.updateDisplayName(
+                                name
+                            )
+
                             showEditDialog = false
                         }
                     },
-                    enabled = displayNameInput.trim().isNotBlank()
+                    enabled =
+                        displayNameInput
+                            .trim()
+                            .isNotBlank()
                 ) {
                     Text("Save")
                 }
@@ -233,6 +287,53 @@ fun ProfileScreen(
                     onClick = {
                         showEditDialog = false
                     }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                if (authState !is AuthState.Loading) {
+                    showLogoutDialog = false
+                }
+            },
+            title = {
+                Text("Logout")
+            },
+            text = {
+                Text(
+                    "Are you sure you want to logout from your COMMERZO account?"
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showLogoutDialog = false
+                        authViewModel.signOut()
+                    },
+                    enabled =
+                        authState !is AuthState.Loading
+                ) {
+                    if (authState is AuthState.Loading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.height(20.dp)
+                        )
+                    } else {
+                        Text("Logout")
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showLogoutDialog = false
+                    },
+                    enabled =
+                        authState !is AuthState.Loading
                 ) {
                     Text("Cancel")
                 }
@@ -250,7 +351,8 @@ private fun StudentProfileCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor =
+                MaterialTheme.colorScheme.primaryContainer
         )
     ) {
         Column(
@@ -269,10 +371,12 @@ private fun StudentProfileCard(
                 ) {
 
                     Text(
-                        text = profile.displayName.ifBlank {
-                            "COMMERZO Student"
-                        },
-                        style = MaterialTheme.typography.headlineSmall,
+                        text =
+                            profile.displayName.ifBlank {
+                                "COMMERZO Student"
+                            },
+                        style =
+                            MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
 
@@ -281,11 +385,15 @@ private fun StudentProfileCard(
                     )
 
                     Text(
-                        text = profile.email.ifBlank {
-                            "Email not available"
-                        },
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        text =
+                            profile.email.ifBlank {
+                                "Email not available"
+                            },
+                        style =
+                            MaterialTheme.typography.bodyMedium,
+                        color =
+                            MaterialTheme.colorScheme
+                                .onPrimaryContainer
                     )
                 }
 
@@ -314,7 +422,9 @@ private fun StudentProfileCard(
 
             ProfileInfoRow(
                 label = "Mobile",
-                value = profile.phoneNumber ?: "Not added"
+                value =
+                    profile.phoneNumber
+                        ?: "Not added"
             )
         }
     }
@@ -327,14 +437,16 @@ private fun ProfileInfoRow(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement =
+            Arrangement.SpaceBetween
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(
-                alpha = 0.75f
-            )
+            color =
+                MaterialTheme.colorScheme
+                    .onPrimaryContainer
+                    .copy(alpha = 0.75f)
         )
 
         Text(
@@ -355,8 +467,10 @@ private fun ProfileLoadingCard() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(24.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement =
+                Arrangement.Center,
+            verticalAlignment =
+                Alignment.CenterVertically
         ) {
             CircularProgressIndicator()
         }
@@ -375,7 +489,8 @@ private fun ProfileEmptyCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment =
+                Alignment.CenterHorizontally
         ) {
 
             Text(
@@ -389,7 +504,8 @@ private fun ProfileEmptyCard(
             )
 
             Text(
-                text = "Your student profile has not been created yet."
+                text =
+                    "Your student profile has not been created yet."
             )
 
             Spacer(
@@ -414,7 +530,8 @@ private fun ProfileErrorCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer
+            containerColor =
+                MaterialTheme.colorScheme.errorContainer
         )
     ) {
         Column(
@@ -463,7 +580,8 @@ private fun ProfileMenuCard(
         onClick = onClick,
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor =
+                MaterialTheme.colorScheme.surface
         )
     ) {
 
@@ -471,7 +589,8 @@ private fun ProfileMenuCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment =
+                Alignment.CenterVertically
         ) {
 
             Icon(
@@ -492,7 +611,8 @@ private fun ProfileMenuCard(
 
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleMedium,
+                    style =
+                        MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
 
@@ -502,8 +622,11 @@ private fun ProfileMenuCard(
 
                 Text(
                     text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style =
+                        MaterialTheme.typography.bodySmall,
+                    color =
+                        MaterialTheme.colorScheme
+                            .onSurfaceVariant
                 )
             }
 
