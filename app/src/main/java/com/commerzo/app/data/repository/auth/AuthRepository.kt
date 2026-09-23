@@ -1,5 +1,6 @@
 package com.commerzo.app.data.repository.auth
 
+import android.app.Activity
 import com.commerzo.app.data.model.auth.AuthState
 import com.commerzo.app.data.model.auth.AuthUser
 
@@ -15,7 +16,9 @@ interface AuthRepository {
         displayName: String
     ): Result<AuthUser>
 
-    suspend fun signInWithGoogle(): Result<AuthUser>
+    suspend fun signInWithGoogle(
+        activity: Activity
+    ): Result<AuthUser>
 
     suspend fun signInWithEmail(
         email: String,
