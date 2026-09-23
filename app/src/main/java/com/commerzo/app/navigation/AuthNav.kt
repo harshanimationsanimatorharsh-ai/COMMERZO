@@ -8,7 +8,6 @@ import com.commerzo.app.ui.screens.auth.CreateAccountScreen
 import com.commerzo.app.ui.screens.auth.LoginScreen
 
 object AuthRoutes {
-
     const val LOGIN = "auth_login"
     const val CREATE_ACCOUNT = "auth_create_account"
 }
@@ -22,9 +21,7 @@ fun AuthNav(
         navController = navController,
         startDestination = AuthRoutes.LOGIN
     ) {
-
         composable(AuthRoutes.LOGIN) {
-
             LoginScreen(
                 onLoginSuccess = onLoginSuccess,
                 onCreateAccount = {
@@ -36,10 +33,12 @@ fun AuthNav(
         }
 
         composable(AuthRoutes.CREATE_ACCOUNT) {
-
             CreateAccountScreen(
                 onBack = {
                     navController.popBackStack()
+                },
+                onAccountCreated = {
+                    onLoginSuccess()
                 }
             )
         }
