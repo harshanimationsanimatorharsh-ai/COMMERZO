@@ -21,9 +21,7 @@ class AuthViewModel(
         )
 
     private val _authState =
-        MutableStateFlow<AuthState>(
-            AuthState.Loading
-        )
+        MutableStateFlow<AuthState>(AuthState.Loading)
 
     val authState: StateFlow<AuthState> =
         _authState.asStateFlow()
@@ -41,8 +39,7 @@ class AuthViewModel(
     fun refreshSession() {
         _authState.value = AuthState.Loading
 
-        val user =
-            repository.getCurrentUser()
+        val user = repository.getCurrentUser()
 
         _currentUser.value = user
 
@@ -52,6 +49,20 @@ class AuthViewModel(
             } else {
                 AuthState.LoggedOut
             }
+    }
+
+    fun createAccountWithEmail(
+        email: String,
+        password: String,
+        displayName: String
+    ) {
+        executeAuthAction {
+            repository.createAccountWithEmail(
+                email = email,
+                password = password,
+                displayName = displayName
+            )
+        }
     }
 
     fun signInWithGoogle() {
@@ -76,9 +87,7 @@ class AuthViewModel(
         phoneNumber: String
     ) {
         viewModelScope.launch {
-
-            _authState.value =
-                AuthState.Loading
+            _authState.value = AuthState.Loading
 
             val result =
                 repository.sendPhoneOtp(
@@ -88,8 +97,7 @@ class AuthViewModel(
             if (result.isFailure) {
                 _authState.value =
                     AuthState.Error(
-                        result.exceptionOrNull()
-                            ?.message
+                        result.exceptionOrNull()?.message
                             ?: "Unable to send OTP."
                     )
             }
@@ -110,27 +118,18 @@ class AuthViewModel(
 
     fun signOut() {
         viewModelScope.launch {
-
-            _authState.value =
-                AuthState.Loading
+            _authState.value = AuthState.Loading
 
             val result =
                 repository.signOut()
 
             if (result.isSuccess) {
-
-                _currentUser.value =
-                    null
-
-                _authState.value =
-                    AuthState.LoggedOut
-
+                _currentUser.value = null
+                _authState.value = AuthState.LoggedOut
             } else {
-
                 _authState.value =
                     AuthState.Error(
-                        result.exceptionOrNull()
-                            ?.message
+                        result.exceptionOrNull()?.message
                             ?: "Unable to sign out."
                     )
             }
@@ -139,27 +138,18 @@ class AuthViewModel(
 
     fun deleteAccount() {
         viewModelScope.launch {
-
-            _authState.value =
-                AuthState.Loading
+            _authState.value = AuthState.Loading
 
             val result =
                 repository.deleteAccount()
 
             if (result.isSuccess) {
-
-                _currentUser.value =
-                    null
-
-                _authState.value =
-                    AuthState.LoggedOut
-
+                _currentUser.value = null
+                _authState.value = AuthState.LoggedOut
             } else {
-
                 _authState.value =
                     AuthState.Error(
-                        result.exceptionOrNull()
-                            ?.message
+                        result.exceptionOrNull()?.message
                             ?: "Unable to delete account."
                     )
             }
@@ -170,32 +160,21 @@ class AuthViewModel(
         action: suspend () -> Result<AuthUser>
     ) {
         viewModelScope.launch {
+            _authState.value = AuthState.Loading
 
-            _authState.value =
-                AuthState.Loading
+            val result = action()
 
-            val result =
-                action()
-
-            result
-                .onSuccess { user ->
-
-                    _currentUser.value =
-                        user
-
-                    _authState.value =
-                        AuthState.LoggedIn(
-                            user.userId
-                        )
-                }
-                .onFailure { error ->
-
-                    _authState.value =
-                        AuthState.Error(
-                            error.message
-                                ?: "Authentication failed."
-                        )
-                }
+            result.onSuccess { user ->
+                _currentUser.value = user
+                _authState.value =
+                    AuthState.LoggedIn(user.userId)
+            }.onFailure { error ->
+                _authState.value =
+                    AuthState.Error(
+                        error.message
+                            ?: "Authentication failed."
+                    )
+            }
         }
     }
 }
