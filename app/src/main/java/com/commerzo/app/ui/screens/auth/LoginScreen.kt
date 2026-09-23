@@ -1,6 +1,7 @@
 package com.commerzo.app.ui.screens.auth
 
 import android.app.Activity
+import android.util.Patterns
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -52,11 +53,40 @@ fun LoginScreen(
         mutableStateOf<String?>(null)
     }
 
+    var passwordResetRequested by remember {
+        mutableStateOf(false)
+    }
+
+    var passwordResetSuccess by remember {
+        mutableStateOf(false)
+    }
+
     val authState by viewModel.authState.collectAsState()
 
     LaunchedEffect(authState) {
         if (authState is AuthState.LoggedIn) {
             onLoginSuccess()
+        }
+
+        /*
+         * Password reset is intentionally handled separately from
+         * normal authentication. The repository returns LoggedOut
+         * after a successful reset-email request.
+         */
+        if (
+            passwordResetRequested &&
+            authState is AuthState.LoggedOut
+        ) {
+            passwordResetSuccess = true
+            passwordResetRequested = false
+            localError = null
+        }
+
+        if (
+            passwordResetRequested &&
+            authState is AuthState.Error
+        ) {
+            passwordResetRequested = false
         }
     }
 
@@ -99,6 +129,7 @@ fun LoginScreen(
             onValueChange = {
                 email = it
                 localError = null
+                passwordResetSuccess = false
             },
             modifier = Modifier.fillMaxWidth(),
             label = {
@@ -115,6 +146,7 @@ fun LoginScreen(
             onValueChange = {
                 password = it
                 localError = null
+                passwordResetSuccess = false
             },
             modifier = Modifier.fillMaxWidth(),
             label = {
@@ -125,7 +157,51 @@ fun LoginScreen(
             enabled = authState !is AuthState.Loading
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+
+        TextButton(
+            onClick = {
+                when {
+                    email.isBlank() -> {
+                        localError =
+                            "Please enter your email address."
+                    }
+
+                    !Patterns.EMAIL_ADDRESS
+                        .matcher(email.trim())
+                        .matches() -> {
+                        localError =
+                            "Please enter a valid email address."
+                    }
+
+                    else -> {
+                        localError = null
+                        passwordResetSuccess = false
+                        passwordResetRequested = true
+
+                        viewModel.sendPasswordResetEmail(
+                            email = email.trim()
+                        )
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = authState !is AuthState.Loading
+        ) {
+            Text("Forgot Password?")
+        }
+
+        if (passwordResetSuccess) {
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "Password reset email sent. Check your inbox and follow the instructions.",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         localError?.let { error ->
             Text(
@@ -164,10 +240,11 @@ fun LoginScreen(
                         localError = "Please enter your email."
                     }
 
-                    !android.util.Patterns.EMAIL_ADDRESS
+                    !Patterns.EMAIL_ADDRESS
                         .matcher(email.trim())
                         .matches() -> {
-                        localError = "Please enter a valid email address."
+                        localError =
+                            "Please enter a valid email address."
                     }
 
                     password.isBlank() -> {
@@ -176,6 +253,7 @@ fun LoginScreen(
 
                     else -> {
                         localError = null
+                        passwordResetSuccess = false
 
                         viewModel.signInWithEmail(
                             email = email.trim(),
@@ -204,6 +282,7 @@ fun LoginScreen(
 
                 if (activity != null) {
                     localError = null
+                    passwordResetSuccess = false
                     viewModel.signInWithGoogle(activity)
                 } else {
                     localError =
