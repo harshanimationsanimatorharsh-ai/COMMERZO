@@ -1,5 +1,6 @@
 package com.commerzo.app.data.repository.auth
 
+import android.app.Activity
 import com.commerzo.app.data.model.auth.AuthState
 import com.commerzo.app.data.model.auth.AuthUser
 
@@ -33,7 +34,9 @@ class LocalAuthRepository(
         )
     }
 
-    override suspend fun signInWithGoogle(): Result<AuthUser> {
+    override suspend fun signInWithGoogle(
+        activity: Activity
+    ): Result<AuthUser> {
         return Result.failure(
             UnsupportedOperationException(
                 "Google Sign-In is not connected yet."
