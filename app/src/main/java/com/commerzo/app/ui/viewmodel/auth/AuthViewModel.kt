@@ -87,6 +87,35 @@ class AuthViewModel(
         }
     }
 
+    fun sendPasswordResetEmail(
+        email: String
+    ) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+
+            val result =
+                repository.sendPasswordResetEmail(
+                    email = email.trim()
+                )
+
+            if (result.isSuccess) {
+                _currentUser.value = null
+
+                /*
+                 * Keep the user logged out after a password-reset request.
+                 * The Login screen can display its own success message.
+                 */
+                _authState.value = AuthState.LoggedOut
+            } else {
+                _authState.value =
+                    AuthState.Error(
+                        result.exceptionOrNull()?.message
+                            ?: "Unable to send password reset email."
+                    )
+            }
+        }
+    }
+
     fun sendPhoneOtp(
         phoneNumber: String
     ) {
