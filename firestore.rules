@@ -1,0 +1,51 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /*
+     * COMMERZO USER PROFILES
+     *
+     * Each authenticated student has one profile:
+     *
+     * users/{firebaseUid}
+     *
+     * Students can read and update ONLY their own profile.
+     *
+     * Admin access will be added later using secure
+     * Firebase custom claims / trusted backend authorization.
+     */
+
+    match /users/{userId} {
+
+      // A signed-in user can read only their own profile.
+      allow read: if isOwner(userId);
+
+      // A signed-in user can create only their own profile.
+      // The client cannot create an admin profile.
+      allow create: if isOwner(userId)
+        && request.resource.data.userId == userId
+        && request.resource.data.role == "student";
+
+      // A signed-in user can update only their own profile.
+      // The role field cannot be changed from the client.
+      allow update: if isOwner(userId)
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.role == resource.data.role;
+
+      // Profile deletion is intentionally disabled for now.
+      // Account deletion will later use a controlled flow that
+      // also handles associated cloud data.
+      allow delete: if false;
+    }
+
+    /*
+     * Helper: verifies that the currently authenticated
+     * Firebase user owns the requested document.
+     */
+    function isOwner(userId) {
+      return request.auth != null
+        && request.auth.uid == userId;
+    }
+  }
+}
