@@ -1,17 +1,18 @@
 package com.commerzo.app.data.repository.auth
 
 import android.app.Activity
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
 import com.commerzo.app.data.model.auth.AuthState
 import com.commerzo.app.data.model.auth.AuthUser
 import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import androidx.credentials.CredentialManager
-import androidx.credentials.GetCredentialRequest
-import androidx.credentials.exceptions.GetCredentialException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
@@ -25,15 +26,41 @@ class FirebaseAuthRepository(
     override fun getAuthState(): AuthState {
         val user = firebaseAuth.currentUser
 
-        return if (user != null) {
-            AuthState.LoggedIn(user.uid)
-        } else {
-            AuthState.LoggedOut
+        if (user == null) {
+            return AuthState.LoggedOut
         }
+
+        /*
+         * Email/password accounts must be email-verified before
+         * COMMERZO treats the Firebase session as authenticated.
+         *
+         * Google accounts do not require a separate COMMERZO
+         * email-verification step because Google authentication
+         * already provides the authenticated identity.
+         */
+        val isEmailPasswordAccount = user.providerData.any {
+            it.providerId == EmailAuthProvider.PROVIDER_ID
+        }
+
+        if (isEmailPasswordAccount && !user.isEmailVerified) {
+            return AuthState.LoggedOut
+        }
+
+        return AuthState.LoggedIn(user.uid)
     }
 
     override fun getCurrentUser(): AuthUser? {
-        return firebaseAuth.currentUser?.toAuthUser()
+        val user = firebaseAuth.currentUser ?: return null
+
+        val isEmailPasswordAccount = user.providerData.any {
+            it.providerId == EmailAuthProvider.PROVIDER_ID
+        }
+
+        if (isEmailPasswordAccount && !user.isEmailVerified) {
+            return null
+        }
+
+        return user.toAuthUser()
     }
 
     override suspend fun createAccountWithEmail(
@@ -44,7 +71,7 @@ class FirebaseAuthRepository(
         return try {
             val result = firebaseAuth
                 .createUserWithEmailAndPassword(
-                    email,
+                    email.trim(),
                     password
                 )
                 .awaitResult()
@@ -59,27 +86,38 @@ class FirebaseAuthRepository(
 
             val profileRequest =
                 UserProfileChangeRequest.Builder()
-                    .setDisplayName(displayName)
+                    .setDisplayName(displayName.trim())
                     .build()
 
             firebaseUser
                 .updateProfile(profileRequest)
                 .awaitCompletion()
 
+            /*
+             * Firebase can create an account for an address such as
+             * randomtext@gmail.com even when that mailbox does not exist.
+             *
+             * The account therefore remains untrusted until the user
+             * clicks Firebase's verification link from the real mailbox.
+             */
             firebaseUser
                 .sendEmailVerification()
                 .awaitCompletion()
 
-            val updatedUser =
-                firebaseAuth.currentUser
-                    ?: firebaseUser
+            /*
+             * Do not keep an unverified email/password account signed in.
+             * This prevents AuthNavigation/AppNavigation from treating
+             * the newly-created but unverified account as an authenticated
+             * COMMERZO user.
+             */
+            firebaseAuth.signOut()
+            sessionStore.clearUser()
 
-            val authUser =
-                updatedUser.toAuthUser()
-
-            sessionStore.saveUser(authUser)
-
-            Result.success(authUser)
+            Result.failure(
+                EmailVerificationRequiredException(
+                    "Account created. Please verify your email address using the verification link sent to your inbox, then sign in again."
+                )
+            )
         } catch (exception: Exception) {
             Result.failure(exception)
         }
@@ -117,10 +155,9 @@ class FirebaseAuthRepository(
                 )
 
             val credential =
-                GoogleIdTokenCredential
-                    .createFrom(
-                        result.credential.data
-                    )
+                GoogleIdTokenCredential.createFrom(
+                    result.credential.data
+                )
 
             val firebaseCredential =
                 GoogleAuthProvider.getCredential(
@@ -166,12 +203,13 @@ class FirebaseAuthRepository(
         password: String
     ): Result<AuthUser> {
         return try {
-            val result = firebaseAuth
-                .signInWithEmailAndPassword(
-                    email,
-                    password
-                )
-                .awaitResult()
+            val result =
+                firebaseAuth
+                    .signInWithEmailAndPassword(
+                        email.trim(),
+                        password
+                    )
+                    .awaitResult()
 
             val firebaseUser =
                 result.user
@@ -181,8 +219,48 @@ class FirebaseAuthRepository(
                         )
                     )
 
+            /*
+             * Refresh Firebase's user information so isEmailVerified
+             * reflects the latest server state after the user clicks
+             * the verification link.
+             */
+            firebaseUser
+                .reload()
+                .awaitCompletion()
+
+            val refreshedUser =
+                firebaseAuth.currentUser
+                    ?: return Result.failure(
+                        IllegalStateException(
+                            "Signed-in user is no longer available."
+                        )
+                    )
+
+            val isEmailPasswordAccount =
+                refreshedUser.providerData.any {
+                    it.providerId == EmailAuthProvider.PROVIDER_ID
+                }
+
+            if (
+                isEmailPasswordAccount &&
+                !refreshedUser.isEmailVerified
+            ) {
+                /*
+                 * Never allow an unverified email/password account
+                 * to continue into COMMERZO.
+                 */
+                firebaseAuth.signOut()
+                sessionStore.clearUser()
+
+                return Result.failure(
+                    EmailVerificationRequiredException(
+                        "Please verify your email address before signing in to COMMERZO."
+                    )
+                )
+            }
+
             val authUser =
-                firebaseUser.toAuthUser()
+                refreshedUser.toAuthUser()
 
             sessionStore.saveUser(authUser)
 
@@ -242,6 +320,10 @@ class FirebaseAuthRepository(
         }
     }
 }
+
+class EmailVerificationRequiredException(
+    message: String
+) : IllegalStateException(message)
 
 private fun com.google.firebase.auth.FirebaseUser.toAuthUser(): AuthUser {
     return AuthUser(
