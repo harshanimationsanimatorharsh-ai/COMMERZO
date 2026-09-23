@@ -3,7 +3,7 @@ package com.commerzo.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.commerzo.app.navigation.AppNavigation
+import com.commerzo.app.navigation.AuthNavigation
 import com.commerzo.app.ui.theme.CommerzoTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             CommerzoTheme {
-                AppNavigation()
+                AuthNavigation()
             }
         }
     }
