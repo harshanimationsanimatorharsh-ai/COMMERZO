@@ -106,9 +106,6 @@ class FirebaseAuthRepository(
 
             /*
              * Do not keep an unverified email/password account signed in.
-             * This prevents AuthNavigation/AppNavigation from treating
-             * the newly-created but unverified account as an authenticated
-             * COMMERZO user.
              */
             firebaseAuth.signOut()
             sessionStore.clearUser()
@@ -221,8 +218,7 @@ class FirebaseAuthRepository(
 
             /*
              * Refresh Firebase's user information so isEmailVerified
-             * reflects the latest server state after the user clicks
-             * the verification link.
+             * reflects the latest server state after verification.
              */
             firebaseUser
                 .reload()
@@ -245,10 +241,6 @@ class FirebaseAuthRepository(
                 isEmailPasswordAccount &&
                 !refreshedUser.isEmailVerified
             ) {
-                /*
-                 * Never allow an unverified email/password account
-                 * to continue into COMMERZO.
-                 */
                 firebaseAuth.signOut()
                 sessionStore.clearUser()
 
@@ -265,6 +257,30 @@ class FirebaseAuthRepository(
             sessionStore.saveUser(authUser)
 
             Result.success(authUser)
+        } catch (exception: Exception) {
+            Result.failure(exception)
+        }
+    }
+
+    override suspend fun sendPasswordResetEmail(
+        email: String
+    ): Result<Unit> {
+        return try {
+            val normalizedEmail = email.trim()
+
+            if (normalizedEmail.isBlank()) {
+                return Result.failure(
+                    IllegalArgumentException(
+                        "Please enter your email address."
+                    )
+                )
+            }
+
+            firebaseAuth
+                .sendPasswordResetEmail(normalizedEmail)
+                .awaitCompletion()
+
+            Result.success(Unit)
         } catch (exception: Exception) {
             Result.failure(exception)
         }
