@@ -33,7 +33,6 @@ class FirebaseAuthRepository(
         password: String,
         displayName: String
     ): Result<AuthUser> {
-
         return try {
             val result = firebaseAuth
                 .createUserWithEmailAndPassword(
@@ -59,6 +58,10 @@ class FirebaseAuthRepository(
                 .updateProfile(profileRequest)
                 .awaitCompletion()
 
+            firebaseUser
+                .sendEmailVerification()
+                .awaitCompletion()
+
             val updatedUser =
                 firebaseAuth.currentUser
                     ?: firebaseUser
@@ -69,7 +72,6 @@ class FirebaseAuthRepository(
             sessionStore.saveUser(authUser)
 
             Result.success(authUser)
-
         } catch (exception: Exception) {
             Result.failure(exception)
         }
@@ -87,7 +89,6 @@ class FirebaseAuthRepository(
         email: String,
         password: String
     ): Result<AuthUser> {
-
         return try {
             val result = firebaseAuth
                 .signInWithEmailAndPassword(
@@ -110,7 +111,6 @@ class FirebaseAuthRepository(
             sessionStore.saveUser(authUser)
 
             Result.success(authUser)
-
         } catch (exception: Exception) {
             Result.failure(exception)
         }
@@ -158,11 +158,9 @@ class FirebaseAuthRepository(
                     )
 
             user.delete().awaitCompletion()
-
             sessionStore.clearUser()
 
             Result.success(Unit)
-
         } catch (exception: Exception) {
             Result.failure(exception)
         }
@@ -185,7 +183,6 @@ private suspend fun <T> com.google.android.gms.tasks.Task<T>.awaitResult(): T {
     return suspendCancellableCoroutine { continuation ->
 
         addOnCompleteListener { task ->
-
             if (task.isSuccessful) {
                 continuation.resume(task.result)
             } else {
@@ -206,7 +203,6 @@ private suspend fun com.google.android.gms.tasks.Task<Void>.awaitCompletion() {
     suspendCancellableCoroutine<Unit> { continuation ->
 
         addOnCompleteListener { task ->
-
             if (task.isSuccessful) {
                 continuation.resume(Unit)
             } else {
