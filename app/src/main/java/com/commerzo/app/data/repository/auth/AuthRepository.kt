@@ -9,6 +9,12 @@ interface AuthRepository {
 
     fun getCurrentUser(): AuthUser?
 
+    suspend fun createAccountWithEmail(
+        email: String,
+        password: String,
+        displayName: String
+    ): Result<AuthUser>
+
     suspend fun signInWithGoogle(): Result<AuthUser>
 
     suspend fun signInWithEmail(
