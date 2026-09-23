@@ -100,11 +100,6 @@ class AuthViewModel(
 
             if (result.isSuccess) {
                 _currentUser.value = null
-
-                /*
-                 * Keep the user logged out after a password-reset request.
-                 * The Login screen can display its own success message.
-                 */
                 _authState.value = AuthState.LoggedOut
             } else {
                 _authState.value =
@@ -117,6 +112,7 @@ class AuthViewModel(
     }
 
     fun sendPhoneOtp(
+        activity: Activity,
         phoneNumber: String
     ) {
         viewModelScope.launch {
@@ -124,10 +120,21 @@ class AuthViewModel(
 
             val result =
                 repository.sendPhoneOtp(
-                    phoneNumber
+                    activity = activity,
+                    phoneNumber = phoneNumber.trim()
                 )
 
-            if (result.isFailure) {
+            if (result.isSuccess) {
+                /*
+                 * Keep the user on the authentication screen while
+                 * the OTP verification step is active.
+                 *
+                 * AuthState does not currently contain a dedicated
+                 * "OTP sent" state, so Loading is cleared here
+                 * without marking the user as logged in.
+                 */
+                _authState.value = AuthState.LoggedOut
+            } else {
                 _authState.value =
                     AuthState.Error(
                         result.exceptionOrNull()?.message
@@ -138,13 +145,11 @@ class AuthViewModel(
     }
 
     fun verifyPhoneOtp(
-        phoneNumber: String,
         otp: String
     ) {
         executeAuthAction {
             repository.verifyPhoneOtp(
-                phoneNumber = phoneNumber,
-                otp = otp
+                otp = otp.trim()
             )
         }
     }
@@ -199,22 +204,24 @@ class AuthViewModel(
 
             result.onSuccess { user ->
                 _currentUser.value = user
+
                 _authState.value =
-                    AuthState.LoggedIn(user.userId)
+                    AuthState.LoggedIn(
+                        user.userId
+                    )
             }.onFailure { error ->
 
-                /*
-                 * Email/password accounts that have not completed
-                 * Firebase email verification must never enter the
-                 * logged-in state.
-                 */
-                if (error is EmailVerificationRequiredException) {
+                if (
+                    error is EmailVerificationRequiredException
+                ) {
                     _currentUser.value = null
+
                     _authState.value =
                         AuthState.Error(
                             error.message
                                 ?: "Please verify your email address before continuing."
                         )
+
                     return@onFailure
                 }
 
