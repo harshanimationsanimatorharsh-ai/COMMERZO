@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.commerzo.app.data.model.auth.AuthState
 import com.commerzo.app.data.model.auth.AuthUser
 import com.commerzo.app.data.repository.auth.AuthRepositoryProvider
+import com.commerzo.app.data.repository.auth.EmailVerificationRequiredException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -172,6 +173,24 @@ class AuthViewModel(
                 _authState.value =
                     AuthState.LoggedIn(user.userId)
             }.onFailure { error ->
+
+                /*
+                 * Email/password accounts that have not completed
+                 * Firebase email verification must never enter the
+                 * logged-in state.
+                 */
+                if (error is EmailVerificationRequiredException) {
+                    _currentUser.value = null
+                    _authState.value =
+                        AuthState.Error(
+                            error.message
+                                ?: "Please verify your email address before continuing."
+                        )
+                    return@onFailure
+                }
+
+                _currentUser.value = null
+
                 _authState.value =
                     AuthState.Error(
                         error.message
