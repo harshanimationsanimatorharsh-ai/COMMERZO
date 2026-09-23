@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "472656083923",
+    "project_id": "commerzo-42fd2",
+    "storage_bucket": "commerzo-42fd2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:472656083923:android:0816a6a9b3ac4e45b00d26",
+        "android_client_info": {
+          "package_name": "com.commerzo.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "472656083923-f77i2g27es3ohmst9is6pv6b2gae1t4o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.commerzo.app",
+            "certificate_hash": "dd605807281553e84bafc1a15c6b98b15c70f3c8"
+          }
+        },
+        {
+          "client_id": "472656083923-o7bvpr5c0m6v02ken1cmhkph8k3lh3qc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXzgGDRqt5S04YGBdx2Bp4Cq9HQX5x_XM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "472656083923-o7bvpr5c0m6v02ken1cmhkph8k3lh3qc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
