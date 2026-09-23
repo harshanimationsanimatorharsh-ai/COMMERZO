@@ -1,6 +1,8 @@
 package com.commerzo.app.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -9,10 +11,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.model.content.CurriculumContentIds
+import com.commerzo.app.data.model.auth.AuthState
 import com.commerzo.app.data.repository.SubjectRepository
 import com.commerzo.app.ui.screens.AchievementsScreen
 import com.commerzo.app.ui.screens.BookmarksScreen
@@ -28,6 +32,14 @@ import com.commerzo.app.ui.screens.TestHistoryScreen
 import com.commerzo.app.ui.screens.TestResultScreen
 import com.commerzo.app.ui.screens.TestScreen
 import com.commerzo.app.ui.screens.TestSelectionScreen
+import com.commerzo.app.ui.screens.auth.CreateAccountScreen
+import com.commerzo.app.ui.screens.auth.LoginScreen
+import com.commerzo.app.ui.viewmodel.auth.AuthViewModel
+
+private object AuthRoutes {
+    const val LOGIN = "auth_login"
+    const val CREATE_ACCOUNT = "auth_create_account"
+}
 
 data class NavigationTestResult(
     val total: Int = 0,
@@ -40,25 +52,175 @@ data class NavigationTestResult(
 
 @Composable
 fun AppNavigation(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    authViewModel: AuthViewModel = viewModel()
 ) {
     var latestTestResult by remember {
         mutableStateOf(NavigationTestResult())
     }
+
+    val authState by authViewModel.authState.collectAsState()
+
+    val currentBackStackEntry by
+        navController.currentBackStackEntryAsState()
+
+    val currentRoute =
+        currentBackStackEntry?.destination?.route
 
     val subjectRepository =
         remember {
             SubjectRepository()
         }
 
+    /*
+     * Authentication is the navigation gate for COMMERZO.
+     *
+     * FirebaseAuthRepository remains the real identity source.
+     * AuthSessionStore is not used as an authorization mechanism.
+     */
+    LaunchedEffect(authState) {
+
+        when (authState) {
+
+            is AuthState.LoggedIn -> {
+
+                if (
+                    currentRoute == AuthRoutes.LOGIN ||
+                    currentRoute == AuthRoutes.CREATE_ACCOUNT ||
+                    currentRoute == null
+                ) {
+                    navController.navigate(
+                        Screen.Home.route
+                    ) {
+                        popUpTo(
+                            AuthRoutes.LOGIN
+                        ) {
+                            inclusive = true
+                        }
+
+                        launchSingleTop = true
+                    }
+                }
+            }
+
+            is AuthState.LoggedOut -> {
+
+                if (
+                    currentRoute != AuthRoutes.LOGIN &&
+                    currentRoute != AuthRoutes.CREATE_ACCOUNT
+                ) {
+                    navController.navigate(
+                        AuthRoutes.LOGIN
+                    ) {
+                        popUpTo(
+                            Screen.Home.route
+                        ) {
+                            inclusive = true
+                        }
+
+                        launchSingleTop = true
+                    }
+                }
+            }
+
+            is AuthState.Loading -> {
+                // Keep the current destination while Firebase
+                // authentication state is being resolved.
+            }
+
+            is AuthState.Error -> {
+                /*
+                 * Authentication errors are displayed by the
+                 * authentication screens.
+                 *
+                 * Do not automatically redirect here because an
+                 * error does not necessarily mean the user is logged out.
+                 */
+            }
+        }
+    }
+
+    val initialDestination =
+        if (authState is AuthState.LoggedIn) {
+            Screen.Home.route
+        } else {
+            AuthRoutes.LOGIN
+        }
+
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = initialDestination
     ) {
 
+        /*
+         * =========================================================
+         * AUTHENTICATION
+         * =========================================================
+         */
+
+        composable(AuthRoutes.LOGIN) {
+
+            LoginScreen(
+                onLoginSuccess = {
+
+                    navController.navigate(
+                        Screen.Home.route
+                    ) {
+                        popUpTo(
+                            AuthRoutes.LOGIN
+                        ) {
+                            inclusive = true
+                        }
+
+                        launchSingleTop = true
+                    }
+                },
+
+                onCreateAccount = {
+
+                    navController.navigate(
+                        AuthRoutes.CREATE_ACCOUNT
+                    )
+                }
+            )
+        }
+
+        composable(AuthRoutes.CREATE_ACCOUNT) {
+
+            CreateAccountScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+
+                onAccountCreated = {
+
+                    navController.navigate(
+                        Screen.Home.route
+                    ) {
+                        popUpTo(
+                            AuthRoutes.CREATE_ACCOUNT
+                        ) {
+                            inclusive = true
+                        }
+
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+
+        /*
+         * =========================================================
+         * MAIN APP
+         * =========================================================
+         */
+
         composable(Screen.Home.route) {
+
             HomeScreen(
+
                 onSubjectClick = { subjectId ->
+
                     navController.navigate(
                         Screen.Chapters.createRoute(
                             subjectId = subjectId,
@@ -69,54 +231,63 @@ fun AppNavigation(
                 },
 
                 onSubjectsClick = {
+
                     navController.navigate(
                         Screen.Subjects.route
                     )
                 },
 
                 onPracticeClick = {
+
                     navController.navigate(
                         Screen.Practice.route
                     )
                 },
 
                 onTestsClick = {
+
                     navController.navigate(
                         Screen.Tests.route
                     )
                 },
 
                 onGamesClick = {
+
                     navController.navigate(
                         Screen.Games.route
                     )
                 },
 
                 onProfileClick = {
+
                     navController.navigate(
                         Screen.Profile.route
                     )
                 },
 
                 onBookmarksClick = {
+
                     navController.navigate(
                         Screen.Bookmarks.route
                     )
                 },
 
                 onTestHistoryClick = {
+
                     navController.navigate(
                         Screen.TestHistory.route
                     )
                 },
 
                 onAchievementsClick = {
+
                     navController.navigate(
                         Screen.Achievements.route
                     )
                 },
 
                 onSettingsClick = {
+
                     navController.navigate(
                         Screen.Settings.route
                     )
@@ -125,15 +296,19 @@ fun AppNavigation(
         }
 
         composable(Screen.Practice.route) {
+
             PracticeScreen(
                 onNavigate = { route ->
+
                     navController.navigate(route)
                 }
             )
         }
 
         composable(Screen.Tests.route) {
+
             TestSelectionScreen(
+
                 onStartTest = {
                     subjectId,
                     chapterId,
@@ -142,7 +317,9 @@ fun AppNavigation(
 
                     navController.navigate(
                         Screen.TestSession.createRoute(
-                            subjectId = toQuestionSubjectId(subjectId),
+                            subjectId = toQuestionSubjectId(
+                                subjectId
+                            ),
                             chapterId = chapterId,
                             board = board,
                             classLevel = classLevel
@@ -151,6 +328,7 @@ fun AppNavigation(
                 },
 
                 onBack = {
+
                     navController.popBackStack()
                 }
             )
@@ -164,7 +342,9 @@ fun AppNavigation(
                     ?: return@composable
 
             val subjectId =
-                toQuestionSubjectId(rawSubjectId)
+                toQuestionSubjectId(
+                    rawSubjectId
+                )
 
             val chapterId =
                 backStackEntry.arguments
@@ -188,9 +368,13 @@ fun AppNavigation(
                 )
 
             TestScreen(
+
                 subjectId = subjectId,
+
                 chapterId = chapterId,
+
                 board = board,
+
                 classLevel = classLevel,
 
                 onTestFinished = {
@@ -217,36 +401,44 @@ fun AppNavigation(
                 },
 
                 onBack = {
+
                     navController.popBackStack()
                 }
             )
         }
 
         composable(Screen.Games.route) {
+
             GamesScreen()
         }
 
         composable(Screen.Profile.route) {
+
             ProfileScreen(
+
                 onBookmarks = {
+
                     navController.navigate(
                         Screen.Bookmarks.route
                     )
                 },
 
                 onTestHistory = {
+
                     navController.navigate(
                         Screen.TestHistory.route
                     )
                 },
 
                 onAchievements = {
+
                     navController.navigate(
                         Screen.Achievements.route
                     )
                 },
 
                 onSettings = {
+
                     navController.navigate(
                         Screen.Settings.route
                     )
@@ -255,7 +447,9 @@ fun AppNavigation(
         }
 
         composable(Screen.Subjects.route) {
+
             SubjectSelectionScreen(
+
                 viewModel = viewModel(),
 
                 onSubjectClick = { subject ->
@@ -303,12 +497,17 @@ fun AppNavigation(
                 )
 
             ChapterScreen(
+
                 subjectId = subjectId,
+
                 subjectName = subjectName,
+
                 board = board,
+
                 classLevel = classLevel,
 
                 onBack = {
+
                     navController.popBackStack()
                 },
 
@@ -319,7 +518,9 @@ fun AppNavigation(
                     navController.navigate(
                         Screen.Questions.createRoute(
                             subjectId =
-                                toQuestionSubjectId(subjectId),
+                                toQuestionSubjectId(
+                                    subjectId
+                                ),
                             chapterId = chapterId,
                             board = board,
                             classLevel = classLevel
@@ -334,15 +535,17 @@ fun AppNavigation(
             val rawSubjectId =
                 backStackEntry.arguments
                     ?.getString("subjectId")
-                    ?: return@composable
+                ?: return@composable
 
             val subjectId =
-                toQuestionSubjectId(rawSubjectId)
+                toQuestionSubjectId(
+                    rawSubjectId
+                )
 
             val chapterId =
                 backStackEntry.arguments
                     ?.getString("chapterId")
-                    ?: return@composable
+                ?: return@composable
 
             val board =
                 enumValueOrDefault(
@@ -361,12 +564,17 @@ fun AppNavigation(
                 )
 
             QuestionScreen(
+
                 subjectId = subjectId,
+
                 chapterId = chapterId,
+
                 board = board,
+
                 classLevel = classLevel,
 
                 onBack = {
+
                     navController.popBackStack()
                 }
             )
@@ -375,12 +583,24 @@ fun AppNavigation(
         composable(Screen.TestResult.route) {
 
             TestResultScreen(
-                total = latestTestResult.total,
-                answered = latestTestResult.answered,
-                correct = latestTestResult.correct,
-                wrong = latestTestResult.wrong,
-                unattempted = latestTestResult.unattempted,
-                marked = latestTestResult.marked,
+
+                total =
+                    latestTestResult.total,
+
+                answered =
+                    latestTestResult.answered,
+
+                correct =
+                    latestTestResult.correct,
+
+                wrong =
+                    latestTestResult.wrong,
+
+                unattempted =
+                    latestTestResult.unattempted,
+
+                marked =
+                    latestTestResult.marked,
 
                 onRestart = {
 
@@ -390,6 +610,7 @@ fun AppNavigation(
                     navController.navigate(
                         Screen.Tests.route
                     ) {
+
                         popUpTo(
                             Screen.Tests.route
                         ) {
@@ -406,6 +627,7 @@ fun AppNavigation(
                     navController.navigate(
                         Screen.Tests.route
                     ) {
+
                         popUpTo(
                             Screen.Tests.route
                         ) {
@@ -417,32 +639,44 @@ fun AppNavigation(
         }
 
         composable(Screen.Bookmarks.route) {
+
             BookmarksScreen(
+
                 onBack = {
+
                     navController.popBackStack()
                 }
             )
         }
 
         composable(Screen.TestHistory.route) {
+
             TestHistoryScreen(
+
                 onBack = {
+
                     navController.popBackStack()
                 }
             )
         }
 
         composable(Screen.Achievements.route) {
+
             AchievementsScreen(
+
                 onBack = {
+
                     navController.popBackStack()
                 }
             )
         }
 
         composable(Screen.Settings.route) {
+
             SettingsScreen(
+
                 onBack = {
+
                     navController.popBackStack()
                 }
             )
@@ -453,12 +687,17 @@ fun AppNavigation(
 private fun toQuestionSubjectId(
     subjectId: String
 ): String {
+
     return when (subjectId) {
 
         CurriculumContentIds.MP_BOARD_CLASS_12_ECONOMICS_MICRO,
+
         CurriculumContentIds.MP_BOARD_CLASS_12_ECONOMICS_MACRO,
+
         CurriculumContentIds.CBSE_CLASS_12_ECONOMICS_INDIAN,
+
         CurriculumContentIds.CBSE_CLASS_12_ECONOMICS_MACRO -> {
+
             "economics"
         }
 
@@ -476,18 +715,23 @@ private fun getSubjectDisplayName(
     return when (subjectId) {
 
         CurriculumContentIds.MP_BOARD_CLASS_12_ECONOMICS_MICRO ->
+
             "Economics • Micro Economics"
 
         CurriculumContentIds.MP_BOARD_CLASS_12_ECONOMICS_MACRO ->
+
             "Economics • Macro Economics"
 
         CurriculumContentIds.CBSE_CLASS_12_ECONOMICS_INDIAN ->
+
             "Economics • Indian Economic Development"
 
         CurriculumContentIds.CBSE_CLASS_12_ECONOMICS_MACRO ->
+
             "Economics • Macroeconomics"
 
         else ->
+
             subjectRepository
                 .getSubjects(
                     board,
@@ -506,10 +750,14 @@ private inline fun <reified T : Enum<T>>
         value: String,
         default: T
     ): T =
+
     try {
+
         enumValueOf<T>(value)
+
     } catch (
         _: IllegalArgumentException
     ) {
+
         default
     }
