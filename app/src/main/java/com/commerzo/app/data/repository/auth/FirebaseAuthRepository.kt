@@ -9,11 +9,18 @@ import com.commerzo.app.data.model.auth.AuthUser
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthMissingActivityForRecaptchaException
+import com.google.firebase.auth.FirebaseAuthMultiFactorException
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthOptions
+import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 
 class FirebaseAuthRepository(
@@ -23,6 +30,15 @@ class FirebaseAuthRepository(
     private val firebaseAuth: FirebaseAuth =
         FirebaseAuth.getInstance()
 
+    /*
+     * Firebase Phone Authentication is callback-based.
+     *
+     * The verification ID is generated when Firebase sends the OTP.
+     * It is kept only inside this repository until the OTP is verified.
+     */
+    @Volatile
+    private var phoneVerificationId: String? = null
+
     override fun getAuthState(): AuthState {
         val user = firebaseAuth.currentUser
 
@@ -30,14 +46,6 @@ class FirebaseAuthRepository(
             return AuthState.LoggedOut
         }
 
-        /*
-         * Email/password accounts must be email-verified before
-         * COMMERZO treats the Firebase session as authenticated.
-         *
-         * Google accounts do not require a separate COMMERZO
-         * email-verification step because Google authentication
-         * already provides the authenticated identity.
-         */
         val isEmailPasswordAccount = user.providerData.any {
             it.providerId == EmailAuthProvider.PROVIDER_ID
         }
@@ -69,12 +77,13 @@ class FirebaseAuthRepository(
         displayName: String
     ): Result<AuthUser> {
         return try {
-            val result = firebaseAuth
-                .createUserWithEmailAndPassword(
-                    email.trim(),
-                    password
-                )
-                .awaitResult()
+            val result =
+                firebaseAuth
+                    .createUserWithEmailAndPassword(
+                        email.trim(),
+                        password
+                    )
+                    .awaitResult()
 
             val firebaseUser =
                 result.user
@@ -93,20 +102,10 @@ class FirebaseAuthRepository(
                 .updateProfile(profileRequest)
                 .awaitCompletion()
 
-            /*
-             * Firebase can create an account for an address such as
-             * randomtext@gmail.com even when that mailbox does not exist.
-             *
-             * The account therefore remains untrusted until the user
-             * clicks Firebase's verification link from the real mailbox.
-             */
             firebaseUser
                 .sendEmailVerification()
                 .awaitCompletion()
 
-            /*
-             * Do not keep an unverified email/password account signed in.
-             */
             firebaseAuth.signOut()
             sessionStore.clearUser()
 
@@ -216,10 +215,6 @@ class FirebaseAuthRepository(
                         )
                     )
 
-            /*
-             * Refresh Firebase's user information so isEmailVerified
-             * reflects the latest server state after verification.
-             */
             firebaseUser
                 .reload()
                 .awaitCompletion()
@@ -287,30 +282,199 @@ class FirebaseAuthRepository(
     }
 
     override suspend fun sendPhoneOtp(
+        activity: Activity,
         phoneNumber: String
     ): Result<Unit> {
-        return Result.failure(
-            UnsupportedOperationException(
-                "Phone OTP authentication is not connected yet."
-            )
-        )
+        return try {
+            val normalizedPhoneNumber =
+                phoneNumber.trim()
+
+            if (normalizedPhoneNumber.isBlank()) {
+                return Result.failure(
+                    IllegalArgumentException(
+                        "Please enter your mobile number."
+                    )
+                )
+            }
+
+            if (!normalizedPhoneNumber.startsWith("+")) {
+                return Result.failure(
+                    IllegalArgumentException(
+                        "Please enter your mobile number with country code, for example +91XXXXXXXXXX."
+                    )
+                )
+            }
+
+            phoneVerificationId = null
+
+            suspendCancellableCoroutine { continuation ->
+
+                val callbacks =
+                    object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+
+                        override fun onVerificationCompleted(
+                            credential: PhoneAuthCredential
+                        ) {
+                            /*
+                             * We intentionally do not automatically sign in here.
+                             *
+                             * COMMERZO's UI asks the user to enter the OTP,
+                             * so verification is completed through
+                             * verifyPhoneOtp().
+                             */
+                        }
+
+                        override fun onVerificationFailed(
+                            exception: Exception
+                        ) {
+                            if (continuation.isActive) {
+                                continuation.resumeWith(
+                                    Result.failure(
+                                        exception.toUserFacingPhoneAuthException()
+                                    )
+                                )
+                            }
+                        }
+
+                        override fun onCodeSent(
+                            verificationId: String,
+                            token: PhoneAuthProvider.ForceResendingToken
+                        ) {
+                            phoneVerificationId =
+                                verificationId
+
+                            if (continuation.isActive) {
+                                continuation.resume(
+                                    Result.success(Unit)
+                                )
+                            }
+                        }
+
+                        override fun onCodeAutoRetrievalTimeOut(
+                            verificationId: String
+                        ) {
+                            /*
+                             * OTP timeout does not mean that the
+                             * already-sent OTP is invalid.
+                             *
+                             * Keep the verification ID so the user
+                             * can still enter the received OTP.
+                             */
+                            if (
+                                phoneVerificationId == null
+                            ) {
+                                phoneVerificationId =
+                                    verificationId
+                            }
+
+                            if (
+                                continuation.isActive
+                            ) {
+                                continuation.resume(
+                                    Result.success(Unit)
+                                )
+                            }
+                        }
+                    }
+
+                val options =
+                    PhoneAuthOptions.newBuilder(
+                        firebaseAuth
+                    )
+                        .setPhoneNumber(
+                            normalizedPhoneNumber
+                        )
+                        .setTimeout(
+                            60L,
+                            TimeUnit.SECONDS
+                        )
+                        .setActivity(activity)
+                        .setCallbacks(callbacks)
+                        .build()
+
+                PhoneAuthProvider.verifyPhoneNumber(
+                    options
+                )
+
+                continuation.invokeOnCancellation {
+                    /*
+                     * Firebase owns the underlying verification
+                     * request. We only clear the local verification
+                     * session when the coroutine is cancelled.
+                     */
+                    phoneVerificationId = null
+                }
+            }
+        } catch (exception: Exception) {
+            Result.failure(exception)
+        }
     }
 
     override suspend fun verifyPhoneOtp(
-        phoneNumber: String,
         otp: String
     ): Result<AuthUser> {
-        return Result.failure(
-            UnsupportedOperationException(
-                "Phone OTP authentication is not connected yet."
-            )
-        )
+        return try {
+            val verificationId =
+                phoneVerificationId
+
+            if (verificationId.isNullOrBlank()) {
+                return Result.failure(
+                    IllegalStateException(
+                        "OTP verification session has expired. Please request a new OTP."
+                    )
+                )
+            }
+
+            val normalizedOtp =
+                otp.trim()
+
+            if (normalizedOtp.isBlank()) {
+                return Result.failure(
+                    IllegalArgumentException(
+                        "Please enter the OTP."
+                    )
+                )
+            }
+
+            val credential =
+                PhoneAuthProvider.getCredential(
+                    verificationId,
+                    normalizedOtp
+                )
+
+            val authResult =
+                firebaseAuth
+                    .signInWithCredential(
+                        credential
+                    )
+                    .awaitResult()
+
+            val firebaseUser =
+                authResult.user
+                    ?: return Result.failure(
+                        IllegalStateException(
+                            "Phone verification succeeded but user data is unavailable."
+                        )
+                    )
+
+            val authUser =
+                firebaseUser.toAuthUser()
+
+            phoneVerificationId = null
+            sessionStore.saveUser(authUser)
+
+            Result.success(authUser)
+        } catch (exception: Exception) {
+            Result.failure(exception)
+        }
     }
 
     override suspend fun signOut(): Result<Unit> {
         return try {
             firebaseAuth.signOut()
+            phoneVerificationId = null
             sessionStore.clearUser()
+
             Result.success(Unit)
         } catch (exception: Exception) {
             Result.failure(exception)
@@ -328,6 +492,8 @@ class FirebaseAuthRepository(
                     )
 
             user.delete().awaitCompletion()
+
+            phoneVerificationId = null
             sessionStore.clearUser()
 
             Result.success(Unit)
@@ -351,6 +517,35 @@ private fun com.google.firebase.auth.FirebaseUser.toAuthUser(): AuthUser {
         isEmailVerified = isEmailVerified,
         isPhoneVerified = phoneNumber != null
     )
+}
+
+private fun Exception.toUserFacingPhoneAuthException(): Exception {
+    return when (this) {
+        is FirebaseAuthInvalidCredentialsException -> {
+            IllegalArgumentException(
+                "The mobile number format is invalid."
+            )
+        }
+
+        is FirebaseAuthMissingActivityForRecaptchaException -> {
+            IllegalStateException(
+                "Phone verification requires an active COMMERZO screen."
+            )
+        }
+
+        is FirebaseAuthMultiFactorException -> {
+            IllegalStateException(
+                "Additional phone verification is required."
+            )
+        }
+
+        else -> {
+            IllegalStateException(
+                message
+                    ?: "Unable to send OTP. Please try again."
+            )
+        }
+    }
 }
 
 private suspend fun <T> Task<T>.awaitResult(): T {
