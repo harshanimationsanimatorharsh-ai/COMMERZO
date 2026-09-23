@@ -60,6 +60,19 @@ fun LoginScreen(
         }
     }
 
+    val authError =
+        (authState as? AuthState.Error)?.message
+
+    val isEmailVerificationError =
+        authError?.contains(
+            "verify your email",
+            ignoreCase = true
+        ) == true ||
+        authError?.contains(
+            "verification",
+            ignoreCase = true
+        ) == true
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -91,7 +104,8 @@ fun LoginScreen(
             label = {
                 Text("Email")
             },
-            singleLine = true
+            singleLine = true,
+            enabled = authState !is AuthState.Loading
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -107,7 +121,8 @@ fun LoginScreen(
                 Text("Password")
             },
             singleLine = true,
-            visualTransformation = PasswordVisualTransformation()
+            visualTransformation = PasswordVisualTransformation(),
+            enabled = authState !is AuthState.Loading
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -122,12 +137,22 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(12.dp))
         }
 
-        if (authState is AuthState.Error) {
+        if (authError != null) {
             Text(
-                text = (authState as AuthState.Error).message,
+                text = authError,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodyMedium
             )
+
+            if (isEmailVerificationError) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Open the verification email sent to your inbox, verify your email address, and then sign in again.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
         }
@@ -139,8 +164,10 @@ fun LoginScreen(
                         localError = "Please enter your email."
                     }
 
-                    !email.contains("@") -> {
-                        localError = "Please enter a valid email."
+                    !android.util.Patterns.EMAIL_ADDRESS
+                        .matcher(email.trim())
+                        .matches() -> {
+                        localError = "Please enter a valid email address."
                     }
 
                     password.isBlank() -> {
@@ -161,7 +188,9 @@ fun LoginScreen(
             enabled = authState !is AuthState.Loading
         ) {
             if (authState is AuthState.Loading) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(
+                    modifier = Modifier.height(20.dp)
+                )
             } else {
                 Text("Sign In with Email")
             }
@@ -204,7 +233,8 @@ fun LoginScreen(
 
         TextButton(
             onClick = onCreateAccount,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = authState !is AuthState.Loading
         ) {
             Text("Create New Account")
         }
