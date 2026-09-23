@@ -44,6 +44,18 @@ jobs:
         run: |
           echo "$COMMERZO_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/commerzo-release.jks"
 
+      - name: Get release SHA-1 fingerprint
+        env:
+          COMMERZO_KEYSTORE_FILE: ${{ runner.temp }}/commerzo-release.jks
+          COMMERZO_KEYSTORE_PASSWORD: ${{ secrets.COMMERZO_KEYSTORE_PASSWORD }}
+          COMMERZO_KEY_ALIAS: ${{ secrets.COMMERZO_KEY_ALIAS }}
+        run: |
+          keytool -list -v \
+            -keystore "$COMMERZO_KEYSTORE_FILE" \
+            -alias "$COMMERZO_KEY_ALIAS" \
+            -storepass "$COMMERZO_KEYSTORE_PASSWORD" \
+            | grep -E "SHA1:|SHA256:"
+
       - name: Build signed release APK
         env:
           COMMERZO_KEYSTORE_FILE: ${{ runner.temp }}/commerzo-release.jks
