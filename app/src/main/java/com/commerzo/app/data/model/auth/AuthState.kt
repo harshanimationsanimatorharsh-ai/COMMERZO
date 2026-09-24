@@ -10,6 +10,8 @@ sealed class AuthState {
         val userId: String
     ) : AuthState()
 
+    data object PhoneOtpSent : AuthState()
+
     data class Error(
         val message: String
     ) : AuthState()
