@@ -49,6 +49,18 @@ fun LoginScreen(
         mutableStateOf("")
     }
 
+    var phoneNumber by remember {
+        mutableStateOf("")
+    }
+
+    var otp by remember {
+        mutableStateOf("")
+    }
+
+    var phoneLoginMode by remember {
+        mutableStateOf(false)
+    }
+
     var localError by remember {
         mutableStateOf<String?>(null)
     }
@@ -64,29 +76,20 @@ fun LoginScreen(
     val authState by viewModel.authState.collectAsState()
 
     LaunchedEffect(authState) {
-        if (authState is AuthState.LoggedIn) {
-            onLoginSuccess()
-        }
+        when (authState) {
+            is AuthState.LoggedIn -> {
+                onLoginSuccess()
+            }
 
-        /*
-         * Password reset is intentionally handled separately from
-         * normal authentication. The repository returns LoggedOut
-         * after a successful reset-email request.
-         */
-        if (
-            passwordResetRequested &&
-            authState is AuthState.LoggedOut
-        ) {
-            passwordResetSuccess = true
-            passwordResetRequested = false
-            localError = null
-        }
+            is AuthState.LoggedOut -> {
+                if (passwordResetRequested) {
+                    passwordResetSuccess = true
+                    passwordResetRequested = false
+                    localError = null
+                }
+            }
 
-        if (
-            passwordResetRequested &&
-            authState is AuthState.Error
-        ) {
-            passwordResetRequested = false
+            else -> Unit
         }
     }
 
@@ -103,219 +106,522 @@ fun LoginScreen(
             ignoreCase = true
         ) == true
 
+    val isLoading =
+        authState is AuthState.Loading
+
+    val isOtpSent =
+        authState is AuthState.PhoneOtpSent
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(
+                rememberScrollState()
+            )
             .padding(24.dp),
         verticalArrangement = Arrangement.Center
     ) {
+
         Text(
             text = "Welcome to COMMERZO",
             style = MaterialTheme.typography.headlineMedium
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(
+            Modifier.height(8.dp)
+        )
 
         Text(
             text = "Learn. Practice. Score.",
             style = MaterialTheme.typography.bodyMedium
         )
 
-        Spacer(modifier = Modifier.height(28.dp))
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = {
-                email = it
-                localError = null
-                passwordResetSuccess = false
-            },
-            modifier = Modifier.fillMaxWidth(),
-            label = {
-                Text("Email")
-            },
-            singleLine = true,
-            enabled = authState !is AuthState.Loading
+        Spacer(
+            Modifier.height(28.dp)
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = {
-                password = it
-                localError = null
-                passwordResetSuccess = false
-            },
-            modifier = Modifier.fillMaxWidth(),
-            label = {
-                Text("Password")
-            },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            enabled = authState !is AuthState.Loading
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        TextButton(
-            onClick = {
-                when {
-                    email.isBlank() -> {
-                        localError =
-                            "Please enter your email address."
-                    }
-
-                    !Patterns.EMAIL_ADDRESS
-                        .matcher(email.trim())
-                        .matches() -> {
-                        localError =
-                            "Please enter a valid email address."
-                    }
-
-                    else -> {
-                        localError = null
-                        passwordResetSuccess = false
-                        passwordResetRequested = true
-
-                        viewModel.sendPasswordResetEmail(
-                            email = email.trim()
-                        )
-                    }
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = authState !is AuthState.Loading
-        ) {
-            Text("Forgot Password?")
-        }
-
-        if (passwordResetSuccess) {
-            Spacer(modifier = Modifier.height(4.dp))
+        if (phoneLoginMode) {
 
             Text(
-                text = "Password reset email sent. Check your inbox and follow the instructions.",
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        localError?.let { error ->
-            Text(
-                text = error,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium
+                text = if (isOtpSent) {
+                    "Verify Mobile Number"
+                } else {
+                    "Login with Mobile"
+                },
+                style = MaterialTheme.typography.titleLarge
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
-        }
-
-        if (authError != null) {
-            Text(
-                text = authError,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium
+            Spacer(
+                Modifier.height(8.dp)
             )
 
-            if (isEmailVerificationError) {
-                Spacer(modifier = Modifier.height(8.dp))
+            if (isOtpSent) {
 
                 Text(
-                    text = "Open the verification email sent to your inbox, verify your email address, and then sign in again.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodySmall
+                    text = "Enter the OTP sent to $phoneNumber",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(
+                    Modifier.height(16.dp)
+                )
+
+                OutlinedTextField(
+                    value = otp,
+                    onValueChange = {
+                        if (it.length <= 6) {
+                            otp = it.filter { character ->
+                                character.isDigit()
+                            }
+                            localError = null
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = {
+                        Text("6-Digit OTP")
+                    },
+                    singleLine = true,
+                    enabled = !isLoading
+                )
+
+                Spacer(
+                    Modifier.height(16.dp)
+                )
+
+                if (localError != null) {
+                    Text(
+                        text = localError.orEmpty(),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    Spacer(
+                        Modifier.height(12.dp)
+                    )
+                }
+
+                if (authError != null) {
+                    Text(
+                        text = authError,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    Spacer(
+                        Modifier.height(12.dp)
+                    )
+                }
+
+                Button(
+                    onClick = {
+                        when {
+                            otp.length != 6 -> {
+                                localError =
+                                    "Please enter the 6-digit OTP."
+                            }
+
+                            else -> {
+                                localError = null
+                                viewModel.verifyPhoneOtp(otp)
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.height(20.dp)
+                        )
+                    } else {
+                        Text("Verify & Continue")
+                    }
+                }
+
+                Spacer(
+                    Modifier.height(8.dp)
+                )
+
+                TextButton(
+                    onClick = {
+                        phoneLoginMode = false
+                        otp = ""
+                        phoneNumber = ""
+                        localError = null
+                        viewModel.refreshSession()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading
+                ) {
+                    Text("Use Another Login Method")
+                }
+
+            } else {
+
+                OutlinedTextField(
+                    value = phoneNumber,
+                    onValueChange = {
+                        phoneNumber = it
+                        localError = null
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = {
+                        Text("Mobile Number")
+                    },
+                    placeholder = {
+                        Text("+91XXXXXXXXXX")
+                    },
+                    singleLine = true,
+                    enabled = !isLoading
+                )
+
+                Spacer(
+                    Modifier.height(8.dp)
+                )
+
+                Text(
+                    text = "Include your country code, for example +91XXXXXXXXXX.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(
+                    Modifier.height(16.dp)
+                )
+
+                if (localError != null) {
+                    Text(
+                        text = localError.orEmpty(),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    Spacer(
+                        Modifier.height(12.dp)
+                    )
+                }
+
+                if (authError != null) {
+                    Text(
+                        text = authError,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    Spacer(
+                        Modifier.height(12.dp)
+                    )
+                }
+
+                Button(
+                    onClick = {
+                        val normalizedPhone =
+                            phoneNumber.trim()
+
+                        when {
+                            normalizedPhone.isBlank() -> {
+                                localError =
+                                    "Please enter your mobile number."
+                            }
+
+                            !normalizedPhone.startsWith("+") -> {
+                                localError =
+                                    "Please include the country code, for example +91XXXXXXXXXX."
+                            }
+
+                            normalizedPhone.length < 10 -> {
+                                localError =
+                                    "Please enter a valid mobile number."
+                            }
+
+                            else -> {
+                                val activity =
+                                    context as? Activity
+
+                                if (activity == null) {
+                                    localError =
+                                        "Unable to start mobile verification."
+                                } else {
+                                    localError = null
+                                    viewModel.sendPhoneOtp(
+                                        activity = activity,
+                                        phoneNumber = normalizedPhone
+                                    )
+                                }
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.height(20.dp)
+                        )
+                    } else {
+                        Text("Send OTP")
+                    }
+                }
+
+                Spacer(
+                    Modifier.height(8.dp)
+                )
+
+                TextButton(
+                    onClick = {
+                        phoneLoginMode = false
+                        phoneNumber = ""
+                        localError = null
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading
+                ) {
+                    Text("Back to Email Login")
+                }
+            }
+
+            Spacer(
+                Modifier.height(16.dp)
+            )
+
+            TextButton(
+                onClick = {
+                    phoneLoginMode = false
+                    phoneNumber = ""
+                    otp = ""
+                    localError = null
+                    viewModel.refreshSession()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
+            ) {
+                Text("Back")
+            }
+
+        } else {
+
+            OutlinedTextField(
+                value = email,
+                onValueChange = {
+                    email = it
+                    localError = null
+                    passwordResetSuccess = false
+                },
+                modifier = Modifier.fillMaxWidth(),
+                label = {
+                    Text("Email")
+                },
+                singleLine = true,
+                enabled = !isLoading
+            )
+
+            Spacer(
+                Modifier.height(12.dp)
+            )
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = {
+                    password = it
+                    localError = null
+                    passwordResetSuccess = false
+                },
+                modifier = Modifier.fillMaxWidth(),
+                label = {
+                    Text("Password")
+                },
+                singleLine = true,
+                visualTransformation =
+                    PasswordVisualTransformation(),
+                enabled = !isLoading
+            )
+
+            Spacer(
+                Modifier.height(8.dp)
+            )
+
+            TextButton(
+                onClick = {
+                    when {
+                        email.isBlank() -> {
+                            localError =
+                                "Please enter your email address."
+                        }
+
+                        !Patterns.EMAIL_ADDRESS
+                            .matcher(email.trim())
+                            .matches() -> {
+                            localError =
+                                "Please enter a valid email address."
+                        }
+
+                        else -> {
+                            localError = null
+                            passwordResetSuccess = false
+                            passwordResetRequested = true
+
+                            viewModel.sendPasswordResetEmail(
+                                email.trim()
+                            )
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
+            ) {
+                Text("Forgot Password?")
+            }
+
+            if (passwordResetSuccess) {
+                Spacer(
+                    Modifier.height(4.dp)
+                )
+
+                Text(
+                    text = "Password reset email sent. Check your inbox and follow the instructions.",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-        }
+            Spacer(
+                Modifier.height(8.dp)
+            )
 
-        Button(
-            onClick = {
-                when {
-                    email.isBlank() -> {
-                        localError = "Please enter your email."
+            localError?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Spacer(
+                    Modifier.height(12.dp)
+                )
+            }
+
+            if (authError != null) {
+                Text(
+                    text = authError,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                if (isEmailVerificationError) {
+                    Spacer(
+                        Modifier.height(8.dp)
+                    )
+
+                    Text(
+                        text = "Open the verification email sent to your inbox, verify your email address, and then sign in again.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                Spacer(
+                    Modifier.height(12.dp)
+                )
+            }
+
+            Button(
+                onClick = {
+                    when {
+                        email.isBlank() -> {
+                            localError =
+                                "Please enter your email."
+                        }
+
+                        !Patterns.EMAIL_ADDRESS
+                            .matcher(email.trim())
+                            .matches() -> {
+                            localError =
+                                "Please enter a valid email address."
+                        }
+
+                        password.isBlank() -> {
+                            localError =
+                                "Please enter your password."
+                        }
+
+                        else -> {
+                            localError = null
+                            passwordResetSuccess = false
+
+                            viewModel.signInWithEmail(
+                                email.trim(),
+                                password
+                            )
+                        }
                     }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.height(20.dp)
+                    )
+                } else {
+                    Text("Sign In with Email")
+                }
+            }
 
-                    !Patterns.EMAIL_ADDRESS
-                        .matcher(email.trim())
-                        .matches() -> {
-                        localError =
-                            "Please enter a valid email address."
-                    }
+            Spacer(
+                Modifier.height(12.dp)
+            )
 
-                    password.isBlank() -> {
-                        localError = "Please enter your password."
-                    }
+            OutlinedButton(
+                onClick = {
+                    val activity =
+                        context as? Activity
 
-                    else -> {
+                    if (activity != null) {
                         localError = null
                         passwordResetSuccess = false
 
-                        viewModel.signInWithEmail(
-                            email = email.trim(),
-                            password = password
+                        viewModel.signInWithGoogle(
+                            activity
                         )
+                    } else {
+                        localError =
+                            "Unable to open Google Sign-In."
                     }
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = authState !is AuthState.Loading
-        ) {
-            if (authState is AuthState.Loading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.height(20.dp)
-                )
-            } else {
-                Text("Sign In with Email")
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
+            ) {
+                Text("Continue with Google")
             }
-        }
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(
+                Modifier.height(12.dp)
+            )
 
-        OutlinedButton(
-            onClick = {
-                val activity = context as? Activity
-
-                if (activity != null) {
+            OutlinedButton(
+                onClick = {
+                    phoneLoginMode = true
                     localError = null
                     passwordResetSuccess = false
-                    viewModel.signInWithGoogle(activity)
-                } else {
-                    localError =
-                        "Unable to open Google Sign-In."
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = authState !is AuthState.Loading
-        ) {
-            Text("Continue with Google")
-        }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
+            ) {
+                Text("Continue with Mobile")
+            }
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(
+                Modifier.height(16.dp)
+            )
 
-        OutlinedButton(
-            onClick = {
-                localError =
-                    "Mobile OTP will be connected in the next authentication step."
-            },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = authState !is AuthState.Loading
-        ) {
-            Text("Continue with Mobile")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TextButton(
-            onClick = onCreateAccount,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = authState !is AuthState.Loading
-        ) {
-            Text("Create New Account")
+            TextButton(
+                onClick = onCreateAccount,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
+            ) {
+                Text("Create New Account")
+            }
         }
     }
 }
