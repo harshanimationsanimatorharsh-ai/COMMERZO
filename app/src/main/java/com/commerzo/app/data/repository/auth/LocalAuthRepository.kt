@@ -29,7 +29,7 @@ class LocalAuthRepository(
     ): Result<AuthUser> {
         return Result.failure(
             UnsupportedOperationException(
-                "Email account registration is not connected yet."
+                "Email account registration is not connected to the local authentication repository."
             )
         )
     }
@@ -39,7 +39,7 @@ class LocalAuthRepository(
     ): Result<AuthUser> {
         return Result.failure(
             UnsupportedOperationException(
-                "Google Sign-In is not connected yet."
+                "Google Sign-In is not connected to the local authentication repository."
             )
         )
     }
@@ -50,28 +50,38 @@ class LocalAuthRepository(
     ): Result<AuthUser> {
         return Result.failure(
             UnsupportedOperationException(
-                "Email authentication is not connected yet."
+                "Email authentication is not connected to the local authentication repository."
             )
         )
     }
 
     override suspend fun sendPhoneOtp(
+        activity: Activity,
         phoneNumber: String
     ): Result<Unit> {
         return Result.failure(
             UnsupportedOperationException(
-                "Phone OTP authentication is not connected yet."
+                "Phone OTP authentication is not connected to the local authentication repository."
             )
         )
     }
 
     override suspend fun verifyPhoneOtp(
-        phoneNumber: String,
         otp: String
     ): Result<AuthUser> {
         return Result.failure(
             UnsupportedOperationException(
-                "Phone OTP authentication is not connected yet."
+                "Phone OTP authentication is not connected to the local authentication repository."
+            )
+        )
+    }
+
+    override suspend fun sendPasswordResetEmail(
+        email: String
+    ): Result<Unit> {
+        return Result.failure(
+            UnsupportedOperationException(
+                "Password reset is not connected to the local authentication repository."
             )
         )
     }
