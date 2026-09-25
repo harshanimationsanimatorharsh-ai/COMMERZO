@@ -7,6 +7,7 @@ import androidx.credentials.exceptions.GetCredentialException
 import com.commerzo.app.data.model.auth.AuthState
 import com.commerzo.app.data.model.auth.AuthUser
 import com.google.android.gms.tasks.Task
+import com.google.firebase.FirebaseException
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
@@ -30,12 +31,6 @@ class FirebaseAuthRepository(
     private val firebaseAuth: FirebaseAuth =
         FirebaseAuth.getInstance()
 
-    /*
-     * Firebase Phone Authentication is callback-based.
-     *
-     * The verification ID is generated when Firebase sends the OTP.
-     * It is kept only inside this repository until the OTP is verified.
-     */
     @Volatile
     private var phoneVerificationId: String? = null
 
@@ -315,17 +310,11 @@ class FirebaseAuthRepository(
                         override fun onVerificationCompleted(
                             credential: PhoneAuthCredential
                         ) {
-                            /*
-                             * We intentionally do not automatically sign in here.
-                             *
-                             * COMMERZO's UI asks the user to enter the OTP,
-                             * so verification is completed through
-                             * verifyPhoneOtp().
-                             */
+                            // Manual OTP verification remains the current UI flow.
                         }
 
                         override fun onVerificationFailed(
-                            exception: Exception
+                            exception: FirebaseException
                         ) {
                             if (continuation.isActive) {
                                 continuation.resumeWith(
@@ -353,23 +342,12 @@ class FirebaseAuthRepository(
                         override fun onCodeAutoRetrievalTimeOut(
                             verificationId: String
                         ) {
-                            /*
-                             * OTP timeout does not mean that the
-                             * already-sent OTP is invalid.
-                             *
-                             * Keep the verification ID so the user
-                             * can still enter the received OTP.
-                             */
-                            if (
-                                phoneVerificationId == null
-                            ) {
+                            if (phoneVerificationId == null) {
                                 phoneVerificationId =
                                     verificationId
                             }
 
-                            if (
-                                continuation.isActive
-                            ) {
+                            if (continuation.isActive) {
                                 continuation.resume(
                                     Result.success(Unit)
                                 )
@@ -397,11 +375,6 @@ class FirebaseAuthRepository(
                 )
 
                 continuation.invokeOnCancellation {
-                    /*
-                     * Firebase owns the underlying verification
-                     * request. We only clear the local verification
-                     * session when the coroutine is cancelled.
-                     */
                     phoneVerificationId = null
                 }
             }
