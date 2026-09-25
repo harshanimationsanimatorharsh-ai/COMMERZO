@@ -48,9 +48,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.commerzo.app.data.model.auth.AuthState
 import com.commerzo.app.data.model.profile.StudentProfile
-import com.commerzo.app.ui.viewmodel.auth.AuthViewModel
 import com.commerzo.app.ui.viewmodel.profile.ProfileState
 import com.commerzo.app.ui.viewmodel.profile.ProfileViewModel
 
@@ -60,11 +58,10 @@ fun ProfileScreen(
     onTestHistory: () -> Unit = {},
     onAchievements: () -> Unit = {},
     onSettings: () -> Unit = {},
-    viewModel: ProfileViewModel = viewModel(),
-    authViewModel: AuthViewModel = viewModel()
+    onLogout: () -> Unit = {},
+    viewModel: ProfileViewModel = viewModel()
 ) {
     val profileState by viewModel.profileState.collectAsState()
-    val authState by authViewModel.authState.collectAsState()
 
     var showEditDialog by remember {
         mutableStateOf(false)
@@ -200,20 +197,6 @@ fun ProfileScreen(
                 }
             )
 
-            if (authState is AuthState.Error) {
-                Spacer(
-                    modifier = Modifier.height(4.dp)
-                )
-
-                Text(
-                    text =
-                        (authState as AuthState.Error).message,
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-
             Spacer(
                 modifier = Modifier.height(20.dp)
             )
@@ -297,9 +280,7 @@ fun ProfileScreen(
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = {
-                if (authState !is AuthState.Loading) {
-                    showLogoutDialog = false
-                }
+                showLogoutDialog = false
             },
             title = {
                 Text("Logout")
@@ -313,27 +294,17 @@ fun ProfileScreen(
                 Button(
                     onClick = {
                         showLogoutDialog = false
-                        authViewModel.signOut()
-                    },
-                    enabled =
-                        authState !is AuthState.Loading
-                ) {
-                    if (authState is AuthState.Loading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.height(20.dp)
-                        )
-                    } else {
-                        Text("Logout")
+                        onLogout()
                     }
+                ) {
+                    Text("Logout")
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = {
                         showLogoutDialog = false
-                    },
-                    enabled =
-                        authState !is AuthState.Loading
+                    }
                 ) {
                     Text("Cancel")
                 }
