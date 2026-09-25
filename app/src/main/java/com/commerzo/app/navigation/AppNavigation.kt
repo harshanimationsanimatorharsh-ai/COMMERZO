@@ -36,11 +36,6 @@ import com.commerzo.app.ui.screens.auth.CreateAccountScreen
 import com.commerzo.app.ui.screens.auth.LoginScreen
 import com.commerzo.app.ui.viewmodel.auth.AuthViewModel
 
-private object AuthRoutes {
-    const val LOGIN = "auth_login"
-    const val CREATE_ACCOUNT = "auth_create_account"
-}
-
 data class NavigationTestResult(
     val total: Int = 0,
     val answered: Int = 0,
@@ -118,7 +113,7 @@ fun AppNavigation(
 
             is AuthState.PhoneOtpSent -> {
                 // OTP is handled inside LoginScreen.
-                // Navigation must remain on the authentication screen.
+                // Navigation remains on the authentication screen.
             }
 
             is AuthState.Error -> {
