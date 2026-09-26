@@ -15,6 +15,8 @@ sealed class Screen(val route: String) {
 
     data object Profile : Screen("profile")
 
+    data object StudyTracker : Screen("study_tracker")
+
     data object Subjects : Screen("subjects")
 
     data object Chapters :
