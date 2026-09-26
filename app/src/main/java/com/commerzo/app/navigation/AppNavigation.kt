@@ -355,6 +355,9 @@ fun AppNavigation(
                     navController.navigate(
                         Screen.Settings.route
                     )
+                },
+                onLogout = {
+                    authViewModel.signOut()
                 }
             )
         }
