@@ -1,6 +1,8 @@
 package com.commerzo.app.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,12 +10,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -22,6 +31,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -32,16 +42,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.model.content.ContentChapter
 import com.commerzo.app.data.model.content.ContentSubject
+import com.commerzo.app.data.model.content.CurriculumContentIds
 import com.commerzo.app.data.repository.QuestionBankManager
 import com.commerzo.app.data.repository.content.ContentManager
 import com.commerzo.app.data.repository.content.CurriculumContentMapper
-import com.commerzo.app.data.model.content.CurriculumContentIds
 
 @Composable
 fun TestSelectionScreen(
@@ -53,15 +65,13 @@ fun TestSelectionScreen(
     ) -> Unit,
     onBack: () -> Unit
 ) {
-    val contentManager =
-        remember {
-            ContentManager()
-        }
+    val contentManager = remember {
+        ContentManager()
+    }
 
-    val questionBankManager =
-        remember {
-            QuestionBankManager()
-        }
+    val questionBankManager = remember {
+        QuestionBankManager()
+    }
 
     var selectedBoard by remember {
         mutableStateOf(Board.MP_BOARD)
@@ -79,30 +89,23 @@ fun TestSelectionScreen(
         mutableStateOf<String?>(null)
     }
 
-    val boardId =
-        remember(selectedBoard) {
-            CurriculumContentMapper.getBoardId(
-                selectedBoard
-            )
-        }
+    val boardId = remember(selectedBoard) {
+        CurriculumContentMapper.getBoardId(selectedBoard)
+    }
 
-    val classId =
-        remember(selectedClass) {
-            CurriculumContentMapper.getClassId(
-                selectedClass
-            )
-        }
+    val classId = remember(selectedClass) {
+        CurriculumContentMapper.getClassId(selectedClass)
+    }
 
     val subjects by produceState<List<ContentSubject>>(
         initialValue = emptyList(),
         boardId,
         classId
     ) {
-        value =
-            contentManager.getSubjects(
-                boardId = boardId,
-                classId = classId
-            )
+        value = contentManager.getSubjects(
+            boardId = boardId,
+            classId = classId
+        )
     }
 
     val chapters by produceState<List<ContentChapter>>(
@@ -111,62 +114,63 @@ fun TestSelectionScreen(
         boardId,
         classId
     ) {
-        value =
-            selectedSubjectId?.let { subjectId ->
-                contentManager.getChapters(
-                    boardId = boardId,
-                    classId = classId,
-                    subjectId = subjectId
-                )
-            } ?: emptyList()
+        value = selectedSubjectId?.let { subjectId ->
+            contentManager.getChapters(
+                boardId = boardId,
+                classId = classId,
+                subjectId = subjectId
+            )
+        } ?: emptyList()
     }
 
-    val questionSubjectId =
-        remember(selectedSubjectId) {
-            toQuestionSubjectId(
-                selectedSubjectId
-            )
-        }
+    val questionSubjectId = remember(selectedSubjectId) {
+        toQuestionSubjectId(selectedSubjectId)
+    }
 
-    val selectedChapter =
-        chapters.firstOrNull {
-            it.id == selectedChapterId
-        }
+    val selectedChapter = chapters.firstOrNull {
+        it.id == selectedChapterId
+    }
 
     val selectedQuestionCount =
         selectedChapter?.let { chapter ->
             questionBankManager
                 .getValidatedQuestions(
-                    subjectId =
-                        questionSubjectId ?: "",
-                    chapterId =
-                        chapter.id,
-                    board =
-                        selectedBoard,
-                    classLevel =
-                        selectedClass
+                    subjectId = questionSubjectId ?: "",
+                    chapterId = chapter.id,
+                    board = selectedBoard,
+                    classLevel = selectedClass
                 )
                 .size
         } ?: 0
+
+    val selectedSubject = subjects.firstOrNull {
+        it.id == selectedSubjectId
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        "Choose Test",
-                        fontWeight = FontWeight.Bold
-                    )
+                    Column {
+                        Text(
+                            text = "Test Center",
+                            fontWeight = FontWeight.ExtraBold
+                        )
+
+                        Text(
+                            text = "Build your test",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(
                         onClick = onBack
                     ) {
                         Icon(
-                            imageVector =
-                                Icons.Default.ArrowBack,
-                            contentDescription =
-                                "Back"
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
                         )
                     }
                 }
@@ -175,180 +179,81 @@ fun TestSelectionScreen(
     ) { paddingValues ->
 
         LazyColumn(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp),
-            verticalArrangement =
-                Arrangement.spacedBy(12.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 10.dp,
+                bottom = 28.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
 
             item {
+                TestHeroCard()
+            }
 
-                Spacer(
-                    modifier =
-                        Modifier.height(8.dp)
-                )
-
-                Text(
-                    text =
-                        "Test Selection",
-                    style =
-                        MaterialTheme.typography.headlineSmall,
-                    fontWeight =
-                        FontWeight.Bold
-                )
-
-                Spacer(
-                    modifier =
-                        Modifier.height(4.dp)
-                )
-
-                Text(
-                    text =
-                        "Select your board, class, subject and chapter.",
-                    style =
-                        MaterialTheme.typography.bodyMedium,
-                    color =
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(
-                    modifier =
-                        Modifier.height(16.dp)
+            item {
+                SelectionSectionTitle(
+                    number = "01",
+                    title = "Choose Board",
+                    subtitle = "Select your examination board"
                 )
             }
 
             item {
-
-                Text(
-                    text = "Board",
-                    style =
-                        MaterialTheme.typography.titleMedium,
-                    fontWeight =
-                        FontWeight.SemiBold
+                SelectionChoiceRow(
+                    first = "MP Board",
+                    second = "CBSE",
+                    firstSelected = selectedBoard == Board.MP_BOARD,
+                    secondSelected = selectedBoard == Board.CBSE,
+                    onFirstClick = {
+                        selectedBoard = Board.MP_BOARD
+                        selectedSubjectId = null
+                        selectedChapterId = null
+                    },
+                    onSecondClick = {
+                        selectedBoard = Board.CBSE
+                        selectedSubjectId = null
+                        selectedChapterId = null
+                    }
                 )
-
-                Spacer(
-                    modifier =
-                        Modifier.height(8.dp)
-                )
-
-                Row(
-                    modifier =
-                        Modifier.fillMaxWidth(),
-                    horizontalArrangement =
-                        Arrangement.spacedBy(8.dp)
-                ) {
-
-                    SelectionButton(
-                        text = "MP Board",
-                        selected =
-                            selectedBoard ==
-                                Board.MP_BOARD,
-                        onClick = {
-                            selectedBoard =
-                                Board.MP_BOARD
-                            selectedSubjectId =
-                                null
-                            selectedChapterId =
-                                null
-                        },
-                        modifier =
-                            Modifier.weight(1f)
-                    )
-
-                    SelectionButton(
-                        text = "CBSE",
-                        selected =
-                            selectedBoard ==
-                                Board.CBSE,
-                        onClick = {
-                            selectedBoard =
-                                Board.CBSE
-                            selectedSubjectId =
-                                null
-                            selectedChapterId =
-                                null
-                        },
-                        modifier =
-                            Modifier.weight(1f)
-                    )
-                }
             }
 
             item {
-
-                Text(
-                    text = "Class",
-                    style =
-                        MaterialTheme.typography.titleMedium,
-                    fontWeight =
-                        FontWeight.SemiBold
+                SelectionSectionTitle(
+                    number = "02",
+                    title = "Choose Class",
+                    subtitle = "Select your current class"
                 )
-
-                Spacer(
-                    modifier =
-                        Modifier.height(8.dp)
-                )
-
-                Row(
-                    modifier =
-                        Modifier.fillMaxWidth(),
-                    horizontalArrangement =
-                        Arrangement.spacedBy(8.dp)
-                ) {
-
-                    SelectionButton(
-                        text = "Class 11",
-                        selected =
-                            selectedClass ==
-                                ClassLevel.CLASS_11,
-                        onClick = {
-                            selectedClass =
-                                ClassLevel.CLASS_11
-                            selectedSubjectId =
-                                null
-                            selectedChapterId =
-                                null
-                        },
-                        modifier =
-                            Modifier.weight(1f)
-                    )
-
-                    SelectionButton(
-                        text = "Class 12",
-                        selected =
-                            selectedClass ==
-                                ClassLevel.CLASS_12,
-                        onClick = {
-                            selectedClass =
-                                ClassLevel.CLASS_12
-                            selectedSubjectId =
-                                null
-                            selectedChapterId =
-                                null
-                        },
-                        modifier =
-                            Modifier.weight(1f)
-                    )
-                }
             }
 
             item {
-
-                Spacer(
-                    modifier =
-                        Modifier.height(4.dp)
+                SelectionChoiceRow(
+                    first = "Class 11",
+                    second = "Class 12",
+                    firstSelected = selectedClass == ClassLevel.CLASS_11,
+                    secondSelected = selectedClass == ClassLevel.CLASS_12,
+                    onFirstClick = {
+                        selectedClass = ClassLevel.CLASS_11
+                        selectedSubjectId = null
+                        selectedChapterId = null
+                    },
+                    onSecondClick = {
+                        selectedClass = ClassLevel.CLASS_12
+                        selectedSubjectId = null
+                        selectedChapterId = null
+                    }
                 )
+            }
 
-                Text(
-                    text = "Subject",
-                    style =
-                        MaterialTheme.typography.titleMedium,
-                    fontWeight =
-                        FontWeight.SemiBold
+            item {
+                SelectionSectionTitle(
+                    number = "03",
+                    title = "Choose Subject",
+                    subtitle = "Select a subject for your test"
                 )
             }
 
@@ -365,22 +270,18 @@ fun TestSelectionScreen(
                     }
 
                 SelectionCard(
-                    title =
-                        "${subject.emoji} ${subject.name}",
+                    title = "${subject.emoji} ${subject.name}",
                     subtitle =
                         if (selectedSubjectId == subject.id) {
-                            "$chapterCount chapters"
+                            "$chapterCount chapters available"
                         } else {
-                            "Select to view chapters"
+                            "Tap to explore chapters"
                         },
-                    selected =
-                        selectedSubjectId ==
-                            subject.id,
+                    icon = Icons.Default.MenuBook,
+                    selected = selectedSubjectId == subject.id,
                     onClick = {
-                        selectedSubjectId =
-                            subject.id
-                        selectedChapterId =
-                            null
+                        selectedSubjectId = subject.id
+                        selectedChapterId = null
                     }
                 )
             }
@@ -388,18 +289,10 @@ fun TestSelectionScreen(
             if (selectedSubjectId != null) {
 
                 item {
-
-                    Spacer(
-                        modifier =
-                            Modifier.height(4.dp)
-                    )
-
-                    Text(
-                        text = "Chapter",
-                        style =
-                            MaterialTheme.typography.titleMedium,
-                        fontWeight =
-                            FontWeight.SemiBold
+                    SelectionSectionTitle(
+                        number = "04",
+                        title = "Choose Chapter",
+                        subtitle = "Select the chapter you want to test"
                     )
                 }
 
@@ -411,36 +304,27 @@ fun TestSelectionScreen(
                     val count =
                         questionBankManager
                             .getValidatedQuestions(
-                                subjectId =
-                                    questionSubjectId
-                                        ?: "",
-                                chapterId =
-                                    chapter.id,
-                                board =
-                                    selectedBoard,
-                                classLevel =
-                                    selectedClass
+                                subjectId = questionSubjectId ?: "",
+                                chapterId = chapter.id,
+                                board = selectedBoard,
+                                classLevel = selectedClass
                             )
                             .size
 
                     SelectionCard(
-                        title =
-                            "${chapter.chapterNumber}. ${chapter.title}",
+                        title = "${chapter.chapterNumber}. ${chapter.title}",
                         subtitle =
                             if (count > 0) {
                                 "$count valid MCQs available"
                             } else {
-                                "No valid MCQs yet"
+                                "No valid MCQs available yet"
                             },
-                        selected =
-                            selectedChapterId ==
-                                chapter.id,
-                        enabled =
-                            count > 0,
+                        icon = Icons.Default.Assessment,
+                        selected = selectedChapterId == chapter.id,
+                        enabled = count > 0,
                         onClick = {
                             if (count > 0) {
-                                selectedChapterId =
-                                    chapter.id
+                                selectedChapterId = chapter.id
                             }
                         }
                     )
@@ -448,112 +332,26 @@ fun TestSelectionScreen(
             }
 
             item {
-
-                Spacer(
-                    modifier =
-                        Modifier.height(8.dp)
+                TestSummaryCard(
+                    board = selectedBoard.displayName(),
+                    className = selectedClass.displayName(),
+                    subject = selectedSubject?.name ?: "Not selected",
+                    chapter = selectedChapter?.title ?: "Not selected",
+                    questionCount = selectedQuestionCount
                 )
-
-                Card(
-                    modifier =
-                        Modifier.fillMaxWidth(),
-                    colors =
-                        CardDefaults.cardColors(
-                            containerColor =
-                                MaterialTheme.colorScheme.surfaceVariant
-                        )
-                ) {
-
-                    Column(
-                        modifier =
-                            Modifier.padding(16.dp)
-                    ) {
-
-                        Text(
-                            text =
-                                "Test Summary",
-                            style =
-                                MaterialTheme.typography.titleMedium,
-                            fontWeight =
-                                FontWeight.Bold
-                        )
-
-                        Spacer(
-                            modifier =
-                                Modifier.height(8.dp)
-                        )
-
-                        Text(
-                            text =
-                                "Board: ${selectedBoard.displayName()}",
-                            style =
-                                MaterialTheme.typography.bodyMedium
-                        )
-
-                        Text(
-                            text =
-                                "Class: ${selectedClass.displayName()}",
-                            style =
-                                MaterialTheme.typography.bodyMedium
-                        )
-
-                        Text(
-                            text =
-                                "Subject: ${
-                                    subjects
-                                        .firstOrNull {
-                                            it.id ==
-                                                selectedSubjectId
-                                        }
-                                        ?.name
-                                        ?: "Not selected"
-                                }",
-                            style =
-                                MaterialTheme.typography.bodyMedium
-                        )
-
-                        Text(
-                            text =
-                                "Chapter: ${
-                                    selectedChapter
-                                        ?.title
-                                        ?: "Not selected"
-                                }",
-                            style =
-                                MaterialTheme.typography.bodyMedium
-                        )
-
-                        Text(
-                            text =
-                                "Questions available: $selectedQuestionCount",
-                            style =
-                                MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
             }
 
             item {
-
-                Spacer(
-                    modifier =
-                        Modifier.height(4.dp)
-                )
-
                 Button(
                     onClick = {
 
                         val subjectId =
-                            selectedSubjectId
-                                ?: return@Button
+                            selectedSubjectId ?: return@Button
 
                         val chapterId =
-                            selectedChapterId
-                                ?: return@Button
+                            selectedChapterId ?: return@Button
 
-                        if (
-                            selectedQuestionCount <= 0
-                        ) {
+                        if (selectedQuestionCount <= 0) {
                             return@Button
                         }
 
@@ -568,74 +366,231 @@ fun TestSelectionScreen(
                         selectedSubjectId != null &&
                             selectedChapterId != null &&
                             selectedQuestionCount > 0,
-                    modifier =
-                        Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp),
+                    shape = RoundedCornerShape(17.dp)
                 ) {
-                    Text("Start Test")
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = null
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(
+                        text = "Start Test",
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
-                Spacer(
-                    modifier =
-                        Modifier.height(8.dp)
-                )
+                Spacer(modifier = Modifier.height(2.dp))
 
                 OutlinedButton(
                     onClick = onBack,
-                    modifier =
-                        Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(17.dp)
                 ) {
                     Text("Cancel")
                 }
+            }
+        }
+    }
+}
 
-                Spacer(
-                    modifier =
-                        Modifier.height(16.dp)
+@Composable
+private fun TestHeroCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(26.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                modifier = Modifier.size(58.dp),
+                shape = RoundedCornerShape(18.dp),
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Assessment,
+                        contentDescription = "Tests",
+                        modifier = Modifier.size(28.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(15.dp))
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Test Center",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "Choose your curriculum and challenge yourself.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                        alpha = 0.78f
+                    )
                 )
             }
         }
     }
 }
 
-private fun toQuestionSubjectId(
-    subjectId: String?
-): String? {
-    return when (subjectId) {
-
-        CurriculumContentIds
-            .MP_BOARD_CLASS_12_ECONOMICS_MICRO,
-        CurriculumContentIds
-            .MP_BOARD_CLASS_12_ECONOMICS_MACRO,
-        CurriculumContentIds
-            .CBSE_CLASS_12_ECONOMICS_INDIAN,
-        CurriculumContentIds
-            .CBSE_CLASS_12_ECONOMICS_MACRO -> {
-            "economics"
+@Composable
+private fun SelectionSectionTitle(
+    number: String,
+    title: String,
+    subtitle: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Surface(
+            modifier = Modifier.size(34.dp),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primaryContainer
+        ) {
+            Box(
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = number,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
 
-        else -> subjectId
+        Spacer(modifier = Modifier.width(11.dp))
+
+        Column {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.ExtraBold
+            )
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
 @Composable
-private fun SelectionButton(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+private fun SelectionChoiceRow(
+    first: String,
+    second: String,
+    firstSelected: Boolean,
+    secondSelected: Boolean,
+    onFirstClick: () -> Unit,
+    onSecondClick: () -> Unit
 ) {
-    if (selected) {
-        Button(
-            onClick = onClick,
-            modifier = modifier
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        ChoiceCard(
+            modifier = Modifier.weight(1f),
+            title = first,
+            selected = firstSelected,
+            onClick = onFirstClick
+        )
+
+        ChoiceCard(
+            modifier = Modifier.weight(1f),
+            title = second,
+            selected = secondSelected,
+            onClick = onSecondClick
+        )
+    }
+}
+
+@Composable
+private fun ChoiceCard(
+    modifier: Modifier,
+    title: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = modifier,
+        onClick = onClick,
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor =
+                if (selected) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.surface
+                }
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 14.dp,
+                    vertical = 16.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text)
-        }
-    } else {
-        OutlinedButton(
-            onClick = onClick,
-            modifier = modifier
-        ) {
-            Text(text)
+            Icon(
+                imageVector = Icons.Default.School,
+                contentDescription = null,
+                modifier = Modifier.size(21.dp),
+                tint =
+                    if (selected) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+            )
+
+            Spacer(modifier = Modifier.width(9.dp))
+
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold
+            )
+
+            if (selected) {
+                Spacer(modifier = Modifier.weight(1f))
+
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Selected",
+                    modifier = Modifier.size(19.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }
@@ -644,84 +599,221 @@ private fun SelectionButton(
 private fun SelectionCard(
     title: String,
     subtitle: String,
+    icon: ImageVector,
     selected: Boolean,
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     Card(
-        modifier =
-            Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
         enabled = enabled,
-        colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    when {
-                        !enabled ->
-                            MaterialTheme.colorScheme.surfaceVariant
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = when {
+                !enabled ->
+                    MaterialTheme.colorScheme.surfaceVariant
 
-                        selected ->
-                            MaterialTheme.colorScheme.primaryContainer
+                selected ->
+                    MaterialTheme.colorScheme.primaryContainer
 
-                        else ->
-                            MaterialTheme.colorScheme.surface
-                    }
-            )
+                else ->
+                    MaterialTheme.colorScheme.surface
+            }
+        )
     ) {
-
         Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-            verticalAlignment =
-                Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(
+                        if (selected) {
+                            MaterialTheme.colorScheme.surface.copy(
+                                alpha = 0.75f
+                            )
+                        } else {
+                            MaterialTheme.colorScheme.surfaceVariant
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(21.dp),
+                    tint =
+                        if (enabled) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                )
+            }
+
+            Spacer(modifier = Modifier.width(13.dp))
 
             Column(
-                modifier =
-                    Modifier.weight(1f)
+                modifier = Modifier.weight(1f)
             ) {
-
                 Text(
                     text = title,
-                    style =
-                        MaterialTheme.typography.titleMedium,
-                    fontWeight =
-                        FontWeight.SemiBold
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold
                 )
 
-                Spacer(
-                    modifier =
-                        Modifier.height(3.dp)
-                )
+                Spacer(modifier = Modifier.height(3.dp))
 
                 Text(
                     text = subtitle,
-                    style =
-                        MaterialTheme.typography.bodySmall,
-                    color =
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
             if (selected) {
-
-                Spacer(
-                    modifier =
-                        Modifier.width(8.dp)
-                )
+                Spacer(modifier = Modifier.width(8.dp))
 
                 Icon(
-                    imageVector =
-                        Icons.Default.CheckCircle,
-                    contentDescription =
-                        "Selected",
-                    tint =
-                        MaterialTheme.colorScheme.primary
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Selected",
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun TestSummaryCard(
+    board: String,
+    className: String,
+    subject: String,
+    chapter: String,
+    questionCount: Int
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    modifier = Modifier.size(40.dp),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            modifier = Modifier.size(21.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(11.dp))
+
+                Column {
+                    Text(
+                        text = "Test Summary",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+
+                    Text(
+                        text = "Review your selection before starting",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            SummaryRow("Board", board)
+            SummaryRow("Class", className)
+            SummaryRow("Subject", subject)
+            SummaryRow("Chapter", chapter)
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Questions available",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Text(
+                    text = questionCount.toString(),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SummaryRow(
+    label: String,
+    value: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 3.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+    }
+}
+
+private fun toQuestionSubjectId(
+    subjectId: String?
+): String? {
+    return when (subjectId) {
+        CurriculumContentIds.MP_BOARD_CLASS_12_ECONOMICS_MICRO,
+        CurriculumContentIds.MP_BOARD_CLASS_12_ECONOMICS_MACRO,
+        CurriculumContentIds.CBSE_CLASS_12_ECONOMICS_INDIAN,
+        CurriculumContentIds.CBSE_CLASS_12_ECONOMICS_MACRO -> {
+            "economics"
+        }
+
+        else -> subjectId
     }
 }
 
