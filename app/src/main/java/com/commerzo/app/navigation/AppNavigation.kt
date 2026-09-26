@@ -302,8 +302,8 @@ fun AppNavigation(
                             navController.navigate(
                                 Screen.Chapters.createRoute(
                                     subjectId = subjectId,
-                                    board = Board.MP_BOARD,
-                                    classLevel = ClassLevel.CLASS_12
+                                    board = Board.MP_BOARD.name,
+                                    classLevel = ClassLevel.CLASS_12.name
                                 )
                             )
                         },
@@ -614,8 +614,8 @@ fun AppNavigation(
                                             subjectId
                                         ),
                                     chapterId = chapterId,
-                                    board = board,
-                                    classLevel = classLevel
+                                    board = board.name,
+                                    classLevel = classLevel.name
                                 )
                             )
                         },
@@ -630,8 +630,8 @@ fun AppNavigation(
                                 Screen.StudyTrackerSession.createRoute(
                                     subjectId = startSubjectId,
                                     chapterId = startChapterId,
-                                    board = startBoard.name,
-                                    classLevel = startClassLevel.name
+                                    board = startBoard,
+                                    classLevel = startClassLevel
                                 )
                             )
                         }
