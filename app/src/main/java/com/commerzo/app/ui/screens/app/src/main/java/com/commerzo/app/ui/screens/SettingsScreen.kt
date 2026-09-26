@@ -1,6 +1,5 @@
 package com.commerzo.app.ui.screens
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,636 +8,165 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Policy
+import androidx.compose.material.icons.filled.SupportAgent
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalContext
-
-private const val SETTINGS_PREFS =
-    "commerzo_settings"
-
-private const val DARK_MODE_KEY =
-    "dark_mode"
-
-private const val NOTIFICATIONS_KEY =
-    "notifications_enabled"
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.commerzo.app.ui.viewmodel.SettingsViewModel
 
 @Composable
 fun SettingsScreen(
-    onBack: () -> Unit
+    viewModel: SettingsViewModel = viewModel()
 ) {
-
-    val context =
-        LocalContext.current
-
-    val preferences =
-        context.getSharedPreferences(
-            SETTINGS_PREFS,
-            Context.MODE_PRIVATE
-        )
-
-    var darkMode by rememberSaveable {
-
-        mutableStateOf(
-            preferences.getBoolean(
-                DARK_MODE_KEY,
-                false
-            )
-        )
-    }
-
-    var notificationsEnabled by
-        rememberSaveable {
-
-            mutableStateOf(
-                preferences.getBoolean(
-                    NOTIFICATIONS_KEY,
-                    true
-                )
-            )
-        }
+    val darkModeEnabled by viewModel.darkModeEnabled.collectAsState()
+    val notificationsEnabled by viewModel.notificationsEnabled.collectAsState()
 
     Scaffold(
         topBar = {
-
             TopAppBar(
                 title = {
-                    Text(
-                        text = "Settings",
-                        fontWeight =
-                            FontWeight.Bold
-                    )
-                },
+                    Column {
+                        Text(
+                            text = "Settings",
+                            fontWeight = FontWeight.ExtraBold
+                        )
 
-                navigationIcon = {
-
-                    IconButton(
-                        onClick = onBack
-                    ) {
-
-                        Icon(
-                            imageVector =
-                                Icons.Default.ArrowBack,
-
-                            contentDescription =
-                                "Back"
+                        Text(
+                            text = "Customize your COMMERZO experience.",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                },
-
-                colors =
-                    TopAppBarDefaults
-                        .topAppBarColors(
-                            containerColor =
-                                MaterialTheme
-                                    .colorScheme
-                                    .surface
-                        )
+                }
             )
         }
     ) { paddingValues ->
 
-        LazyColumn(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(
-                        paddingValues
-                    )
-                    .padding(
-                        horizontal = 16.dp
-                    ),
-
-            verticalArrangement =
-                Arrangement.spacedBy(
-                    12.dp
-                )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
 
-            item {
+            Spacer(
+                modifier = Modifier.height(4.dp)
+            )
 
-                Spacer(
-                    modifier =
-                        Modifier.height(
-                            8.dp
-                        )
-                )
-            }
+            SettingsSectionTitle(
+                title = "Appearance",
+                subtitle = "Make the app comfortable for you"
+            )
 
-            item {
-
-                SettingsSectionTitle(
-                    title = "Preferences"
-                )
-            }
-
-            item {
-
-                SettingSwitchCard(
-                    icon =
-                        Icons.Default.DarkMode,
-
-                    title =
-                        "Dark Mode",
-
-                    description =
-                        "Use a darker appearance throughout COMMERZO.",
-
-                    checked =
-                        darkMode,
-
-                    onCheckedChange = {
-
-                        darkMode = it
-
-                        preferences
-                            .edit()
-                            .putBoolean(
-                                DARK_MODE_KEY,
-                                it
-                            )
-                            .apply()
-                    }
-                )
-            }
-
-            item {
-
-                SettingSwitchCard(
-                    icon =
-                        Icons.Default.Notifications,
-
-                    title =
-                        "Notifications",
-
-                    description =
-                        "Receive learning and practice reminders.",
-
-                    checked =
-                        notificationsEnabled,
-
-                    onCheckedChange = {
-
-                        notificationsEnabled = it
-
-                        preferences
-                            .edit()
-                            .putBoolean(
-                                NOTIFICATIONS_KEY,
-                                it
-                            )
-                            .apply()
-                    }
-                )
-            }
-
-            item {
-
-                Spacer(
-                    modifier =
-                        Modifier.height(
-                            8.dp
-                        )
-                )
-
-                SettingsSectionTitle(
-                    title = "About"
-                )
-            }
-
-            item {
-
-                AboutCard()
-            }
-
-            item {
-
-                Spacer(
-                    modifier =
-                        Modifier.height(
-                            8.dp
-                        )
-                )
-
-                SettingsSectionTitle(
-                    title = "Support"
-                )
-            }
-
-            item {
-
-                SupportCard()
-            }
-
-            item {
-
-                Spacer(
-                    modifier =
-                        Modifier.height(
-                            20.dp
-                        )
-                )
-
-                Column(
-                    modifier =
-                        Modifier.fillMaxWidth(),
-
-                    horizontalAlignment =
-                        Alignment.CenterHorizontally
-                ) {
-
-                    Text(
-                        text =
-                            "COMMERZO",
-
-                        style =
-                            MaterialTheme
-                                .typography
-                                .titleMedium,
-
-                        fontWeight =
-                            FontWeight.Bold
-                    )
-
-                    Spacer(
-                        modifier =
-                            Modifier.height(
-                                4.dp
-                            )
-                    )
-
-                    Text(
-                        text =
-                            "Learn. Practice. Grow.",
-
-                        style =
-                            MaterialTheme
-                                .typography
-                                .bodySmall,
-
-                        color =
-                            MaterialTheme
-                                .colorScheme
-                                .onSurfaceVariant
-                    )
-
-                    Spacer(
-                        modifier =
-                            Modifier.height(
-                                4.dp
-                            )
-                    )
-
-                    Text(
-                        text =
-                            "Founded by Mr.Harsh Shrivas",
-
-                        style =
-                            MaterialTheme
-                                .typography
-                                .labelSmall,
-
-                        color =
-                            MaterialTheme
-                                .colorScheme
-                                .primary
-                    )
+            SettingsToggleCard(
+                icon = Icons.Default.DarkMode,
+                title = "Dark Mode",
+                subtitle = "Use a darker appearance",
+                checked = darkModeEnabled,
+                onCheckedChange = {
+                    viewModel.setDarkModeEnabled(it)
                 }
-
-                Spacer(
-                    modifier =
-                        Modifier.height(
-                            20.dp
-                        )
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SettingSwitchCard(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    description: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-
-    Card(
-        modifier =
-            Modifier.fillMaxWidth(),
-
-        colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    MaterialTheme
-                        .colorScheme
-                        .surface
             )
-    ) {
 
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        16.dp
-                    ),
-
-            verticalAlignment =
-                Alignment.CenterVertically
-        ) {
-
-            Icon(
-                imageVector =
-                    icon,
-
-                contentDescription =
-                    null
+            SettingsSectionTitle(
+                title = "Notifications",
+                subtitle = "Stay updated with your learning"
             )
+
+            SettingsToggleCard(
+                icon = Icons.Default.Notifications,
+                title = "Notifications",
+                subtitle = "Receive learning reminders and updates",
+                checked = notificationsEnabled,
+                onCheckedChange = {
+                    viewModel.setNotificationsEnabled(it)
+                }
+            )
+
+            SettingsSectionTitle(
+                title = "Account",
+                subtitle = "Manage your student preferences"
+            )
+
+            SettingsActionCard(
+                icon = Icons.Default.Person,
+                title = "Student Profile",
+                subtitle = "View and update your profile",
+                onClick = {}
+            )
+
+            SettingsActionCard(
+                icon = Icons.Default.SwapHoriz,
+                title = "Learning Preferences",
+                subtitle = "Board, class and study preferences",
+                onClick = {}
+            )
+
+            SettingsSectionTitle(
+                title = "Help & Support",
+                subtitle = "We're here when you need help"
+            )
+
+            SettingsActionCard(
+                icon = Icons.Default.SupportAgent,
+                title = "Support Team",
+                subtitle = "Get help from the COMMERZO team",
+                onClick = {}
+            )
+
+            SupportEmailCard()
+
+            SettingsSectionTitle(
+                title = "Information",
+                subtitle = "About COMMERZO"
+            )
+
+            SettingsActionCard(
+                icon = Icons.Default.Info,
+                title = "About COMMERZO",
+                subtitle = "Learn more about the app",
+                onClick = {}
+            )
+
+            SettingsActionCard(
+                icon = Icons.Default.Policy,
+                title = "Privacy & Security",
+                subtitle = "Understand how your account is protected",
+                onClick = {}
+            )
+
+            SurfaceVersionCard()
 
             Spacer(
-                modifier =
-                    Modifier.width(
-                        14.dp
-                    )
-            )
-
-            Column(
-                modifier =
-                    Modifier.weight(
-                        1f
-                    )
-            ) {
-
-                Text(
-                    text =
-                        title,
-
-                    style =
-                        MaterialTheme
-                            .typography
-                            .titleMedium,
-
-                    fontWeight =
-                        FontWeight.SemiBold
-                )
-
-                Spacer(
-                    modifier =
-                        Modifier.height(
-                            3.dp
-                        )
-                )
-
-                Text(
-                    text =
-                        description,
-
-                    style =
-                        MaterialTheme
-                            .typography
-                            .bodySmall,
-
-                    color =
-                        MaterialTheme
-                            .colorScheme
-                            .onSurfaceVariant
-                )
-            }
-
-            Switch(
-                checked =
-                    checked,
-
-                onCheckedChange =
-                    onCheckedChange
-            )
-        }
-    }
-}
-
-@Composable
-private fun AboutCard() {
-
-    Card(
-        modifier =
-            Modifier.fillMaxWidth(),
-
-        colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    MaterialTheme
-                        .colorScheme
-                        .surface
-            )
-    ) {
-
-        Column(
-            modifier =
-                Modifier.padding(
-                    16.dp
-                )
-        ) {
-
-            Row(
-                verticalAlignment =
-                    Alignment.CenterVertically
-            ) {
-
-                Icon(
-                    imageVector =
-                        Icons.Default.Info,
-
-                    contentDescription =
-                        null
-                )
-
-                Spacer(
-                    modifier =
-                        Modifier.width(
-                            12.dp
-                        )
-                )
-
-                Text(
-                    text =
-                        "About COMMERZO",
-
-                    style =
-                        MaterialTheme
-                            .typography
-                            .titleMedium,
-
-                    fontWeight =
-                        FontWeight.Bold
-                )
-            }
-
-            Spacer(
-                modifier =
-                    Modifier.height(
-                        14.dp
-                    )
-            )
-
-            InfoRow(
-                label =
-                    "Version",
-
-                value =
-                    "1.0"
-            )
-
-            InfoRow(
-                label =
-                    "Founder",
-
-                value =
-                    "Mr.Harsh Shrivas"
-            )
-
-            InfoRow(
-                label =
-                    "Platform",
-
-                value =
-                    "Android"
-            )
-
-            InfoRow(
-                label =
-                    "Focus",
-
-                value =
-                    "Commerce Education"
-            )
-        }
-    }
-}
-
-@Composable
-private fun SupportCard() {
-
-    Card(
-        modifier =
-            Modifier.fillMaxWidth(),
-
-        colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    MaterialTheme
-                        .colorScheme
-                        .surface
-            )
-    ) {
-
-        Column(
-            modifier =
-                Modifier.padding(
-                    16.dp
-                )
-        ) {
-
-            Row(
-                verticalAlignment =
-                    Alignment.CenterVertically
-            ) {
-
-                Icon(
-                    imageVector =
-                        Icons.Default.Person,
-
-                    contentDescription =
-                        null
-                )
-
-                Spacer(
-                    modifier =
-                        Modifier.width(
-                            12.dp
-                        )
-                )
-
-                Text(
-                    text =
-                        "Help & Support",
-
-                    style =
-                        MaterialTheme
-                            .typography
-                            .titleMedium,
-
-                    fontWeight =
-                        FontWeight.Bold
-                )
-            }
-
-            Spacer(
-                modifier =
-                    Modifier.height(
-                        12.dp
-                    )
-            )
-
-            Text(
-                text =
-                    "For questions, feedback, or support, contact:",
-
-                style =
-                    MaterialTheme
-                        .typography
-                        .bodyMedium
-            )
-
-            Spacer(
-                modifier =
-                    Modifier.height(
-                        6.dp
-                    )
-            )
-
-            Text(
-                text =
-                    "theharshshrivas@gmail.com",
-
-                style =
-                    MaterialTheme
-                        .typography
-                        .bodyMedium,
-
-                color =
-                    MaterialTheme
-                        .colorScheme
-                        .primary,
-
-                fontWeight =
-                    FontWeight.Medium
+                modifier = Modifier.height(16.dp)
             )
         }
     }
@@ -646,72 +174,260 @@ private fun SupportCard() {
 
 @Composable
 private fun SettingsSectionTitle(
-    title: String
+    title: String,
+    subtitle: String
 ) {
+    Column {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.ExtraBold
+        )
 
-    Text(
-        text =
-            title,
+        Spacer(
+            modifier = Modifier.height(3.dp)
+        )
 
-        style =
-            MaterialTheme
-                .typography
-                .titleSmall,
-
-        fontWeight =
-            FontWeight.Bold,
-
-        color =
-            MaterialTheme
-                .colorScheme
-                .primary
-    )
+        Text(
+            text = subtitle,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
 }
 
 @Composable
-private fun InfoRow(
-    label: String,
-    value: String
+private fun SettingsToggleCard(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
 ) {
-
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(
-                    vertical = 5.dp
-                ),
-
-        horizontalArrangement =
-            Arrangement.SpaceBetween
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
 
-        Text(
-            text =
-                label,
+            SurfaceIcon(
+                icon = icon
+            )
 
-            style =
-                MaterialTheme
-                    .typography
-                    .bodyMedium,
+            Spacer(
+                modifier = Modifier.width(13.dp)
+            )
 
-            color =
-                MaterialTheme
-                    .colorScheme
-                    .onSurfaceVariant
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(
+                    modifier = Modifier.height(3.dp)
+                )
+
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Switch(
+                checked = checked,
+                onCheckedChange = onCheckedChange
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingsActionCard(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        shape = RoundedCornerShape(18.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            SurfaceIcon(
+                icon = icon
+            )
+
+            Spacer(
+                modifier = Modifier.width(13.dp)
+            )
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(
+                    modifier = Modifier.height(3.dp)
+                )
+
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Text(
+                text = "›",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun SurfaceIcon(
+    icon: androidx.compose.ui.graphics.vector.ImageVector
+) {
+    androidx.compose.material3.Surface(
+        modifier = Modifier.size(44.dp),
+        shape = RoundedCornerShape(13.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant
+    ) {
+        androidx.compose.foundation.layout.Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(21.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+@Composable
+private fun SupportEmailCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
         )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(17.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
 
-        Text(
-            text =
-                value,
+            androidx.compose.material3.Surface(
+                modifier = Modifier.size(44.dp),
+                shape = RoundedCornerShape(13.dp),
+                color = MaterialTheme.colorScheme.surface.copy(
+                    alpha = 0.75f
+                )
+            ) {
+                androidx.compose.foundation.layout.Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Email,
+                        contentDescription = "Support email",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
 
-            style =
-                MaterialTheme
-                    .typography
-                    .bodyMedium,
+            Spacer(
+                modifier = Modifier.width(13.dp)
+            )
 
-            fontWeight =
-                FontWeight.Medium
-        )
+            Column {
+                Text(
+                    text = "Support Email",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(
+                    modifier = Modifier.height(3.dp)
+                )
+
+                Text(
+                    text = "theharshshrivas@gmail.com",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SurfaceVersionCard() {
+    androidx.compose.material3.Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "COMMERZO",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.ExtraBold
+            )
+
+            Spacer(
+                modifier = Modifier.height(3.dp)
+            )
+
+            Text(
+                text = "Learn. Practice. Score.",
+                style = MaterialTheme.typography.bodySmall
+            )
+
+            Spacer(
+                modifier = Modifier.height(4.dp)
+            )
+
+            Text(
+                text = "Version 5.3.0",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
