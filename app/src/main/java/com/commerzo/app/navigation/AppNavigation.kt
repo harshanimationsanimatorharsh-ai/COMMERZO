@@ -377,8 +377,8 @@ fun AppNavigation(
                                         subjectId
                                     ),
                                     chapterId = chapterId,
-                                    board = board,
-                                    classLevel = classLevel
+                                    board = board.name,
+                                    classLevel = classLevel.name
                                 )
                             )
                         },
@@ -493,12 +493,6 @@ fun AppNavigation(
                     )
                 }
 
-                /*
-                 * Study Tracker dashboard.
-                 *
-                 * This screen is intentionally kept separate from the
-                 * chapter-specific study session route.
-                 */
                 composable(Screen.StudyTracker.route) {
                     StudyTrackerScreen(
                         onBack = {
@@ -507,12 +501,6 @@ fun AppNavigation(
                     )
                 }
 
-                /*
-                 * Real chapter-specific Study Tracker session.
-                 *
-                 * Context is passed through the navigation route:
-                 * subjectId + chapterId + board + classLevel.
-                 */
                 composable(
                     Screen.StudyTrackerSession.route
                 ) { backStackEntry ->
@@ -642,8 +630,8 @@ fun AppNavigation(
                                 Screen.StudyTrackerSession.createRoute(
                                     subjectId = startSubjectId,
                                     chapterId = startChapterId,
-                                    board = startBoard,
-                                    classLevel = startClassLevel
+                                    board = startBoard.name,
+                                    classLevel = startClassLevel.name
                                 )
                             )
                         }
