@@ -1,6 +1,8 @@
 package com.commerzo.app.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,9 +29,11 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +52,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -80,31 +87,43 @@ fun ProfileScreen(
     }
 
     LaunchedEffect(profileState) {
-        val profile =
-            (profileState as? ProfileState.Success)?.profile
+        val profile = (profileState as? ProfileState.Success)?.profile
 
-        if (
-            profile != null &&
-            displayNameInput.isBlank()
-        ) {
+        if (profile != null && displayNameInput.isBlank()) {
             displayNameInput = profile.displayName
         }
     }
 
     Scaffold(
+        containerColor = Color.White,
         topBar = {
             TopAppBar(
+                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White
+                ),
                 title = {
                     Column {
                         Text(
                             text = "Profile",
-                            fontWeight = FontWeight.ExtraBold
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFF102A56)
                         )
 
                         Text(
                             text = "Manage your account and progress.",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFF6B7892)
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = onSettings
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = Color(0xFF243B64)
                         )
                     }
                 }
@@ -115,14 +134,15 @@ fun ProfileScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(Color.White)
                 .verticalScroll(rememberScrollState())
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+                .padding(horizontal = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
             Spacer(
-                modifier = Modifier.height(4.dp)
+                modifier = Modifier.height(2.dp)
             )
 
             when (val state = profileState) {
@@ -145,11 +165,10 @@ fun ProfileScreen(
                 }
 
                 is ProfileState.Success -> {
-                    StudentProfileCard(
+                    StudentProfileHeroCard(
                         profile = state.profile,
                         onEdit = {
-                            displayNameInput =
-                                state.profile.displayName
+                            displayNameInput = state.profile.displayName
                             showEditDialog = true
                         }
                     )
@@ -163,69 +182,92 @@ fun ProfileScreen(
                 subtitle = "Track your learning journey"
             )
 
-            ProfileMenuCard(
-                icon = Icons.Default.AccessTime,
-                title = "Study Tracker",
-                subtitle = "Track study time, goals and subject progress",
-                onClick = onStudyTracker
-            )
+            ProfileMenuGroup {
+                ProfileMenuRow(
+                    icon = Icons.Default.AccessTime,
+                    title = "Study Tracker",
+                    subtitle = "Track study time, goals and progress",
+                    iconBackground = Color(0xFFE8F7F1),
+                    iconTint = Color(0xFF0AA66E),
+                    onClick = onStudyTracker
+                )
+            }
 
             SectionHeader(
                 title = "Account",
                 subtitle = "Your COMMERZO account"
             )
 
-            ProfileMenuCard(
-                icon = Icons.Default.Bookmark,
-                title = "Bookmarks",
-                subtitle = "View your saved questions",
-                onClick = onBookmarks
-            )
+            ProfileMenuGroup {
+                ProfileMenuRow(
+                    icon = Icons.Default.Bookmark,
+                    title = "Bookmarks",
+                    subtitle = "View your saved questions",
+                    iconBackground = Color(0xFFE8F0FF),
+                    iconTint = Color(0xFF2563EB),
+                    onClick = onBookmarks
+                )
 
-            ProfileMenuCard(
-                icon = Icons.Default.History,
-                title = "Test History",
-                subtitle = "View your previous test results",
-                onClick = onTestHistory
-            )
+                MenuDivider()
 
-            ProfileMenuCard(
-                icon = Icons.Default.EmojiEvents,
-                title = "Achievements",
-                subtitle = "Track milestones and achievements",
-                onClick = onAchievements
-            )
+                ProfileMenuRow(
+                    icon = Icons.Default.History,
+                    title = "Test History",
+                    subtitle = "View your previous test results",
+                    iconBackground = Color(0xFFF0EBFF),
+                    iconTint = Color(0xFF7048E8),
+                    onClick = onTestHistory
+                )
+
+                MenuDivider()
+
+                ProfileMenuRow(
+                    icon = Icons.Default.EmojiEvents,
+                    title = "Achievements",
+                    subtitle = "Track milestones and achievements",
+                    iconBackground = Color(0xFFFFF3D9),
+                    iconTint = Color(0xFFE89B00),
+                    onClick = onAchievements
+                )
+            }
 
             SectionHeader(
                 title = "More",
                 subtitle = "Manage your COMMERZO experience"
             )
 
-            ProfileMenuCard(
-                icon = Icons.Default.Settings,
-                title = "Settings",
-                subtitle = "Notifications, appearance and preferences",
-                onClick = onSettings
-            )
+            ProfileMenuGroup {
+                ProfileMenuRow(
+                    icon = Icons.Default.Settings,
+                    title = "Settings",
+                    subtitle = "Notifications, appearance and preferences",
+                    iconBackground = Color(0xFFEDEBFF),
+                    iconTint = Color(0xFF6250E8),
+                    onClick = onSettings
+                )
 
-            ProfileMenuCard(
-                icon = Icons.Default.ExitToApp,
-                title = "Logout",
-                subtitle = "Sign out from your COMMERZO account",
-                isDestructive = true,
-                onClick = {
-                    showLogoutDialog = true
-                }
-            )
+                MenuDivider()
 
-            Spacer(
-                modifier = Modifier.height(8.dp)
-            )
+                ProfileMenuRow(
+                    icon = Icons.Default.ExitToApp,
+                    title = "Logout",
+                    subtitle = "Sign out from your COMMERZO account",
+                    iconBackground = Color(0xFFFFE9E9),
+                    iconTint = Color(0xFFE5484D),
+                    titleColor = Color(0xFFD9363E),
+                    arrowTint = Color(0xFFD9363E),
+                    onClick = {
+                        showLogoutDialog = true
+                    }
+                )
+            }
 
             Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 2.dp),
+                shape = RoundedCornerShape(22.dp),
+                color = Color(0xFFF7F9FD)
             ) {
                 Column(
                     modifier = Modifier.padding(18.dp)
@@ -233,32 +275,35 @@ fun ProfileScreen(
                     Text(
                         text = "COMMERZO",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.ExtraBold
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFF102A56)
                     )
 
                     Spacer(
-                        modifier = Modifier.height(3.dp)
+                        modifier = Modifier.height(4.dp)
                     )
 
                     Text(
                         text = "Learn. Practice. Score.",
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF36558A)
                     )
 
                     Spacer(
-                        modifier = Modifier.height(3.dp)
+                        modifier = Modifier.height(4.dp)
                     )
 
                     Text(
                         text = "Your focused Commerce learning space.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = Color(0xFF71809B)
                     )
                 }
             }
 
             Spacer(
-                modifier = Modifier.height(14.dp)
+                modifier = Modifier.height(20.dp)
             )
         }
     }
@@ -269,7 +314,10 @@ fun ProfileScreen(
                 showEditDialog = false
             },
             title = {
-                Text("Edit Profile")
+                Text(
+                    text = "Edit Profile",
+                    fontWeight = FontWeight.Bold
+                )
             },
             text = {
                 OutlinedTextField(
@@ -287,15 +335,17 @@ fun ProfileScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        val name =
-                            displayNameInput.trim()
+                        val name = displayNameInput.trim()
 
                         if (name.isNotBlank()) {
                             viewModel.updateDisplayName(name)
                             showEditDialog = false
                         }
                     },
-                    enabled = displayNameInput.trim().isNotBlank()
+                    enabled = displayNameInput.trim().isNotBlank(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF315FEA)
+                    )
                 ) {
                     Text("Save")
                 }
@@ -318,7 +368,10 @@ fun ProfileScreen(
                 showLogoutDialog = false
             },
             title = {
-                Text("Logout")
+                Text(
+                    text = "Logout",
+                    fontWeight = FontWeight.Bold
+                )
             },
             text = {
                 Text(
@@ -330,7 +383,10 @@ fun ProfileScreen(
                     onClick = {
                         showLogoutDialog = false
                         onLogout()
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFE5484D)
+                    )
                 ) {
                     Text("Logout")
                 }
@@ -349,15 +405,271 @@ fun ProfileScreen(
 }
 
 @Composable
-private fun StudentProfileCard(
+private fun StudentProfileHeroCard(
     profile: StudentProfile,
     onEdit: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 7.dp
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF1557D6),
+                            Color(0xFF3568F2),
+                            Color(0xFF7057E8)
+                        )
+                    ),
+                    shape = RoundedCornerShape(28.dp)
+                )
+                .padding(20.dp)
+        ) {
+            Column {
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    Surface(
+                        modifier = Modifier.size(76.dp),
+                        shape = CircleShape,
+                        color = Color.White.copy(alpha = 0.94f)
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Surface(
+                                modifier = Modifier.size(66.dp),
+                                shape = CircleShape,
+                                color = Color(0xFFE2F0FF)
+                            ) {
+                                Box(
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = profile.displayName
+                                            .firstOrNull()
+                                            ?.uppercase()
+                                            ?: "C",
+                                        style = MaterialTheme.typography.headlineMedium,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = Color(0xFF245EDC)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(
+                        modifier = Modifier.width(14.dp)
+                    )
+
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = profile.displayName.ifBlank {
+                                "COMMERZO Student"
+                            },
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color.White
+                        )
+
+                        Spacer(
+                            modifier = Modifier.height(3.dp)
+                        )
+
+                        Text(
+                            text = profile.email.ifBlank {
+                                "Email not available"
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.84f)
+                        )
+
+                        Spacer(
+                            modifier = Modifier.height(8.dp)
+                        )
+
+                        Surface(
+                            shape = RoundedCornerShape(50.dp),
+                            color = Color.White.copy(alpha = 0.18f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(
+                                    horizontal = 10.dp,
+                                    vertical = 6.dp
+                                ),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Verified,
+                                    contentDescription = "Student",
+                                    modifier = Modifier.size(15.dp),
+                                    tint = Color.White
+                                )
+
+                                Spacer(
+                                    modifier = Modifier.width(5.dp)
+                                )
+
+                                Text(
+                                    text = "Student",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            }
+                        }
+                    }
+
+                    Surface(
+                        modifier = Modifier.size(42.dp),
+                        shape = RoundedCornerShape(14.dp),
+                        color = Color.White.copy(alpha = 0.16f)
+                    ) {
+                        IconButton(
+                            onClick = onEdit
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Edit Profile",
+                                tint = Color.White
+                            )
+                        }
+                    }
+                }
+
+                Spacer(
+                    modifier = Modifier.height(20.dp)
+                )
+
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    color = Color.White
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                horizontal = 14.dp,
+                                vertical = 14.dp
+                            ),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        ProfileStat(
+                            icon = Icons.Default.Star,
+                            iconTint = Color(0xFFE7A600),
+                            title = "Level 1",
+                            subtitle = "0 / 800 XP",
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        StatDivider()
+
+                        ProfileStat(
+                            icon = Icons.Default.AccessTime,
+                            iconTint = Color(0xFF0AA66E),
+                            title = "Study",
+                            subtitle = "Keep going",
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        StatDivider()
+
+                        ProfileStat(
+                            icon = Icons.Default.EmojiEvents,
+                            iconTint = Color(0xFF7048E8),
+                            title = "Student",
+                            subtitle = "Active",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProfileStat(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconTint: Color,
+    title: String,
+    subtitle: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Surface(
+            modifier = Modifier.size(36.dp),
+            shape = RoundedCornerShape(11.dp),
+            color = iconTint.copy(alpha = 0.12f)
+        ) {
+            Box(
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = iconTint
+                )
+            }
+        }
+
+        Spacer(
+            modifier = Modifier.height(6.dp)
+        )
+
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.ExtraBold,
+            color = Color(0xFF18294A)
+        )
+
+        Text(
+            text = subtitle,
+            style = MaterialTheme.typography.labelSmall,
+            color = Color(0xFF71809B)
+        )
+    }
+}
+
+@Composable
+private fun StatDivider() {
+    Surface(
+        modifier = Modifier
+            .width(1.dp)
+            .height(52.dp),
+        color = Color(0xFFE8ECF4)
+    ) {}
+}
+
+@Composable
+private fun XPProgressCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = Color(0xFFF5F8FF)
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp
@@ -368,141 +680,21 @@ private fun StudentProfileCard(
         ) {
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 Surface(
-                    modifier = Modifier.size(64.dp),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primaryContainer
+                    modifier = Modifier.size(46.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    color = Color(0xFFFFF1C7)
                 ) {
-                    BoxContent {
-                        Text(
-                            text = profile.displayName
-                                .firstOrNull()
-                                ?.uppercase()
-                                ?: "C",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                }
-
-                Spacer(
-                    modifier = Modifier.width(14.dp)
-                )
-
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = profile.displayName.ifBlank {
-                            "COMMERZO Student"
-                        },
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.ExtraBold
-                    )
-
-                    Spacer(
-                        modifier = Modifier.height(3.dp)
-                    )
-
-                    Text(
-                        text = profile.email.ifBlank {
-                            "Email not available"
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Spacer(
-                        modifier = Modifier.height(7.dp)
-                    )
-
-                    Surface(
-                        shape = RoundedCornerShape(50.dp),
-                        color = MaterialTheme.colorScheme.primaryContainer
+                    Box(
+                        contentAlignment = Alignment.Center
                     ) {
-                        Row(
-                            modifier = Modifier.padding(
-                                horizontal = 9.dp,
-                                vertical = 5.dp
-                            ),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Verified,
-                                contentDescription = "Student",
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-
-                            Spacer(
-                                modifier = Modifier.width(4.dp)
-                            )
-
-                            Text(
-                                text = "Student",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                }
-
-                IconButton(
-                    onClick = onEdit
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit Profile"
-                    )
-                }
-            }
-
-            Spacer(
-                modifier = Modifier.height(18.dp)
-            )
-
-            ProfileInfoRow(
-                label = "Mobile",
-                value = profile.phoneNumber ?: "Not added"
-            )
-        }
-    }
-}
-
-@Composable
-private fun XPProgressCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(18.dp)
-        ) {
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    modifier = Modifier.size(42.dp),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surface.copy(
-                        alpha = 0.75f
-                    )
-                ) {
-                    BoxContent {
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = "XP",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = Color(0xFFE7A600),
+                            modifier = Modifier.size(25.dp)
                         )
                     }
                 }
@@ -517,42 +709,49 @@ private fun XPProgressCard() {
                     Text(
                         text = "Level 1",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.ExtraBold
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFF172A4D)
                     )
 
                     Text(
-                        text = "Beginner",
+                        text = "Keep learning to unlock your next level",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = Color(0xFF71809B)
                     )
                 }
 
                 Text(
                     text = "0 XP",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFF315FEA)
                 )
             }
 
             Spacer(
-                modifier = Modifier.height(14.dp)
+                modifier = Modifier.height(15.dp)
             )
 
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(50.dp),
-                color = MaterialTheme.colorScheme.surface.copy(
-                    alpha = 0.65f
-                )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(9.dp)
+                    .clip(RoundedCornerShape(50.dp))
+                    .background(Color(0xFFE1E8F7))
             ) {
-                Text(
-                    text = "0 / 800 XP",
-                    modifier = Modifier.padding(
-                        horizontal = 14.dp,
-                        vertical = 8.dp
-                    ),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0f)
+                        .height(9.dp)
+                        .clip(RoundedCornerShape(50.dp))
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color(0xFF315FEA),
+                                    Color(0xFF7048E8)
+                                )
+                            )
+                        )
                 )
             }
 
@@ -560,82 +759,91 @@ private fun XPProgressCard() {
                 modifier = Modifier.height(8.dp)
             )
 
-            Text(
-                text = "Complete practice and tests to earn XP.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "0 / 800 XP",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF596A89)
+                )
+
+                Text(
+                    text = "Earn XP from practice & tests",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color(0xFF71809B)
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun ProfileInfoRow(
-    label: String,
-    value: String
+private fun ProfileMenuGroup(
+    content: @Composable ColumnScope.() -> Unit
 ) {
-    Row(
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 3.dp
         )
-
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodySmall,
-            fontWeight = FontWeight.SemiBold
+    ) {
+        Column(
+            modifier = Modifier.padding(
+                vertical = 4.dp
+            ),
+            content = content
         )
     }
 }
 
 @Composable
-private fun ProfileMenuCard(
+private fun ProfileMenuRow(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
     subtitle: String,
-    isDestructive: Boolean = false,
+    iconBackground: Color,
+    iconTint: Color,
+    titleColor: Color = Color(0xFF172A4D),
+    arrowTint: Color = Color(0xFF72819C),
     onClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = onClick,
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp)),
+        color = Color.Transparent,
+        onClick = onClick
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(
+                    horizontal = 14.dp,
+                    vertical = 14.dp
+                ),
             verticalAlignment = Alignment.CenterVertically
         ) {
 
             Surface(
-                modifier = Modifier.size(42.dp),
-                shape = RoundedCornerShape(13.dp),
-                color =
-                    if (isDestructive) {
-                        MaterialTheme.colorScheme.errorContainer
-                    } else {
-                        MaterialTheme.colorScheme.surfaceVariant
-                    }
+                modifier = Modifier.size(46.dp),
+                shape = RoundedCornerShape(14.dp),
+                color = iconBackground
             ) {
-                BoxContent {
+                Box(
+                    contentAlignment = Alignment.Center
+                ) {
                     Icon(
                         imageVector = icon,
                         contentDescription = title,
-                        modifier = Modifier.size(20.dp),
-                        tint =
-                            if (isDestructive) {
-                                MaterialTheme.colorScheme.error
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            }
+                        modifier = Modifier.size(22.dp),
+                        tint = iconTint
                     )
                 }
             }
@@ -651,12 +859,7 @@ private fun ProfileMenuCard(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color =
-                        if (isDestructive) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            MaterialTheme.colorScheme.onSurface
-                        }
+                    color = titleColor
                 )
 
                 Spacer(
@@ -666,22 +869,29 @@ private fun ProfileMenuCard(
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color(0xFF71809B)
                 )
             }
 
             Icon(
                 imageVector = Icons.Default.ArrowForward,
                 contentDescription = "Open $title",
-                tint =
-                    if (isDestructive) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    }
+                modifier = Modifier.size(21.dp),
+                tint = arrowTint
             )
         }
     }
+}
+
+@Composable
+private fun MenuDivider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(
+            start = 73.dp,
+            end = 14.dp
+        ),
+        color = Color(0xFFEDF0F5)
+    )
 }
 
 @Composable
@@ -689,11 +899,17 @@ private fun SectionHeader(
     title: String,
     subtitle: String
 ) {
-    Column {
+    Column(
+        modifier = Modifier.padding(
+            start = 2.dp,
+            top = 2.dp
+        )
+    ) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.ExtraBold
+            fontWeight = FontWeight.ExtraBold,
+            color = Color(0xFF12284C)
         )
 
         Spacer(
@@ -703,7 +919,7 @@ private fun SectionHeader(
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = Color(0xFF71809B)
         )
     }
 }
@@ -712,16 +928,21 @@ private fun SectionHeader(
 private fun ProfileLoadingCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp)
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFF7F9FD)
+        )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
+                .padding(28.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            CircularProgressIndicator()
+            CircularProgressIndicator(
+                color = Color(0xFF315FEA)
+            )
         }
     }
 }
@@ -732,34 +953,43 @@ private fun ProfileEmptyCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp)
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFF7F9FD)
+        )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(22.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Profile not found",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF172A4D)
             )
 
             Spacer(
-                modifier = Modifier.height(8.dp)
+                modifier = Modifier.height(7.dp)
             )
 
             Text(
-                text = "Your student profile has not been created yet."
+                text = "Your student profile has not been created yet.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color(0xFF71809B)
             )
 
             Spacer(
-                modifier = Modifier.height(12.dp)
+                modifier = Modifier.height(14.dp)
             )
 
             Button(
-                onClick = onRetry
+                onClick = onRetry,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF315FEA)
+                )
             ) {
                 Text("Try Again")
             }
@@ -774,9 +1004,9 @@ private fun ProfileErrorCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer
+            containerColor = Color(0xFFFFF2F2)
         )
     ) {
         Column(
@@ -787,7 +1017,8 @@ private fun ProfileErrorCard(
             Text(
                 text = "Unable to load profile",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFB4232B)
             )
 
             Spacer(
@@ -796,30 +1027,22 @@ private fun ProfileErrorCard(
 
             Text(
                 text = message,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color(0xFF6D3A3E)
             )
 
             Spacer(
-                modifier = Modifier.height(12.dp)
+                modifier = Modifier.height(14.dp)
             )
 
             Button(
-                onClick = onRetry
+                onClick = onRetry,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF315FEA)
+                )
             ) {
                 Text("Retry")
             }
         }
-    }
-}
-
-@Composable
-private fun BoxContent(
-    content: @Composable () -> Unit
-) {
-    androidx.compose.foundation.layout.Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        content()
     }
 }
