@@ -56,15 +56,19 @@ import java.util.Locale
 @Composable
 fun StudyTrackerScreen(
     onBack: () -> Unit,
-    onStartStudy: (
-        board: String,
-        classLevel: String,
-        subjectId: String,
-        chapterId: String?
-    ) -> Unit = { _, _, _, _ -> },
+    subjectId: String? = null,
+    chapterId: String? = null,
+    board: String? = null,
+    classLevel: String? = null,
     viewModel: StudyTrackerViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val hasStudyContext =
+        !subjectId.isNullOrBlank() &&
+            !chapterId.isNullOrBlank() &&
+            !board.isNullOrBlank() &&
+            !classLevel.isNullOrBlank()
 
     LaunchedEffect(Unit) {
         viewModel.refresh()
@@ -74,7 +78,13 @@ fun StudyTrackerScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Study Tracker")
+                    Text(
+                        if (hasStudyContext) {
+                            "Start Study"
+                        } else {
+                            "Study Tracker"
+                        }
+                    )
                 },
                 navigationIcon = {
                     IconButton(
@@ -111,17 +121,33 @@ fun StudyTrackerScreen(
                 )
             }
 
-            else -> {
-                StudyTrackerContent(
+            hasStudyContext -> {
+                StudyTrackerSessionContent(
                     uiState = uiState,
+                    board = board.orEmpty(),
+                    classLevel = classLevel.orEmpty(),
+                    subjectId = subjectId.orEmpty(),
+                    chapterId = chapterId.orEmpty(),
                     onStart = {
-                        onStartStudy(
-                            "",
-                            "",
-                            "",
-                            null
+                        viewModel.startSession(
+                            board = board.orEmpty(),
+                            classLevel = classLevel.orEmpty(),
+                            subjectId = subjectId.orEmpty(),
+                            chapterId = chapterId.orEmpty()
                         )
                     },
+                    onStop = {
+                        viewModel.stopActiveSession()
+                    },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                )
+            }
+
+            else -> {
+                StudyTrackerDashboardContent(
+                    uiState = uiState,
                     onStop = {
                         viewModel.stopActiveSession()
                     },
@@ -135,9 +161,54 @@ fun StudyTrackerScreen(
 }
 
 @Composable
-private fun StudyTrackerContent(
+private fun StudyTrackerSessionContent(
     uiState: StudyTrackerUiState,
+    board: String,
+    classLevel: String,
+    subjectId: String,
+    chapterId: String,
     onStart: () -> Unit,
+    onStop: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            horizontal = 16.dp,
+            vertical = 16.dp
+        ),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        item {
+            StudyContextCard(
+                board = board,
+                classLevel = classLevel,
+                subjectId = subjectId,
+                chapterId = chapterId
+            )
+        }
+
+        item {
+            ActiveSessionCard(
+                session = uiState.activeSession,
+                requestedSubjectId = subjectId,
+                requestedChapterId = chapterId,
+                onStart = onStart,
+                onStop = onStop
+            )
+        }
+
+        uiState.errorMessage?.let { message ->
+            item {
+                ErrorCard(message)
+            }
+        }
+    }
+}
+
+@Composable
+private fun StudyTrackerDashboardContent(
+    uiState: StudyTrackerUiState,
     onStop: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -152,7 +223,9 @@ private fun StudyTrackerContent(
         item {
             ActiveSessionCard(
                 session = uiState.activeSession,
-                onStart = onStart,
+                requestedSubjectId = null,
+                requestedChapterId = null,
+                onStart = null,
                 onStop = onStop
             )
         }
@@ -219,21 +292,49 @@ private fun StudyTrackerContent(
 
         uiState.errorMessage?.let { message ->
             item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor =
-                            MaterialTheme.colorScheme.errorContainer
-                    )
-                ) {
-                    Text(
-                        text = message,
-                        modifier = Modifier.padding(16.dp),
-                        color =
-                            MaterialTheme.colorScheme.onErrorContainer
-                    )
-                }
+                ErrorCard(message)
             }
+        }
+    }
+}
+
+@Composable
+private fun StudyContextCard(
+    board: String,
+    classLevel: String,
+    subjectId: String,
+    chapterId: String
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "Study Context",
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            Text(
+                text = subjectId,
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Text(
+                text = chapterId,
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            Text(
+                text = "$board • $classLevel",
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }
@@ -241,15 +342,23 @@ private fun StudyTrackerContent(
 @Composable
 private fun ActiveSessionCard(
     session: StudySession?,
-    onStart: () -> Unit,
+    requestedSubjectId: String?,
+    requestedChapterId: String?,
+    onStart: (() -> Unit)?,
     onStop: () -> Unit
 ) {
+    val activeSessionMatchesRequestedContext =
+        session != null &&
+            !requestedSubjectId.isNullOrBlank() &&
+            !requestedChapterId.isNullOrBlank() &&
+            session.subjectId == requestedSubjectId &&
+            session.chapterId == requestedChapterId
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor =
-                MaterialTheme.colorScheme.primaryContainer
+            containerColor = MaterialTheme.colorScheme.primaryContainer
         )
     ) {
         Column(
@@ -278,10 +387,18 @@ private fun ActiveSessionCard(
                     )
 
                     Text(
-                        text = if (session == null) {
-                            "Select a subject and chapter to start tracking."
-                        } else {
-                            buildSessionLabel(session)
+                        text = when {
+                            session != null -> {
+                                buildSessionLabel(session)
+                            }
+
+                            onStart != null -> {
+                                "Start this chapter to track your study time."
+                            }
+
+                            else -> {
+                                "Open a chapter and start a study session."
+                            }
                         },
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -318,7 +435,7 @@ private fun ActiveSessionCard(
 
                     Text("Stop Study Session")
                 }
-            } else {
+            } else if (onStart != null) {
                 Button(
                     onClick = onStart,
                     modifier = Modifier.fillMaxWidth()
@@ -332,8 +449,13 @@ private fun ActiveSessionCard(
                         modifier = Modifier.size(8.dp)
                     )
 
-                    Text("Select Subject & Start")
+                    Text("Start Study Session")
                 }
+            } else if (!activeSessionMatchesRequestedContext) {
+                Text(
+                    text = "Study sessions are started from a specific chapter.",
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
     }
@@ -613,7 +735,7 @@ private fun RecentSessionCard(
 
                 Text(
                     text = session.chapterId
-                        ?: "General study",
+                        ?: "Unknown chapter",
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -667,6 +789,24 @@ private fun EmptyTrackerState(
             text = message,
             modifier = Modifier.padding(24.dp),
             style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+@Composable
+private fun ErrorCard(
+    message: String
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer
+        )
+    ) {
+        Text(
+            text = message,
+            modifier = Modifier.padding(16.dp),
+            color = MaterialTheme.colorScheme.onErrorContainer
         )
     }
 }
