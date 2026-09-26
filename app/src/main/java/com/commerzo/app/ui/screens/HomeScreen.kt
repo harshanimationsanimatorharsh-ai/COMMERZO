@@ -1,6 +1,8 @@
 package com.commerzo.app.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,9 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Assessment
@@ -21,18 +27,19 @@ import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SportsEsports
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -66,29 +73,35 @@ fun HomeScreen(
                     Column {
                         Text(
                             text = "COMMERZO",
-                            fontWeight = FontWeight.Bold
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.ExtraBold
                         )
 
                         Text(
-                            text = "Learn. Practice. Grow.",
+                            text = "Learn. Practice. Score.",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
                 actions = {
-                    OutlinedButton(
-                        onClick = onProfileClick,
-                        modifier = Modifier.padding(end = 8.dp)
+                    Surface(
+                        modifier = Modifier
+                            .padding(end = 12.dp)
+                            .size(42.dp),
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        onClick = onProfileClick
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Profile"
-                        )
-
-                        Spacer(modifier = Modifier.width(6.dp))
-
-                        Text("Profile")
+                        Box(
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Profile",
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
                     }
                 }
             )
@@ -98,29 +111,24 @@ fun HomeScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(paddingValues),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 8.dp,
+                bottom = 28.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
             item {
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "Welcome back, Harsh 👋",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
+                WelcomeHeader(
+                    onProfileClick = onProfileClick
                 )
+            }
 
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "Keep learning and move closer to your goals.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
+            item {
+                ProgressOverview()
             }
 
             item {
@@ -130,117 +138,88 @@ fun HomeScreen(
             }
 
             item {
-                Text(
-                    text = "Quick Actions",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                SectionHeader(
+                    title = "Continue Learning",
+                    subtitle = "Pick up where you left off"
                 )
-
-                Spacer(modifier = Modifier.height(8.dp))
             }
 
             item {
-                QuickActionCard(
-                    title = "Practice",
-                    subtitle = "Chapter-wise MCQs with explanations",
-                    icon = Icons.Default.MenuBook,
+                ContinueLearningCard(
                     onClick = onPracticeClick
                 )
             }
 
             item {
-                QuickActionCard(
-                    title = "Tests",
-                    subtitle = "Take a 50-question test",
-                    icon = Icons.Default.Assessment,
-                    onClick = onTestsClick
+                SectionHeader(
+                    title = "Quick Actions",
+                    subtitle = "Everything you need in one place"
                 )
             }
 
             item {
-                QuickActionCard(
-                    title = "Games",
-                    subtitle = "Learn with fun challenges",
-                    icon = Icons.Default.SportsEsports,
-                    onClick = onGamesClick
-                )
-            }
-
-            item {
-                Text(
-                    text = "Your Learning",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                        end = 4.dp
+                    )
                 ) {
-                    SmallActionCard(
-                        modifier = Modifier.weight(1f),
-                        title = "Bookmarks",
-                        icon = Icons.Default.Bookmark,
-                        onClick = onBookmarksClick
-                    )
+                    item {
+                        QuickActionTile(
+                            title = "Practice",
+                            subtitle = "MCQs",
+                            icon = Icons.Default.MenuBook,
+                            onClick = onPracticeClick
+                        )
+                    }
 
-                    SmallActionCard(
-                        modifier = Modifier.weight(1f),
-                        title = "Test History",
-                        icon = Icons.Default.History,
-                        onClick = onTestHistoryClick
-                    )
+                    item {
+                        QuickActionTile(
+                            title = "Tests",
+                            subtitle = "Full tests",
+                            icon = Icons.Default.Assessment,
+                            onClick = onTestsClick
+                        )
+                    }
+
+                    item {
+                        QuickActionTile(
+                            title = "Games",
+                            subtitle = "Mind games",
+                            icon = Icons.Default.SportsEsports,
+                            onClick = onGamesClick
+                        )
+                    }
                 }
             }
 
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    SmallActionCard(
-                        modifier = Modifier.weight(1f),
-                        title = "Achievements",
-                        icon = Icons.Default.EmojiEvents,
-                        onClick = onAchievementsClick
-                    )
-
-                    SmallActionCard(
-                        modifier = Modifier.weight(1f),
-                        title = "Settings",
-                        icon = Icons.Default.Settings,
-                        onClick = onSettingsClick
-                    )
-                }
+                SectionHeader(
+                    title = "Your Learning",
+                    subtitle = "Track and manage your progress"
+                )
             }
 
             item {
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "Subjects",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                LearningToolsGrid(
+                    onBookmarksClick = onBookmarksClick,
+                    onTestHistoryClick = onTestHistoryClick,
+                    onAchievementsClick = onAchievementsClick,
+                    onSettingsClick = onSettingsClick
                 )
+            }
 
-                Text(
-                    text = "Choose a subject to continue learning.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            item {
+                SectionHeader(
+                    title = "Subjects",
+                    subtitle = "Choose a subject to continue"
                 )
-
-                Spacer(modifier = Modifier.height(8.dp))
             }
 
             items(
                 items = subjects,
                 key = { it.id }
             ) { subject ->
-
                 HomeSubjectCard(
                     subject = subject,
                     onClick = {
@@ -250,43 +229,7 @@ fun HomeScreen(
             }
 
             item {
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(18.dp)
-                    ) {
-                        Text(
-                            text = "COMMERZO",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        Text(
-                            text = "Learn. Practice. Grow.",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        Text(
-                            text = "Founded by Mr.Harsh Shrivas",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
+                BrandFooter()
             }
         }
     }
@@ -299,13 +242,174 @@ private data class HomeSubject(
 )
 
 @Composable
+private fun WelcomeHeader(
+    onProfileClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = "Welcome back 👋",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.ExtraBold
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "Ready to make progress today?",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Surface(
+            modifier = Modifier.size(48.dp),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            onClick = onProfileClick
+        ) {
+            Box(
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Profile",
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProgressOverview() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = "Your Progress",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = "Level 1 • Beginner",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+                ) {
+                    Text(
+                        text = "XP",
+                        modifier = Modifier.padding(
+                            horizontal = 12.dp,
+                            vertical = 9.dp
+                        ),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                ProgressStat(
+                    modifier = Modifier.weight(1f),
+                    value = "0",
+                    label = "XP"
+                )
+
+                ProgressStat(
+                    modifier = Modifier.weight(1f),
+                    value = "0",
+                    label = "Tests"
+                )
+
+                ProgressStat(
+                    modifier = Modifier.weight(1f),
+                    value = "0",
+                    label = "Days"
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProgressStat(
+    modifier: Modifier,
+    value: String,
+    label: String
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f)
+    ) {
+        Column(
+            modifier = Modifier.padding(
+                vertical = 12.dp,
+                horizontal = 8.dp
+            ),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.ExtraBold
+            )
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
 private fun CurriculumCard(
     onChangeClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
         Row(
@@ -318,30 +422,30 @@ private fun CurriculumCard(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = "Current Curriculum",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    text = "CURRENT CURRICULUM",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(5.dp))
 
                 Text(
                     text = "MP Board • Class 12",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    fontWeight = FontWeight.ExtraBold
                 )
 
                 Spacer(modifier = Modifier.height(3.dp))
 
                 Text(
-                    text = "Change your board or class",
+                    text = "Your selected learning path",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
-            Button(
+            OutlinedButton(
                 onClick = onChangeClick
             ) {
                 Text("Change")
@@ -351,15 +455,16 @@ private fun CurriculumCard(
 }
 
 @Composable
-private fun QuickActionCard(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
+private fun ContinueLearningCard(
     onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        onClick = onClick
+        onClick = onClick,
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     ) {
         Row(
             modifier = Modifier
@@ -367,10 +472,21 @@ private fun QuickActionCard(
                 .padding(18.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = title
-            )
+            Surface(
+                modifier = Modifier.size(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MenuBook,
+                        contentDescription = "Continue learning",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.width(14.dp))
 
@@ -378,15 +494,15 @@ private fun QuickActionCard(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = title,
+                    text = "Start Practice",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.ExtraBold
                 )
 
                 Spacer(modifier = Modifier.height(3.dp))
 
                 Text(
-                    text = subtitle,
+                    text = "Practice chapter-wise MCQs and improve your score.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -394,42 +510,176 @@ private fun QuickActionCard(
 
             Icon(
                 imageVector = Icons.Default.ArrowForward,
-                contentDescription = "Open $title"
+                contentDescription = "Open practice"
             )
         }
     }
 }
 
 @Composable
-private fun SmallActionCard(
-    modifier: Modifier = Modifier,
+private fun QuickActionTile(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.width(142.dp),
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Surface(
+                modifier = Modifier.size(44.dp),
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = title,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.ExtraBold
+            )
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun LearningToolsGrid(
+    onBookmarksClick: () -> Unit,
+    onTestHistoryClick: () -> Unit,
+    onAchievementsClick: () -> Unit,
+    onSettingsClick: () -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            LearningToolCard(
+                modifier = Modifier.weight(1f),
+                title = "Bookmarks",
+                icon = Icons.Default.Bookmark,
+                onClick = onBookmarksClick
+            )
+
+            LearningToolCard(
+                modifier = Modifier.weight(1f),
+                title = "History",
+                icon = Icons.Default.History,
+                onClick = onTestHistoryClick
+            )
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            LearningToolCard(
+                modifier = Modifier.weight(1f),
+                title = "Achievements",
+                icon = Icons.Default.EmojiEvents,
+                onClick = onAchievementsClick
+            )
+
+            LearningToolCard(
+                modifier = Modifier.weight(1f),
+                title = "Settings",
+                icon = Icons.Default.Settings,
+                onClick = onSettingsClick
+            )
+        }
+    }
+}
+
+@Composable
+private fun LearningToolCard(
+    modifier: Modifier,
     title: String,
     icon: ImageVector,
     onClick: () -> Unit
 ) {
     Card(
         modifier = modifier,
-        onClick = onClick
+        onClick = onClick,
+        shape = RoundedCornerShape(18.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(15.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = title
-            )
+            Surface(
+                modifier = Modifier.size(38.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surfaceVariant
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = title,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.Bold
             )
         }
+    }
+}
+
+@Composable
+private fun SectionHeader(
+    title: String,
+    subtitle: String
+) {
+    Column {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.ExtraBold
+        )
+
+        Spacer(modifier = Modifier.height(3.dp))
+
+        Text(
+            text = subtitle,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -441,20 +691,28 @@ private fun HomeSubjectCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        shape = RoundedCornerShape(20.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(18.dp),
+                .padding(17.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = subject.emoji,
-                style = MaterialTheme.typography.headlineSmall
-            )
+            Box(
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(RoundedCornerShape(15.dp))
+                    .background(
+                        MaterialTheme.colorScheme.primaryContainer
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = subject.emoji,
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
 
             Spacer(modifier = Modifier.width(14.dp))
 
@@ -464,13 +722,13 @@ private fun HomeSubjectCard(
                 Text(
                     text = subject.name,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.ExtraBold
                 )
 
                 Spacer(modifier = Modifier.height(3.dp))
 
                 Text(
-                    text = "Open chapters and practice",
+                    text = "Chapters • Practice • Tests",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -479,6 +737,40 @@ private fun HomeSubjectCard(
             Icon(
                 imageVector = Icons.Default.ArrowForward,
                 contentDescription = "Open ${subject.name}"
+            )
+        }
+    }
+}
+
+@Composable
+private fun BrandFooter() {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp)
+        ) {
+            Text(
+                text = "COMMERZO",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.ExtraBold
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "Learn. Practice. Score.",
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Text(
+                text = "A focused learning space for Commerce students.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
