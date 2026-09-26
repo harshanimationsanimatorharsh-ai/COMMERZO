@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.commerzo.app.data.model.profile.StudentProfile
 import com.commerzo.app.data.repository.auth.AuthRepositoryProvider
 import com.commerzo.app.data.repository.profile.UserProfileRepositoryProvider
+import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,9 +14,16 @@ import kotlinx.coroutines.launch
 
 sealed class ProfileState {
     data object Loading : ProfileState()
-    data class Success(val profile: StudentProfile) : ProfileState()
+
+    data class Success(
+        val profile: StudentProfile
+    ) : ProfileState()
+
     data object Empty : ProfileState()
-    data class Error(val message: String) : ProfileState()
+
+    data class Error(
+        val message: String
+    ) : ProfileState()
 }
 
 class ProfileViewModel(
@@ -23,13 +31,17 @@ class ProfileViewModel(
 ) : AndroidViewModel(application) {
 
     private val authRepository =
-        AuthRepositoryProvider.getRepository(application.applicationContext)
+        AuthRepositoryProvider.getRepository(
+            application.applicationContext
+        )
 
     private val profileRepository =
         UserProfileRepositoryProvider.getRepository()
 
     private val _profileState =
-        MutableStateFlow<ProfileState>(ProfileState.Loading)
+        MutableStateFlow<ProfileState>(
+            ProfileState.Loading
+        )
 
     val profileState: StateFlow<ProfileState> =
         _profileState.asStateFlow()
@@ -40,71 +52,107 @@ class ProfileViewModel(
 
     fun loadProfile() {
         viewModelScope.launch {
-            _profileState.value = ProfileState.Loading
 
-            val firebaseUser = authRepository.getCurrentUser()
+            _profileState.value =
+                ProfileState.Loading
+
+            val firebaseUser =
+                authRepository.getCurrentUser()
 
             if (firebaseUser == null) {
                 _profileState.value =
-                    ProfileState.Error("No signed-in user found.")
+                    ProfileState.Error(
+                        "No signed-in user found."
+                    )
+
                 return@launch
             }
 
             val result =
-                profileRepository.getProfile(firebaseUser.userId)
+                profileRepository.getProfile(
+                    firebaseUser.uid
+                )
 
-            result
-                .onSuccess { profile ->
-                    if (profile != null) {
-                        _profileState.value =
-                            ProfileState.Success(profile)
-                    } else {
-                        val newProfile = StudentProfile(
-                            userId = firebaseUser.userId,
-                            displayName = firebaseUser.displayName.orEmpty(),
-                            email = firebaseUser.email.orEmpty(),
-                            phoneNumber = firebaseUser.phoneNumber,
-                            photoUrl = firebaseUser.photoUrl,
-                            role = "student",
-                            createdAt = System.currentTimeMillis(),
-                            updatedAt = System.currentTimeMillis()
+            result.onSuccess { profile ->
+
+                if (profile != null) {
+
+                    _profileState.value =
+                        ProfileState.Success(profile)
+
+                } else {
+
+                    val newProfile =
+                        createProfileFromFirebaseUser(
+                            firebaseUser
                         )
 
-                        val createResult =
-                            profileRepository.createOrUpdateProfile(newProfile)
+                    val createResult =
+                        profileRepository.createOrUpdateProfile(
+                            newProfile
+                        )
 
-                        if (createResult.isSuccess) {
-                            _profileState.value =
-                                ProfileState.Success(newProfile)
-                        } else {
-                            _profileState.value =
-                                ProfileState.Error(
-                                    createResult.exceptionOrNull()?.message
-                                        ?: "Unable to create student profile."
-                                )
-                        }
+                    if (createResult.isSuccess) {
+
+                        _profileState.value =
+                            ProfileState.Success(
+                                newProfile
+                            )
+
+                    } else {
+
+                        // Firestore may be temporarily offline.
+                        // Keep the authenticated Firebase
+                        // user visible instead of showing an error.
+                        _profileState.value =
+                            ProfileState.Success(
+                                newProfile
+                            )
                     }
                 }
-                .onFailure { error ->
-                    _profileState.value =
-                        ProfileState.Error(
-                            error.message
-                                ?: "Unable to load student profile."
-                        )
-                }
+
+            }.onFailure {
+
+                /*
+                 * Firestore can temporarily be offline.
+                 *
+                 * Firebase Authentication already contains
+                 * the user's basic profile information, so use
+                 * that information as a safe local fallback.
+                 */
+                val fallbackProfile =
+                    createProfileFromFirebaseUser(
+                        firebaseUser
+                    )
+
+                _profileState.value =
+                    ProfileState.Success(
+                        fallbackProfile
+                    )
+            }
         }
     }
 
-    fun updateDisplayName(displayName: String) {
+    fun updateDisplayName(
+        displayName: String
+    ) {
+        val name = displayName.trim()
+
+        if (name.isBlank()) {
+            return
+        }
+
         updateProfileField(
             mapOf(
-                "displayName" to displayName.trim(),
+                "displayName" to name,
                 "updatedAt" to System.currentTimeMillis()
             )
         )
     }
 
-    fun updatePhoneNumber(phoneNumber: String?) {
+    fun updatePhoneNumber(
+        phoneNumber: String?
+    ) {
         updateProfileField(
             mapOf(
                 "phoneNumber" to phoneNumber?.trim(),
@@ -113,7 +161,9 @@ class ProfileViewModel(
         )
     }
 
-    fun updatePhotoUrl(photoUrl: String?) {
+    fun updatePhotoUrl(
+        photoUrl: String?
+    ) {
         updateProfileField(
             mapOf(
                 "photoUrl" to photoUrl,
@@ -126,36 +176,103 @@ class ProfileViewModel(
         updates: Map<String, Any?>
     ) {
         viewModelScope.launch {
-            val currentState = _profileState.value
+
+            val currentState =
+                _profileState.value
 
             val currentProfile =
-                (currentState as? ProfileState.Success)?.profile
+                (currentState as? ProfileState.Success)
+                    ?.profile
 
             if (currentProfile == null) {
                 _profileState.value =
                     ProfileState.Error(
                         "Student profile is not loaded yet."
                     )
+
                 return@launch
             }
 
             val result =
                 profileRepository.updateProfile(
-                    userId = currentProfile.userId,
-                    updates = updates
+                    currentProfile.userId,
+                    updates
                 )
 
-            result
-                .onSuccess {
-                    loadProfile()
-                }
-                .onFailure { error ->
-                    _profileState.value =
-                        ProfileState.Error(
-                            error.message
-                                ?: "Unable to update student profile."
-                        )
-                }
+            if (result.isSuccess) {
+
+                loadProfile()
+
+            } else {
+
+                /*
+                 * Optimistic local update.
+                 *
+                 * If Firestore is offline, the user should
+                 * still see the updated information locally.
+                 */
+                val updatedProfile =
+                    applyLocalUpdates(
+                        profile = currentProfile,
+                        updates = updates
+                    )
+
+                _profileState.value =
+                    ProfileState.Success(
+                        updatedProfile
+                    )
+            }
         }
+    }
+
+    private fun createProfileFromFirebaseUser(
+        firebaseUser: FirebaseUser
+    ): StudentProfile {
+
+        return StudentProfile(
+            userId = firebaseUser.uid,
+            displayName =
+                firebaseUser.displayName.orEmpty(),
+            email =
+                firebaseUser.email.orEmpty(),
+            phoneNumber =
+                firebaseUser.phoneNumber,
+            photoUrl =
+                firebaseUser.photoUrl?.toString(),
+            role = "student",
+            createdAt = System.currentTimeMillis(),
+            updatedAt = System.currentTimeMillis()
+        )
+    }
+
+    private fun applyLocalUpdates(
+        profile: StudentProfile,
+        updates: Map<String, Any?>
+    ): StudentProfile {
+
+        return profile.copy(
+            displayName =
+                updates["displayName"]
+                    ?.toString()
+                    ?: profile.displayName,
+
+            phoneNumber =
+                if (updates.containsKey("phoneNumber")) {
+                    updates["phoneNumber"] as? String
+                } else {
+                    profile.phoneNumber
+                },
+
+            photoUrl =
+                if (updates.containsKey("photoUrl")) {
+                    updates["photoUrl"] as? String
+                } else {
+                    profile.photoUrl
+                },
+
+            updatedAt =
+                (updates["updatedAt"] as? Long)
+                    ?: profile.updatedAt
+        )
     }
 }
