@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +28,7 @@ import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -112,13 +114,13 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            contentPadding = PaddingValues(
                 start = 16.dp,
                 end = 16.dp,
                 top = 8.dp,
                 bottom = 28.dp
             ),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
 
             item {
@@ -128,7 +130,13 @@ fun HomeScreen(
             }
 
             item {
-                ProgressOverview()
+                ProgressOverview(
+                    onAchievementsClick = onAchievementsClick
+                )
+            }
+
+            item {
+                DailyStreakCard()
             }
 
             item {
@@ -140,7 +148,7 @@ fun HomeScreen(
             item {
                 SectionHeader(
                     title = "Continue Learning",
-                    subtitle = "Pick up where you left off"
+                    subtitle = "Keep building your Commerce skills"
                 )
             }
 
@@ -153,16 +161,14 @@ fun HomeScreen(
             item {
                 SectionHeader(
                     title = "Quick Actions",
-                    subtitle = "Everything you need in one place"
+                    subtitle = "Jump into your favourite activities"
                 )
             }
 
             item {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                        end = 4.dp
-                    )
+                    contentPadding = PaddingValues(end = 4.dp)
                 ) {
                     item {
                         QuickActionTile(
@@ -258,17 +264,17 @@ private fun WelcomeHeader(
                 fontWeight = FontWeight.ExtraBold
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(5.dp))
 
             Text(
-                text = "Ready to make progress today?",
+                text = "Let's make today a productive study day.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
         Surface(
-            modifier = Modifier.size(48.dp),
+            modifier = Modifier.size(50.dp),
             shape = CircleShape,
             color = MaterialTheme.colorScheme.primaryContainer,
             onClick = onProfileClick
@@ -287,13 +293,16 @@ private fun WelcomeHeader(
 }
 
 @Composable
-private fun ProgressOverview() {
+private fun ProgressOverview(
+    onAchievementsClick: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(26.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
+        ),
+        onClick = onAchievementsClick
     ) {
         Column(
             modifier = Modifier
@@ -307,12 +316,13 @@ private fun ProgressOverview() {
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "Your Progress",
-                        style = MaterialTheme.typography.labelLarge,
+                        text = "YOUR PROGRESS",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(5.dp))
 
                     Text(
                         text = "Level 1 • Beginner",
@@ -320,20 +330,28 @@ private fun ProgressOverview() {
                         fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
+
+                    Spacer(modifier = Modifier.height(3.dp))
+
+                    Text(
+                        text = "Keep learning to unlock more XP",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                            .copy(alpha = 0.75f)
+                    )
                 }
 
                 Surface(
                     shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
                 ) {
-                    Text(
-                        text = "XP",
-                        modifier = Modifier.padding(
-                            horizontal = 12.dp,
-                            vertical = 9.dp
-                        ),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold
+                    Icon(
+                        imageVector = Icons.Default.EmojiEvents,
+                        contentDescription = "Achievements",
+                        modifier = Modifier
+                            .padding(12.dp)
+                            .size(24.dp),
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -375,7 +393,7 @@ private fun ProgressStat(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f)
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
     ) {
         Column(
             modifier = Modifier.padding(
@@ -402,12 +420,69 @@ private fun ProgressStat(
 }
 
 @Composable
+private fun DailyStreakCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                modifier = Modifier.size(48.dp),
+                shape = RoundedCornerShape(15.dp),
+                color = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Whatshot,
+                        contentDescription = "Study streak",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Study Streak",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold
+                )
+
+                Spacer(modifier = Modifier.height(3.dp))
+
+                Text(
+                    text = "Start today and build your streak.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Text(
+                text = "0 days",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
 private fun CurriculumCard(
     onChangeClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
@@ -428,7 +503,7 @@ private fun CurriculumCard(
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                Spacer(modifier = Modifier.height(5.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
                     text = "MP Board • Class 12",
@@ -461,7 +536,7 @@ private fun ContinueLearningCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
-        shape = RoundedCornerShape(22.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
@@ -469,12 +544,12 @@ private fun ContinueLearningCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(18.dp),
+                .padding(19.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(52.dp),
-                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.size(54.dp),
+                shape = RoundedCornerShape(17.dp),
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
                 Box(
@@ -499,7 +574,7 @@ private fun ContinueLearningCard(
                     fontWeight = FontWeight.ExtraBold
                 )
 
-                Spacer(modifier = Modifier.height(3.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
                     text = "Practice chapter-wise MCQs and improve your score.",
@@ -524,16 +599,16 @@ private fun QuickActionTile(
     onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.width(142.dp),
+        modifier = Modifier.width(148.dp),
         onClick = onClick,
-        shape = RoundedCornerShape(20.dp)
+        shape = RoundedCornerShape(22.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
             Surface(
-                modifier = Modifier.size(44.dp),
-                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier.size(46.dp),
+                shape = RoundedCornerShape(15.dp),
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
                 Box(
@@ -555,7 +630,7 @@ private fun QuickActionTile(
                 fontWeight = FontWeight.ExtraBold
             )
 
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(3.dp))
 
             Text(
                 text = subtitle,
@@ -626,7 +701,7 @@ private fun LearningToolCard(
     Card(
         modifier = modifier,
         onClick = onClick,
-        shape = RoundedCornerShape(18.dp)
+        shape = RoundedCornerShape(19.dp)
     ) {
         Row(
             modifier = Modifier
@@ -635,7 +710,7 @@ private fun LearningToolCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(38.dp),
+                modifier = Modifier.size(40.dp),
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.surfaceVariant
             ) {
@@ -691,7 +766,7 @@ private fun HomeSubjectCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
-        shape = RoundedCornerShape(20.dp)
+        shape = RoundedCornerShape(21.dp)
     ) {
         Row(
             modifier = Modifier
@@ -701,8 +776,8 @@ private fun HomeSubjectCard(
         ) {
             Box(
                 modifier = Modifier
-                    .size(50.dp)
-                    .clip(RoundedCornerShape(15.dp))
+                    .size(52.dp)
+                    .clip(RoundedCornerShape(16.dp))
                     .background(
                         MaterialTheme.colorScheme.primaryContainer
                     ),
@@ -746,7 +821,7 @@ private fun HomeSubjectCard(
 private fun BrandFooter() {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(22.dp),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Column(
