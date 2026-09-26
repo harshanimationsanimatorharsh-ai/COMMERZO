@@ -1,6 +1,7 @@
 package com.commerzo.app.navigation
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -140,6 +141,7 @@ fun AppNavigation(
                         ) {
                             inclusive = true
                         }
+
                         launchSingleTop = true
                     }
                 }
@@ -158,21 +160,22 @@ fun AppNavigation(
                         ) {
                             inclusive = true
                         }
+
                         launchSingleTop = true
                     }
                 }
             }
 
             is AuthState.Loading -> {
-                // Keep the current destination while authentication resolves.
+                // Authentication state is still resolving.
             }
 
             is AuthState.PhoneOtpSent -> {
-                // OTP is handled inside LoginScreen.
+                // OTP flow is handled by LoginScreen.
             }
 
             is AuthState.Error -> {
-                // Authentication screens display their own errors.
+                // Authentication screens handle their own errors.
             }
         }
     }
@@ -239,7 +242,7 @@ fun AppNavigation(
                     if (showBottomBar) {
                         innerPadding
                     } else {
-                        androidx.compose.foundation.layout.PaddingValues()
+                        PaddingValues()
                     }
                 )
         ) {
@@ -404,17 +407,19 @@ fun AppNavigation(
 
                     val board =
                         enumValueOrDefault(
-                            backStackEntry.arguments
-                                ?.getString("board")
-                                ?: Board.MP_BOARD.name,
+                            decodeRouteArgument(
+                                backStackEntry.arguments
+                                    ?.getString("board")
+                            ),
                             Board.MP_BOARD
                         )
 
                     val classLevel =
                         enumValueOrDefault(
-                            backStackEntry.arguments
-                                ?.getString("classLevel")
-                                ?: ClassLevel.CLASS_12.name,
+                            decodeRouteArgument(
+                                backStackEntry.arguments
+                                    ?.getString("classLevel")
+                            ),
                             ClassLevel.CLASS_12
                         )
 
@@ -488,8 +493,67 @@ fun AppNavigation(
                     )
                 }
 
+                /*
+                 * Study Tracker dashboard.
+                 *
+                 * This screen is intentionally kept separate from the
+                 * chapter-specific study session route.
+                 */
                 composable(Screen.StudyTracker.route) {
-                    StudyTrackerScreen()
+                    StudyTrackerScreen(
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
+
+                /*
+                 * Real chapter-specific Study Tracker session.
+                 *
+                 * Context is passed through the navigation route:
+                 * subjectId + chapterId + board + classLevel.
+                 */
+                composable(
+                    Screen.StudyTrackerSession.route
+                ) { backStackEntry ->
+
+                    val subjectId =
+                        decodeRouteArgument(
+                            backStackEntry.arguments
+                                ?.getString("subjectId")
+                        ).takeIf { it.isNotBlank() }
+                            ?: return@composable
+
+                    val chapterId =
+                        decodeRouteArgument(
+                            backStackEntry.arguments
+                                ?.getString("chapterId")
+                        ).takeIf { it.isNotBlank() }
+                            ?: return@composable
+
+                    val board =
+                        decodeRouteArgument(
+                            backStackEntry.arguments
+                                ?.getString("board")
+                        ).takeIf { it.isNotBlank() }
+                            ?: return@composable
+
+                    val classLevel =
+                        decodeRouteArgument(
+                            backStackEntry.arguments
+                                ?.getString("classLevel")
+                        ).takeIf { it.isNotBlank() }
+                            ?: return@composable
+
+                    StudyTrackerScreen(
+                        subjectId = subjectId,
+                        chapterId = chapterId,
+                        board = board,
+                        classLevel = classLevel,
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(Screen.Subjects.route) {
@@ -511,23 +575,27 @@ fun AppNavigation(
                 composable(Screen.Chapters.route) { backStackEntry ->
 
                     val subjectId =
-                        backStackEntry.arguments
-                            ?.getString("subjectId")
+                        decodeRouteArgument(
+                            backStackEntry.arguments
+                                ?.getString("subjectId")
+                        ).takeIf { it.isNotBlank() }
                             ?: return@composable
 
                     val board =
                         enumValueOrDefault(
-                            backStackEntry.arguments
-                                ?.getString("board")
-                                ?: Board.MP_BOARD.name,
+                            decodeRouteArgument(
+                                backStackEntry.arguments
+                                    ?.getString("board")
+                            ),
                             Board.MP_BOARD
                         )
 
                     val classLevel =
                         enumValueOrDefault(
-                            backStackEntry.arguments
-                                ?.getString("classLevel")
-                                ?: ClassLevel.CLASS_12.name,
+                            decodeRouteArgument(
+                                backStackEntry.arguments
+                                    ?.getString("classLevel")
+                            ),
                             ClassLevel.CLASS_12
                         )
 
@@ -562,6 +630,22 @@ fun AppNavigation(
                                     classLevel = classLevel
                                 )
                             )
+                        },
+                        onStartStudy = {
+                            startSubjectId,
+                            startChapterId,
+                            startBoard,
+                            startClassLevel,
+                            _ ->
+
+                            navController.navigate(
+                                Screen.StudyTrackerSession.createRoute(
+                                    subjectId = startSubjectId,
+                                    chapterId = startChapterId,
+                                    board = startBoard,
+                                    classLevel = startClassLevel
+                                )
+                            )
                         }
                     )
                 }
@@ -569,9 +653,11 @@ fun AppNavigation(
                 composable(Screen.Questions.route) { backStackEntry ->
 
                     val rawSubjectId =
-                        backStackEntry.arguments
-                            ?.getString("subjectId")
-                        ?: return@composable
+                        decodeRouteArgument(
+                            backStackEntry.arguments
+                                ?.getString("subjectId")
+                        ).takeIf { it.isNotBlank() }
+                            ?: return@composable
 
                     val subjectId =
                         toQuestionSubjectId(
@@ -579,23 +665,27 @@ fun AppNavigation(
                         )
 
                     val chapterId =
-                        backStackEntry.arguments
-                            ?.getString("chapterId")
-                        ?: return@composable
+                        decodeRouteArgument(
+                            backStackEntry.arguments
+                                ?.getString("chapterId")
+                        ).takeIf { it.isNotBlank() }
+                            ?: return@composable
 
                     val board =
                         enumValueOrDefault(
-                            backStackEntry.arguments
-                                ?.getString("board")
-                                ?: Board.MP_BOARD.name,
+                            decodeRouteArgument(
+                                backStackEntry.arguments
+                                    ?.getString("board")
+                            ),
                             Board.MP_BOARD
                         )
 
                     val classLevel =
                         enumValueOrDefault(
-                            backStackEntry.arguments
-                                ?.getString("classLevel")
-                                ?: ClassLevel.CLASS_12.name,
+                            decodeRouteArgument(
+                                backStackEntry.arguments
+                                    ?.getString("classLevel")
+                            ),
                             ClassLevel.CLASS_12
                         )
 
@@ -746,3 +836,20 @@ private inline fun <reified T : Enum<T>>
     } catch (_: IllegalArgumentException) {
         default
     }
+
+private fun decodeRouteArgument(
+    value: String?
+): String {
+    if (value.isNullOrBlank()) {
+        return ""
+    }
+
+    return try {
+        java.net.URLDecoder.decode(
+            value,
+            Charsets.UTF_8.name()
+        )
+    } catch (_: IllegalArgumentException) {
+        value
+    }
+}
