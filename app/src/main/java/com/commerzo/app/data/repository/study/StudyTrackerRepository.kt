@@ -47,15 +47,23 @@ class StudyTrackerRepository(
     /**
      * Creates a new active study session.
      *
+     * New sessions require complete study context:
+     * board + class + subject + chapter.
+     *
+     * Older persisted sessions with a null chapterId remain supported.
+     *
      * Only one active session is allowed per user.
      */
     fun startSession(session: StudySession): Result<StudySession> {
         return try {
             validateSessionUser(session)
+            validateNewSessionContext(session)
 
             if (session.status != StudySession.STATUS_ACTIVE) {
                 return Result.failure(
-                    IllegalArgumentException("A new study session must have ACTIVE status.")
+                    IllegalArgumentException(
+                        "A new study session must have ACTIVE status."
+                    )
                 )
             }
 
@@ -63,18 +71,28 @@ class StudyTrackerRepository(
 
             if (existingActiveSession != null) {
                 return Result.failure(
-                    IllegalStateException("An active study session already exists.")
+                    IllegalStateException(
+                        "An active study session already exists."
+                    )
                 )
             }
 
             val now = System.currentTimeMillis()
 
             val activeSession = session.copy(
-                startedAt = if (session.startedAt > 0L) session.startedAt else now,
+                startedAt = if (session.startedAt > 0L) {
+                    session.startedAt
+                } else {
+                    now
+                },
                 endedAt = null,
                 durationSeconds = 0L,
                 status = StudySession.STATUS_ACTIVE,
-                createdAt = if (session.createdAt > 0L) session.createdAt else now,
+                createdAt = if (session.createdAt > 0L) {
+                    session.createdAt
+                } else {
+                    now
+                },
                 updatedAt = now
             )
 
@@ -91,19 +109,34 @@ class StudyTrackerRepository(
 
     /**
      * Updates an existing study session belonging to the same user.
+     *
+     * Existing legacy sessions remain editable for backward compatibility.
      */
     fun updateSession(session: StudySession): Result<StudySession> {
         return try {
             validateSessionUser(session)
 
             val sessions = getSessions(session.userId).toMutableList()
+
             val index = sessions.indexOfFirst {
                 it.sessionId == session.sessionId
             }
 
             if (index == -1) {
                 return Result.failure(
-                    IllegalArgumentException("Study session not found.")
+                    IllegalArgumentException(
+                        "Study session not found."
+                    )
+                )
+            }
+
+            val existingSession = sessions[index]
+
+            if (existingSession.userId != session.userId) {
+                return Result.failure(
+                    SecurityException(
+                        "Study session does not belong to this user."
+                    )
                 )
             }
 
@@ -133,7 +166,17 @@ class StudyTrackerRepository(
         return try {
             if (userId.isBlank()) {
                 return Result.failure(
-                    IllegalArgumentException("User ID cannot be empty.")
+                    IllegalArgumentException(
+                        "User ID cannot be empty."
+                    )
+                )
+            }
+
+            if (sessionId.isBlank()) {
+                return Result.failure(
+                    IllegalArgumentException(
+                        "Session ID cannot be empty."
+                    )
                 )
             }
 
@@ -145,7 +188,9 @@ class StudyTrackerRepository(
 
             if (index == -1) {
                 return Result.failure(
-                    IllegalArgumentException("Study session not found.")
+                    IllegalArgumentException(
+                        "Study session not found."
+                    )
                 )
             }
 
@@ -153,7 +198,9 @@ class StudyTrackerRepository(
 
             if (existingSession.userId != userId) {
                 return Result.failure(
-                    SecurityException("Study session does not belong to this user.")
+                    SecurityException(
+                        "Study session does not belong to this user."
+                    )
                 )
             }
 
@@ -163,7 +210,9 @@ class StudyTrackerRepository(
 
             if (existingSession.startedAt <= 0L) {
                 return Result.failure(
-                    IllegalStateException("Study session has an invalid start time.")
+                    IllegalStateException(
+                        "Study session has an invalid start time."
+                    )
                 )
             }
 
@@ -200,7 +249,9 @@ class StudyTrackerRepository(
         return try {
             if (userId.isBlank()) {
                 return Result.failure(
-                    IllegalArgumentException("User ID cannot be empty.")
+                    IllegalArgumentException(
+                        "User ID cannot be empty."
+                    )
                 )
             }
 
@@ -243,13 +294,17 @@ class StudyTrackerRepository(
         }
 
         if (safeUserId.isBlank()) {
-            throw IllegalArgumentException("Invalid user ID.")
+            throw IllegalArgumentException(
+                "Invalid user ID."
+            )
         }
 
         return PREF_PREFIX + safeUserId
     }
 
-    private fun validateSessionUser(session: StudySession) {
+    private fun validateSessionUser(
+        session: StudySession
+    ) {
         if (session.userId.isBlank()) {
             throw IllegalArgumentException(
                 "Study session must contain a Firebase user ID."
@@ -265,6 +320,43 @@ class StudyTrackerRepository(
         if (session.subjectId.isBlank()) {
             throw IllegalArgumentException(
                 "Study session must contain a subject ID."
+            )
+        }
+    }
+
+    /**
+     * Strict validation for newly created study sessions.
+     *
+     * This prevents meaningless "General study" sessions and guarantees
+     * that every new tracker session is connected to a real curriculum node.
+     *
+     * Existing persisted sessions are intentionally not validated here,
+     * preserving backward compatibility with older data.
+     */
+    private fun validateNewSessionContext(
+        session: StudySession
+    ) {
+        if (session.board.isBlank()) {
+            throw IllegalArgumentException(
+                "Study session must contain board information."
+            )
+        }
+
+        if (session.classLevel.isBlank()) {
+            throw IllegalArgumentException(
+                "Study session must contain class information."
+            )
+        }
+
+        if (session.subjectId.isBlank()) {
+            throw IllegalArgumentException(
+                "Study session must contain subject information."
+            )
+        }
+
+        if (session.chapterId.isNullOrBlank()) {
+            throw IllegalArgumentException(
+                "Study session must contain chapter information."
             )
         }
     }
@@ -291,7 +383,10 @@ class StudyTrackerRepository(
                         "endedAt",
                         session.endedAt ?: JSONObject.NULL
                     )
-                    put("durationSeconds", session.durationSeconds)
+                    put(
+                        "durationSeconds",
+                        session.durationSeconds
+                    )
                     put("status", session.status)
                     put("createdAt", session.createdAt)
                     put("updatedAt", session.updatedAt)
@@ -320,7 +415,10 @@ class StudyTrackerRepository(
                     classLevel = item.optString("classLevel"),
                     subjectId = item.optString("subjectId"),
                     chapterId = item.optStringOrNull("chapterId"),
-                    startedAt = item.optLong("startedAt", 0L),
+                    startedAt = item.optLong(
+                        "startedAt",
+                        0L
+                    ),
                     endedAt = item.optLongOrNull("endedAt"),
                     durationSeconds = item.optLong(
                         "durationSeconds",
