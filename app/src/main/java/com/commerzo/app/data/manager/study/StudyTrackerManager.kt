@@ -19,25 +19,25 @@ class StudyTrackerManager(
     private val studyTrackerRepository =
         StudyTrackerRepository(appContext)
 
-    /**
-     * Returns the currently authenticated Firebase user.
-     */
     fun getCurrentUser(): AuthUser? {
         return authRepository.getCurrentUser()
     }
 
-    /**
-     * Returns the Firebase UID of the currently authenticated user.
-     */
     fun getCurrentUserId(): String? {
-        return getCurrentUser()?.userId
+        return getCurrentUser()
+            ?.userId
             ?.takeIf { it.isNotBlank() }
     }
 
     /**
-     * Starts a new study session for the authenticated user.
+     * Starts a new chapter-specific study session.
      *
-     * The session remains ACTIVE until explicitly completed.
+     * New sessions require:
+     * - authenticated user
+     * - board
+     * - class level
+     * - subject
+     * - chapter
      */
     fun startSession(
         board: String,
@@ -49,30 +49,54 @@ class StudyTrackerManager(
         val userId = getCurrentUserId()
             ?: return Result.failure(
                 IllegalStateException(
-                    "No signed-in user found."
+                    "You must be signed in to start a study session."
                 )
             )
 
-        if (board.isBlank()) {
-            return Result.failure(
-                IllegalArgumentException(
-                    "Board cannot be empty."
-                )
-            )
-        }
+        val cleanBoard = board.trim()
+        val cleanClassLevel = classLevel.trim()
+        val cleanSubjectId = subjectId.trim()
+        val cleanChapterId = chapterId?.trim()
 
-        if (classLevel.isBlank()) {
+        if (cleanBoard.isBlank()) {
             return Result.failure(
                 IllegalArgumentException(
-                    "Class level cannot be empty."
+                    "Board information is required."
                 )
             )
         }
 
-        if (subjectId.isBlank()) {
+        if (cleanClassLevel.isBlank()) {
             return Result.failure(
                 IllegalArgumentException(
-                    "Subject ID cannot be empty."
+                    "Class information is required."
+                )
+            )
+        }
+
+        if (cleanSubjectId.isBlank()) {
+            return Result.failure(
+                IllegalArgumentException(
+                    "Subject information is required."
+                )
+            )
+        }
+
+        if (cleanChapterId.isNullOrBlank()) {
+            return Result.failure(
+                IllegalArgumentException(
+                    "Chapter information is required."
+                )
+            )
+        }
+
+        val existingActiveSession =
+            studyTrackerRepository.getActiveSession(userId)
+
+        if (existingActiveSession != null) {
+            return Result.failure(
+                IllegalStateException(
+                    "A study session is already active."
                 )
             )
         }
@@ -82,12 +106,10 @@ class StudyTrackerManager(
         val session = StudySession(
             sessionId = UUID.randomUUID().toString(),
             userId = userId,
-            board = board.trim(),
-            classLevel = classLevel.trim(),
-            subjectId = subjectId.trim(),
-            chapterId = chapterId
-                ?.trim()
-                ?.takeIf { it.isNotBlank() },
+            board = cleanBoard,
+            classLevel = cleanClassLevel,
+            subjectId = cleanSubjectId,
+            chapterId = cleanChapterId,
             startedAt = now,
             endedAt = null,
             durationSeconds = 0L,
@@ -96,32 +118,29 @@ class StudyTrackerManager(
             updatedAt = now
         )
 
-        return studyTrackerRepository.startSession(session)
+        return studyTrackerRepository.startSession(
+            session
+        )
     }
 
-    /**
-     * Returns the current active session for the authenticated user.
-     */
     fun getActiveSession(): StudySession? {
         val userId = getCurrentUserId()
             ?: return null
 
-        return studyTrackerRepository.getActiveSession(userId)
+        return studyTrackerRepository.getActiveSession(
+            userId
+        )
     }
 
-    /**
-     * Returns all saved sessions for the authenticated user.
-     */
     fun getSessions(): List<StudySession> {
         val userId = getCurrentUserId()
             ?: return emptyList()
 
-        return studyTrackerRepository.getSessions(userId)
+        return studyTrackerRepository.getSessions(
+            userId
+        )
     }
 
-    /**
-     * Completes the supplied active session.
-     */
     fun completeSession(
         sessionId: String,
         endedAt: Long = System.currentTimeMillis()
@@ -130,14 +149,14 @@ class StudyTrackerManager(
         val userId = getCurrentUserId()
             ?: return Result.failure(
                 IllegalStateException(
-                    "No signed-in user found."
+                    "You must be signed in to complete a study session."
                 )
             )
 
         if (sessionId.isBlank()) {
             return Result.failure(
                 IllegalArgumentException(
-                    "Session ID cannot be empty."
+                    "Session ID is required."
                 )
             )
         }
@@ -149,31 +168,28 @@ class StudyTrackerManager(
         )
     }
 
-    /**
-     * Completes the currently active session.
-     *
-     * Returns null when no active session exists.
-     */
     fun completeActiveSession(
         endedAt: Long = System.currentTimeMillis()
     ): Result<StudySession?> {
 
-        val activeSession = getActiveSession()
-            ?: return Result.success(null)
+        val userId = getCurrentUserId()
+            ?: return Result.failure(
+                IllegalStateException(
+                    "You must be signed in to complete a study session."
+                )
+            )
 
-        return completeSession(
+        val activeSession =
+            studyTrackerRepository.getActiveSession(userId)
+                ?: return Result.success(null)
+
+        return studyTrackerRepository.completeSession(
+            userId = userId,
             sessionId = activeSession.sessionId,
             endedAt = endedAt
-        ).map { completedSession ->
-            completedSession
-        }
+        )
     }
 
-    /**
-     * Returns sessions that started within the supplied timestamp range.
-     *
-     * startInclusive <= startedAt < endExclusive
-     */
     fun getSessionsBetween(
         startInclusive: Long,
         endExclusive: Long
@@ -183,22 +199,23 @@ class StudyTrackerManager(
             return emptyList()
         }
 
-        return getSessions().filter { session ->
-            session.startedAt >= startInclusive &&
-                session.startedAt < endExclusive
-        }
+        return getSessions()
+            .filter { session ->
+                session.startedAt >= startInclusive &&
+                    session.startedAt < endExclusive
+            }
     }
 
-    /**
-     * Returns recently completed sessions.
-     */
     fun getRecentCompletedSessions(
         limit: Int = 10
     ): List<StudySession> {
 
-        if (limit <= 0) return emptyList()
+        if (limit <= 0) {
+            return emptyList()
+        }
 
         return getSessions()
+            .asSequence()
             .filter {
                 it.status == StudySession.STATUS_COMPLETED
             }
@@ -206,13 +223,12 @@ class StudyTrackerManager(
                 it.startedAt
             }
             .take(limit)
+            .toList()
     }
 
-    /**
-     * Returns total completed study duration in seconds.
-     */
     fun getTotalStudySeconds(): Long {
         return getSessions()
+            .asSequence()
             .filter {
                 it.status == StudySession.STATUS_COMPLETED
             }
@@ -221,38 +237,41 @@ class StudyTrackerManager(
             }
     }
 
-    /**
-     * Returns total completed study duration for
-     * sessions belonging to a specific subject.
-     */
     fun getSubjectStudySeconds(
         subjectId: String
     ): Long {
 
-        if (subjectId.isBlank()) return 0L
+        val cleanSubjectId = subjectId.trim()
+
+        if (cleanSubjectId.isBlank()) {
+            return 0L
+        }
 
         return getSessions()
+            .asSequence()
             .filter {
                 it.status == StudySession.STATUS_COMPLETED &&
-                    it.subjectId == subjectId
+                    it.subjectId == cleanSubjectId
             }
             .sumOf {
                 it.durationSeconds.coerceAtLeast(0L)
             }
     }
 
-    /**
-     * Returns completed study duration for a timestamp range.
-     */
     fun getStudySecondsBetween(
         startInclusive: Long,
         endExclusive: Long
     ): Long {
 
+        if (startInclusive >= endExclusive) {
+            return 0L
+        }
+
         return getSessionsBetween(
             startInclusive = startInclusive,
             endExclusive = endExclusive
         )
+            .asSequence()
             .filter {
                 it.status == StudySession.STATUS_COMPLETED
             }
@@ -261,11 +280,6 @@ class StudyTrackerManager(
             }
     }
 
-    /**
-     * Updates an existing session.
-     *
-     * User ID is always taken from the authenticated account.
-     */
     fun updateSession(
         session: StudySession
     ): Result<StudySession> {
@@ -273,14 +287,22 @@ class StudyTrackerManager(
         val userId = getCurrentUserId()
             ?: return Result.failure(
                 IllegalStateException(
-                    "No signed-in user found."
+                    "You must be signed in to update a study session."
                 )
             )
+
+        if (session.sessionId.isBlank()) {
+            return Result.failure(
+                IllegalArgumentException(
+                    "Session ID is required."
+                )
+            )
+        }
 
         if (session.userId != userId) {
             return Result.failure(
                 SecurityException(
-                    "Study session does not belong to the signed-in user."
+                    "Study session does not belong to the current user."
                 )
             )
         }
@@ -290,16 +312,12 @@ class StudyTrackerManager(
         )
     }
 
-    /**
-     * Clears locally stored tracker data for the
-     * currently authenticated user only.
-     */
     fun clearCurrentUserData(): Result<Unit> {
 
         val userId = getCurrentUserId()
             ?: return Result.failure(
                 IllegalStateException(
-                    "No signed-in user found."
+                    "You must be signed in to clear study tracker data."
                 )
             )
 
