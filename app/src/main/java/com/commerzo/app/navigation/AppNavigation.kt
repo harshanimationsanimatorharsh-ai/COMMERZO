@@ -42,6 +42,7 @@ import com.commerzo.app.ui.screens.PracticeScreen
 import com.commerzo.app.ui.screens.ProfileScreen
 import com.commerzo.app.ui.screens.QuestionScreen
 import com.commerzo.app.ui.screens.SettingsScreen
+import com.commerzo.app.ui.screens.StudyTrackerScreen
 import com.commerzo.app.ui.screens.SubjectSelectionScreen
 import com.commerzo.app.ui.screens.TestHistoryScreen
 import com.commerzo.app.ui.screens.TestResultScreen
@@ -480,6 +481,10 @@ fun AppNavigation(
                             authViewModel.signOut()
                         }
                     )
+                }
+
+                composable(Screen.StudyTracker.route) {
+                    StudyTrackerScreen()
                 }
 
                 composable(Screen.Subjects.route) {
