@@ -1,6 +1,7 @@
 package com.commerzo.app.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,10 +39,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.commerzo.app.ui.viewmodel.SettingsViewModel
+import com.commerzo.app.ui.viewmodel.settings.SettingsViewModel
 
 @Composable
 fun SettingsScreen(
+    onBack: () -> Unit,
     viewModel: SettingsViewModel = viewModel()
 ) {
     val darkModeEnabled by viewModel.darkModeEnabled.collectAsState()
@@ -319,7 +321,7 @@ private fun SurfaceIcon(
         shape = RoundedCornerShape(13.dp),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
-        androidx.compose.foundation.layout.Box(
+        Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
@@ -356,7 +358,7 @@ private fun SupportEmailCard() {
                     alpha = 0.75f
                 )
             ) {
-                androidx.compose.foundation.layout.Box(
+                Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
@@ -384,7 +386,7 @@ private fun SupportEmailCard() {
                 )
 
                 Text(
-                    text = "theharshshrivas@gmail.com",
+                    text = SettingsViewModel.SUPPORT_EMAIL,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
