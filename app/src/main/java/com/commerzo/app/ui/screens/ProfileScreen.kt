@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Edit
@@ -47,7 +48,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -61,6 +61,7 @@ fun ProfileScreen(
     onTestHistory: () -> Unit = {},
     onAchievements: () -> Unit = {},
     onSettings: () -> Unit = {},
+    onStudyTracker: () -> Unit = {},
     onLogout: () -> Unit = {},
     viewModel: ProfileViewModel = viewModel()
 ) {
@@ -156,6 +157,18 @@ fun ProfileScreen(
                     XPProgressCard()
                 }
             }
+
+            SectionHeader(
+                title = "Your Progress",
+                subtitle = "Track your learning journey"
+            )
+
+            ProfileMenuCard(
+                icon = Icons.Default.AccessTime,
+                title = "Study Tracker",
+                subtitle = "Track study time, goals and subject progress",
+                onClick = onStudyTracker
+            )
 
             SectionHeader(
                 title = "Account",
