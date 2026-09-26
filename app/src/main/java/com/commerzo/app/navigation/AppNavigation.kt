@@ -477,6 +477,11 @@ fun AppNavigation(
                                 Screen.Settings.route
                             )
                         },
+                        onStudyTracker = {
+                            navController.navigate(
+                                Screen.StudyTracker.route
+                            )
+                        },
                         onLogout = {
                             authViewModel.signOut()
                         }
