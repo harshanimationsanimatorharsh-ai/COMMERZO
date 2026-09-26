@@ -552,8 +552,8 @@ fun AppNavigation(
                             navController.navigate(
                                 Screen.Chapters.createRoute(
                                     subjectId = subject.id,
-                                    board = subject.board,
-                                    classLevel = subject.classLevel
+                                    board = subject.board.name,
+                                    classLevel = subject.classLevel.name
                                 )
                             )
                         }
