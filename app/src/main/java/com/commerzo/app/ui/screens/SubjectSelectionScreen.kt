@@ -40,7 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.model.SubjectData
-import com.commerzo.app.ui.viewmodel.SubjectSelectionViewModel
+import com.commerzo.app.viewmodel.SubjectSelectionViewModel
 
 @Composable
 fun SubjectSelectionScreen(
