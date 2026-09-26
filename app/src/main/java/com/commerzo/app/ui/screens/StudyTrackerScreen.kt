@@ -32,7 +32,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -42,6 +41,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.commerzo.app.data.model.study.StudySession
@@ -85,10 +88,10 @@ fun StudyTrackerScreen(
         when {
             uiState.isLoading -> {
                 Box(
-                    modifier = androidx.compose.ui.Modifier
+                    modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues),
-                    contentAlignment = androidx.compose.ui.Alignment.Center
+                    contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
                 }
@@ -96,7 +99,7 @@ fun StudyTrackerScreen(
 
             !uiState.isSignedIn -> {
                 EmptyTrackerState(
-                    modifier = androidx.compose.ui.Modifier
+                    modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues),
                     message = "Sign in to start tracking your study time."
@@ -107,12 +110,6 @@ fun StudyTrackerScreen(
                 StudyTrackerContent(
                     uiState = uiState,
                     onStart = {
-                        /*
-                         * Subject/chapter selection will be connected
-                         * from the learning flow in a later phase.
-                         *
-                         * For now this starts a general session.
-                         */
                         viewModel.startSession(
                             board = "general",
                             classLevel = "12",
@@ -122,7 +119,7 @@ fun StudyTrackerScreen(
                     onStop = {
                         viewModel.stopActiveSession()
                     },
-                    modifier = androidx.compose.ui.Modifier
+                    modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
                 )
@@ -136,17 +133,16 @@ private fun StudyTrackerContent(
     uiState: StudyTrackerUiState,
     onStart: () -> Unit,
     onStop: () -> Unit,
-    modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier
+    modifier: Modifier = Modifier
 ) {
     LazyColumn(
         modifier = modifier,
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+        contentPadding = PaddingValues(
             horizontal = 16.dp,
             vertical = 16.dp
         ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-
         item {
             ActiveSessionCard(
                 session = uiState.activeSession,
@@ -202,7 +198,7 @@ private fun StudyTrackerContent(
         if (uiState.recentSessions.isEmpty()) {
             item {
                 EmptyTrackerState(
-                    modifier = androidx.compose.ui.Modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .height(120.dp),
                     message = "Your completed study sessions will appear here."
@@ -222,7 +218,7 @@ private fun StudyTrackerContent(
         uiState.errorMessage?.let { message ->
             item {
                 Card(
-                    modifier = androidx.compose.ui.Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
                         containerColor =
                             MaterialTheme.colorScheme.errorContainer
@@ -230,7 +226,7 @@ private fun StudyTrackerContent(
                 ) {
                     Text(
                         text = message,
-                        modifier = androidx.compose.ui.Modifier.padding(16.dp),
+                        modifier = Modifier.padding(16.dp),
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )
                 }
@@ -246,7 +242,7 @@ private fun ActiveSessionCard(
     onStop: () -> Unit
 ) {
     Card(
-        modifier = androidx.compose.ui.Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor =
@@ -254,17 +250,16 @@ private fun ActiveSessionCard(
         )
     ) {
         Column(
-            modifier = androidx.compose.ui.Modifier.padding(20.dp),
+            modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-
             Row(
-                modifier = androidx.compose.ui.Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
-                    modifier = androidx.compose.ui.Modifier.weight(1f)
+                    modifier = Modifier.weight(1f)
                 ) {
                     Text(
                         text = if (session == null) {
@@ -276,7 +271,7 @@ private fun ActiveSessionCard(
                     )
 
                     Spacer(
-                        modifier = androidx.compose.ui.Modifier.height(4.dp)
+                        modifier = Modifier.height(4.dp)
                     )
 
                     Text(
@@ -296,7 +291,7 @@ private fun ActiveSessionCard(
                         Icons.Default.AccessTime
                     },
                     contentDescription = null,
-                    modifier = androidx.compose.ui.Modifier.size(32.dp)
+                    modifier = Modifier.size(32.dp)
                 )
             }
 
@@ -307,7 +302,7 @@ private fun ActiveSessionCard(
 
                 Button(
                     onClick = onStop,
-                    modifier = androidx.compose.ui.Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(
                         imageVector = Icons.Default.Stop,
@@ -315,7 +310,7 @@ private fun ActiveSessionCard(
                     )
 
                     Spacer(
-                        modifier = androidx.compose.ui.Modifier.size(8.dp)
+                        modifier = Modifier.size(8.dp)
                     )
 
                     Text("Stop Study Session")
@@ -323,7 +318,7 @@ private fun ActiveSessionCard(
             } else {
                 Button(
                     onClick = onStart,
-                    modifier = androidx.compose.ui.Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
@@ -331,7 +326,7 @@ private fun ActiveSessionCard(
                     )
 
                     Spacer(
-                        modifier = androidx.compose.ui.Modifier.size(8.dp)
+                        modifier = Modifier.size(8.dp)
                     )
 
                     Text("Start Studying")
@@ -378,14 +373,13 @@ private fun StudyOverviewCard(
     uiState: StudyTrackerUiState
 ) {
     Card(
-        modifier = androidx.compose.ui.Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp)
     ) {
         Column(
-            modifier = androidx.compose.ui.Modifier.padding(20.dp),
+            modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
             Text(
                 text = "Your Progress",
                 style = MaterialTheme.typography.titleLarge
@@ -404,11 +398,11 @@ private fun StudyOverviewCard(
             )
 
             Row(
-                modifier = androidx.compose.ui.Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 StatItem(
-                    modifier = androidx.compose.ui.Modifier.weight(1f),
+                    modifier = Modifier.weight(1f),
                     value = formatDuration(
                         uiState.todayStudySeconds
                     ),
@@ -416,13 +410,13 @@ private fun StudyOverviewCard(
                 )
 
                 StatItem(
-                    modifier = androidx.compose.ui.Modifier.weight(1f),
+                    modifier = Modifier.weight(1f),
                     value = uiState.todaySessionCount.toString(),
                     label = "Sessions"
                 )
 
                 StatItem(
-                    modifier = androidx.compose.ui.Modifier.weight(1f),
+                    modifier = Modifier.weight(1f),
                     value = uiState.currentStreak.toString(),
                     label = "Day streak"
                 )
@@ -446,16 +440,15 @@ private fun TodayGoalCard(
             .coerceAtLeast(0L)
 
     Card(
-        modifier = androidx.compose.ui.Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp)
     ) {
         Column(
-            modifier = androidx.compose.ui.Modifier.padding(20.dp),
+            modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-
             Row(
-                modifier = androidx.compose.ui.Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
@@ -470,7 +463,7 @@ private fun TodayGoalCard(
 
             LinearProgressIndicator(
                 progress = { progress },
-                modifier = androidx.compose.ui.Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             )
 
             Text(
@@ -493,27 +486,27 @@ private fun StudyPeriodCard(
     sessions: Int?
 ) {
     Card(
-        modifier = androidx.compose.ui.Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp)
     ) {
         Row(
-            modifier = androidx.compose.ui.Modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(18.dp),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = androidx.compose.ui.Modifier.size(30.dp)
+                modifier = Modifier.size(30.dp)
             )
 
             Spacer(
-                modifier = androidx.compose.ui.Modifier.size(14.dp)
+                modifier = Modifier.size(14.dp)
             )
 
             Column(
-                modifier = androidx.compose.ui.Modifier.weight(1f)
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = title,
@@ -542,27 +535,27 @@ private fun StreakCard(
     longestStreak: Int
 ) {
     Card(
-        modifier = androidx.compose.ui.Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp)
     ) {
         Row(
-            modifier = androidx.compose.ui.Modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(20.dp),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Default.Whatshot,
                 contentDescription = null,
-                modifier = androidx.compose.ui.Modifier.size(36.dp)
+                modifier = Modifier.size(36.dp)
             )
 
             Spacer(
-                modifier = androidx.compose.ui.Modifier.size(16.dp)
+                modifier = Modifier.size(16.dp)
             )
 
             Column(
-                modifier = androidx.compose.ui.Modifier.weight(1f)
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = "$currentStreak day streak",
@@ -588,27 +581,27 @@ private fun RecentSessionCard(
     session: StudySession
 ) {
     Card(
-        modifier = androidx.compose.ui.Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
-            modifier = androidx.compose.ui.Modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Default.CheckCircle,
                 contentDescription = null,
-                modifier = androidx.compose.ui.Modifier.size(28.dp)
+                modifier = Modifier.size(28.dp)
             )
 
             Spacer(
-                modifier = androidx.compose.ui.Modifier.size(12.dp)
+                modifier = Modifier.size(12.dp)
             )
 
             Column(
-                modifier = androidx.compose.ui.Modifier.weight(1f)
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = session.subjectId,
@@ -634,7 +627,7 @@ private fun RecentSessionCard(
 
 @Composable
 private fun StatItem(
-    modifier: androidx.compose.ui.Modifier,
+    modifier: Modifier,
     value: String,
     label: String
 ) {
@@ -660,16 +653,16 @@ private fun StatItem(
 
 @Composable
 private fun EmptyTrackerState(
-    modifier: androidx.compose.ui.Modifier,
+    modifier: Modifier,
     message: String
 ) {
     Box(
         modifier = modifier,
-        contentAlignment = androidx.compose.ui.Alignment.Center
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = message,
-            modifier = androidx.compose.ui.Modifier.padding(24.dp),
+            modifier = Modifier.padding(24.dp),
             style = MaterialTheme.typography.bodyLarge
         )
     }
