@@ -1,5 +1,20 @@
 package com.commerzo.app.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.filled.Gamepad
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,6 +60,40 @@ data class NavigationTestResult(
     val marked: Int = 0
 )
 
+private data class BottomNavItem(
+    val route: String,
+    val label: String,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector
+)
+
+private val bottomNavItems = listOf(
+    BottomNavItem(
+        route = Screen.Home.route,
+        label = "Home",
+        icon = Icons.Default.Home
+    ),
+    BottomNavItem(
+        route = Screen.Subjects.route,
+        label = "Learn",
+        icon = Icons.Default.AutoStories
+    ),
+    BottomNavItem(
+        route = Screen.Practice.route,
+        label = "Practice",
+        icon = Icons.Default.PlayCircle
+    ),
+    BottomNavItem(
+        route = Screen.Games.route,
+        label = "Games",
+        icon = Icons.Default.Gamepad
+    ),
+    BottomNavItem(
+        route = Screen.Profile.route,
+        label = "Profile",
+        icon = Icons.Default.Person
+    )
+)
+
 @Composable
 fun AppNavigation(
     navController: NavHostController = rememberNavController(),
@@ -66,6 +115,12 @@ fun AppNavigation(
         remember {
             SubjectRepository()
         }
+
+    val showBottomBar =
+        authState is AuthState.LoggedIn &&
+            bottomNavItems.any { item ->
+                item.route == currentRoute
+            }
 
     LaunchedEffect(authState) {
         when (authState) {
@@ -113,7 +168,6 @@ fun AppNavigation(
 
             is AuthState.PhoneOtpSent -> {
                 // OTP is handled inside LoginScreen.
-                // Navigation remains on the authentication screen.
             }
 
             is AuthState.Error -> {
@@ -129,423 +183,494 @@ fun AppNavigation(
             AuthRoutes.LOGIN
         }
 
-    NavHost(
-        navController = navController,
-        startDestination = initialDestination
-    ) {
+    Scaffold(
+        bottomBar = {
+            if (showBottomBar) {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ) {
+                    bottomNavItems.forEach { item ->
 
-        composable(AuthRoutes.LOGIN) {
-            LoginScreen(
-                onLoginSuccess = {
-                    navController.navigate(
-                        Screen.Home.route
-                    ) {
-                        popUpTo(
-                            AuthRoutes.LOGIN
-                        ) {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
+                        val selected =
+                            currentRoute == item.route
+
+                        NavigationBarItem(
+                            selected = selected,
+                            onClick = {
+
+                                if (!selected) {
+                                    navController.navigate(
+                                        item.route
+                                    ) {
+                                        popUpTo(
+                                            Screen.Home.route
+                                        ) {
+                                            saveState = true
+                                        }
+
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = item.label
+                                )
+                            },
+                            label = {
+                                Text(
+                                    text = item.label
+                                )
+                            }
+                        )
                     }
-                },
-                onCreateAccount = {
-                    navController.navigate(
-                        AuthRoutes.CREATE_ACCOUNT
+                }
+            }
+        }
+    ) { innerPadding ->
+
+        Box(
+            modifier = androidx.compose.ui.Modifier
+                .fillMaxSize()
+                .padding(
+                    if (showBottomBar) {
+                        innerPadding
+                    } else {
+                        androidx.compose.foundation.layout.PaddingValues()
+                    }
+                )
+        ) {
+
+            NavHost(
+                navController = navController,
+                startDestination = initialDestination
+            ) {
+
+                composable(AuthRoutes.LOGIN) {
+                    LoginScreen(
+                        onLoginSuccess = {
+                            navController.navigate(
+                                Screen.Home.route
+                            ) {
+                                popUpTo(
+                                    AuthRoutes.LOGIN
+                                ) {
+                                    inclusive = true
+                                }
+
+                                launchSingleTop = true
+                            }
+                        },
+                        onCreateAccount = {
+                            navController.navigate(
+                                AuthRoutes.CREATE_ACCOUNT
+                            )
+                        }
                     )
                 }
-            )
-        }
 
-        composable(AuthRoutes.CREATE_ACCOUNT) {
-            CreateAccountScreen(
-                onBack = {
-                    navController.popBackStack()
-                },
-                onAccountCreated = {
-                    navController.navigate(
-                        Screen.Home.route
-                    ) {
-                        popUpTo(
-                            AuthRoutes.CREATE_ACCOUNT
-                        ) {
-                            inclusive = true
+                composable(AuthRoutes.CREATE_ACCOUNT) {
+                    CreateAccountScreen(
+                        onBack = {
+                            navController.popBackStack()
+                        },
+                        onAccountCreated = {
+                            navController.navigate(
+                                Screen.Home.route
+                            ) {
+                                popUpTo(
+                                    AuthRoutes.CREATE_ACCOUNT
+                                ) {
+                                    inclusive = true
+                                }
+
+                                launchSingleTop = true
+                            }
                         }
-                        launchSingleTop = true
-                    }
+                    )
                 }
-            )
-        }
 
-        composable(Screen.Home.route) {
-            HomeScreen(
-                onSubjectClick = { subjectId ->
-                    navController.navigate(
-                        Screen.Chapters.createRoute(
+                composable(Screen.Home.route) {
+                    HomeScreen(
+                        onSubjectClick = { subjectId ->
+                            navController.navigate(
+                                Screen.Chapters.createRoute(
+                                    subjectId = subjectId,
+                                    board = Board.MP_BOARD,
+                                    classLevel = ClassLevel.CLASS_12
+                                )
+                            )
+                        },
+                        onSubjectsClick = {
+                            navController.navigate(
+                                Screen.Subjects.route
+                            )
+                        },
+                        onPracticeClick = {
+                            navController.navigate(
+                                Screen.Practice.route
+                            )
+                        },
+                        onTestsClick = {
+                            navController.navigate(
+                                Screen.Tests.route
+                            )
+                        },
+                        onGamesClick = {
+                            navController.navigate(
+                                Screen.Games.route
+                            )
+                        },
+                        onProfileClick = {
+                            navController.navigate(
+                                Screen.Profile.route
+                            )
+                        },
+                        onBookmarksClick = {
+                            navController.navigate(
+                                Screen.Bookmarks.route
+                            )
+                        },
+                        onTestHistoryClick = {
+                            navController.navigate(
+                                Screen.TestHistory.route
+                            )
+                        },
+                        onAchievementsClick = {
+                            navController.navigate(
+                                Screen.Achievements.route
+                            )
+                        },
+                        onSettingsClick = {
+                            navController.navigate(
+                                Screen.Settings.route
+                            )
+                        }
+                    )
+                }
+
+                composable(Screen.Practice.route) {
+                    PracticeScreen(
+                        onNavigate = { route ->
+                            navController.navigate(route)
+                        }
+                    )
+                }
+
+                composable(Screen.Tests.route) {
+                    TestSelectionScreen(
+                        onStartTest = {
+                            subjectId,
+                            chapterId,
+                            board,
+                            classLevel ->
+
+                            navController.navigate(
+                                Screen.TestSession.createRoute(
+                                    subjectId = toQuestionSubjectId(
+                                        subjectId
+                                    ),
+                                    chapterId = chapterId,
+                                    board = board,
+                                    classLevel = classLevel
+                                )
+                            )
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
+
+                composable(Screen.TestSession.route) { backStackEntry ->
+
+                    val rawSubjectId =
+                        backStackEntry.arguments
+                            ?.getString("subjectId")
+                            ?: return@composable
+
+                    val subjectId =
+                        toQuestionSubjectId(
+                            rawSubjectId
+                        )
+
+                    val chapterId =
+                        backStackEntry.arguments
+                            ?.getString("chapterId")
+                            ?: return@composable
+
+                    val board =
+                        enumValueOrDefault(
+                            backStackEntry.arguments
+                                ?.getString("board")
+                                ?: Board.MP_BOARD.name,
+                            Board.MP_BOARD
+                        )
+
+                    val classLevel =
+                        enumValueOrDefault(
+                            backStackEntry.arguments
+                                ?.getString("classLevel")
+                                ?: ClassLevel.CLASS_12.name,
+                            ClassLevel.CLASS_12
+                        )
+
+                    TestScreen(
+                        subjectId = subjectId,
+                        chapterId = chapterId,
+                        board = board,
+                        classLevel = classLevel,
+                        onTestFinished = {
+                            total,
+                            answered,
+                            correct,
+                            wrong,
+                            unattempted,
+                            marked ->
+
+                            latestTestResult =
+                                NavigationTestResult(
+                                    total = total,
+                                    answered = answered,
+                                    correct = correct,
+                                    wrong = wrong,
+                                    unattempted = unattempted,
+                                    marked = marked
+                                )
+
+                            navController.navigate(
+                                Screen.TestResult.route
+                            )
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
+
+                composable(Screen.Games.route) {
+                    GamesScreen()
+                }
+
+                composable(Screen.Profile.route) {
+                    ProfileScreen(
+                        onBookmarks = {
+                            navController.navigate(
+                                Screen.Bookmarks.route
+                            )
+                        },
+                        onTestHistory = {
+                            navController.navigate(
+                                Screen.TestHistory.route
+                            )
+                        },
+                        onAchievements = {
+                            navController.navigate(
+                                Screen.Achievements.route
+                            )
+                        },
+                        onSettings = {
+                            navController.navigate(
+                                Screen.Settings.route
+                            )
+                        },
+                        onLogout = {
+                            authViewModel.signOut()
+                        }
+                    )
+                }
+
+                composable(Screen.Subjects.route) {
+                    SubjectSelectionScreen(
+                        viewModel = viewModel(),
+                        onSubjectClick = { subject ->
+
+                            navController.navigate(
+                                Screen.Chapters.createRoute(
+                                    subjectId = subject.id,
+                                    board = subject.board,
+                                    classLevel = subject.classLevel
+                                )
+                            )
+                        }
+                    )
+                }
+
+                composable(Screen.Chapters.route) { backStackEntry ->
+
+                    val subjectId =
+                        backStackEntry.arguments
+                            ?.getString("subjectId")
+                            ?: return@composable
+
+                    val board =
+                        enumValueOrDefault(
+                            backStackEntry.arguments
+                                ?.getString("board")
+                                ?: Board.MP_BOARD.name,
+                            Board.MP_BOARD
+                        )
+
+                    val classLevel =
+                        enumValueOrDefault(
+                            backStackEntry.arguments
+                                ?.getString("classLevel")
+                                ?: ClassLevel.CLASS_12.name,
+                            ClassLevel.CLASS_12
+                        )
+
+                    val subjectName =
+                        getSubjectDisplayName(
+                            subjectRepository = subjectRepository,
                             subjectId = subjectId,
-                            board = Board.MP_BOARD,
-                            classLevel = ClassLevel.CLASS_12
-                        )
-                    )
-                },
-                onSubjectsClick = {
-                    navController.navigate(
-                        Screen.Subjects.route
-                    )
-                },
-                onPracticeClick = {
-                    navController.navigate(
-                        Screen.Practice.route
-                    )
-                },
-                onTestsClick = {
-                    navController.navigate(
-                        Screen.Tests.route
-                    )
-                },
-                onGamesClick = {
-                    navController.navigate(
-                        Screen.Games.route
-                    )
-                },
-                onProfileClick = {
-                    navController.navigate(
-                        Screen.Profile.route
-                    )
-                },
-                onBookmarksClick = {
-                    navController.navigate(
-                        Screen.Bookmarks.route
-                    )
-                },
-                onTestHistoryClick = {
-                    navController.navigate(
-                        Screen.TestHistory.route
-                    )
-                },
-                onAchievementsClick = {
-                    navController.navigate(
-                        Screen.Achievements.route
-                    )
-                },
-                onSettingsClick = {
-                    navController.navigate(
-                        Screen.Settings.route
-                    )
-                }
-            )
-        }
-
-        composable(Screen.Practice.route) {
-            PracticeScreen(
-                onNavigate = { route ->
-                    navController.navigate(route)
-                }
-            )
-        }
-
-        composable(Screen.Tests.route) {
-            TestSelectionScreen(
-                onStartTest = {
-                    subjectId,
-                    chapterId,
-                    board,
-                    classLevel ->
-
-                    navController.navigate(
-                        Screen.TestSession.createRoute(
-                            subjectId = toQuestionSubjectId(subjectId),
-                            chapterId = chapterId,
                             board = board,
                             classLevel = classLevel
                         )
-                    )
-                },
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
 
-        composable(Screen.TestSession.route) { backStackEntry ->
+                    ChapterScreen(
+                        subjectId = subjectId,
+                        subjectName = subjectName,
+                        board = board,
+                        classLevel = classLevel,
+                        onBack = {
+                            navController.popBackStack()
+                        },
+                        onChapterClick = {
+                            chapterId,
+                            _ ->
 
-            val rawSubjectId =
-                backStackEntry.arguments
-                    ?.getString("subjectId")
-                    ?: return@composable
-
-            val subjectId =
-                toQuestionSubjectId(rawSubjectId)
-
-            val chapterId =
-                backStackEntry.arguments
-                    ?.getString("chapterId")
-                    ?: return@composable
-
-            val board =
-                enumValueOrDefault(
-                    backStackEntry.arguments
-                        ?.getString("board")
-                        ?: Board.MP_BOARD.name,
-                    Board.MP_BOARD
-                )
-
-            val classLevel =
-                enumValueOrDefault(
-                    backStackEntry.arguments
-                        ?.getString("classLevel")
-                        ?: ClassLevel.CLASS_12.name,
-                    ClassLevel.CLASS_12
-                )
-
-            TestScreen(
-                subjectId = subjectId,
-                chapterId = chapterId,
-                board = board,
-                classLevel = classLevel,
-                onTestFinished = {
-                    total,
-                    answered,
-                    correct,
-                    wrong,
-                    unattempted,
-                    marked ->
-
-                    latestTestResult =
-                        NavigationTestResult(
-                            total = total,
-                            answered = answered,
-                            correct = correct,
-                            wrong = wrong,
-                            unattempted = unattempted,
-                            marked = marked
-                        )
-
-                    navController.navigate(
-                        Screen.TestResult.route
-                    )
-                },
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
-
-        composable(Screen.Games.route) {
-            GamesScreen()
-        }
-
-        composable(Screen.Profile.route) {
-            ProfileScreen(
-                onBookmarks = {
-                    navController.navigate(
-                        Screen.Bookmarks.route
-                    )
-                },
-                onTestHistory = {
-                    navController.navigate(
-                        Screen.TestHistory.route
-                    )
-                },
-                onAchievements = {
-                    navController.navigate(
-                        Screen.Achievements.route
-                    )
-                },
-                onSettings = {
-                    navController.navigate(
-                        Screen.Settings.route
-                    )
-                },
-                onLogout = {
-                    authViewModel.signOut()
-                }
-            )
-        }
-
-        composable(Screen.Subjects.route) {
-            SubjectSelectionScreen(
-                viewModel = viewModel(),
-                onSubjectClick = { subject ->
-                    navController.navigate(
-                        Screen.Chapters.createRoute(
-                            subject.id,
-                            subject.board,
-                            subject.classLevel
-                        )
-                    )
-                }
-            )
-        }
-
-        composable(Screen.Chapters.route) { backStackEntry ->
-
-            val subjectId =
-                backStackEntry.arguments
-                    ?.getString("subjectId")
-                    ?: return@composable
-
-            val board =
-                enumValueOrDefault(
-                    backStackEntry.arguments
-                        ?.getString("board")
-                        ?: Board.MP_BOARD.name,
-                    Board.MP_BOARD
-                )
-
-            val classLevel =
-                enumValueOrDefault(
-                    backStackEntry.arguments
-                        ?.getString("classLevel")
-                        ?: ClassLevel.CLASS_12.name,
-                    ClassLevel.CLASS_12
-                )
-
-            val subjectName =
-                getSubjectDisplayName(
-                    subjectRepository = subjectRepository,
-                    subjectId = subjectId,
-                    board = board,
-                    classLevel = classLevel
-                )
-
-            ChapterScreen(
-                subjectId = subjectId,
-                subjectName = subjectName,
-                board = board,
-                classLevel = classLevel,
-                onBack = {
-                    navController.popBackStack()
-                },
-                onChapterClick = {
-                    chapterId,
-                    _ ->
-
-                    navController.navigate(
-                        Screen.Questions.createRoute(
-                            subjectId =
-                                toQuestionSubjectId(
-                                    subjectId
-                                ),
-                            chapterId = chapterId,
-                            board = board,
-                            classLevel = classLevel
-                        )
-                    )
-                }
-            )
-        }
-
-        composable(Screen.Questions.route) { backStackEntry ->
-
-            val rawSubjectId =
-                backStackEntry.arguments
-                    ?.getString("subjectId")
-                ?: return@composable
-
-            val subjectId =
-                toQuestionSubjectId(rawSubjectId)
-
-            val chapterId =
-                backStackEntry.arguments
-                    ?.getString("chapterId")
-                ?: return@composable
-
-            val board =
-                enumValueOrDefault(
-                    backStackEntry.arguments
-                        ?.getString("board")
-                        ?: Board.MP_BOARD.name,
-                    Board.MP_BOARD
-                )
-
-            val classLevel =
-                enumValueOrDefault(
-                    backStackEntry.arguments
-                        ?.getString("classLevel")
-                        ?: ClassLevel.CLASS_12.name,
-                    ClassLevel.CLASS_12
-                )
-
-            QuestionScreen(
-                subjectId = subjectId,
-                chapterId = chapterId,
-                board = board,
-                classLevel = classLevel,
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
-
-        composable(Screen.TestResult.route) {
-            TestResultScreen(
-                total = latestTestResult.total,
-                answered = latestTestResult.answered,
-                correct = latestTestResult.correct,
-                wrong = latestTestResult.wrong,
-                unattempted = latestTestResult.unattempted,
-                marked = latestTestResult.marked,
-                onRestart = {
-                    latestTestResult =
-                        NavigationTestResult()
-
-                    navController.navigate(
-                        Screen.Tests.route
-                    ) {
-                        popUpTo(
-                            Screen.Tests.route
-                        ) {
-                            inclusive = true
+                            navController.navigate(
+                                Screen.Questions.createRoute(
+                                    subjectId =
+                                        toQuestionSubjectId(
+                                            subjectId
+                                        ),
+                                    chapterId = chapterId,
+                                    board = board,
+                                    classLevel = classLevel
+                                )
+                            )
                         }
-                    }
-                },
-                onBackToTests = {
-                    latestTestResult =
-                        NavigationTestResult()
+                    )
+                }
 
-                    navController.navigate(
-                        Screen.Tests.route
-                    ) {
-                        popUpTo(
-                            Screen.Tests.route
-                        ) {
-                            inclusive = true
+                composable(Screen.Questions.route) { backStackEntry ->
+
+                    val rawSubjectId =
+                        backStackEntry.arguments
+                            ?.getString("subjectId")
+                        ?: return@composable
+
+                    val subjectId =
+                        toQuestionSubjectId(
+                            rawSubjectId
+                        )
+
+                    val chapterId =
+                        backStackEntry.arguments
+                            ?.getString("chapterId")
+                        ?: return@composable
+
+                    val board =
+                        enumValueOrDefault(
+                            backStackEntry.arguments
+                                ?.getString("board")
+                                ?: Board.MP_BOARD.name,
+                            Board.MP_BOARD
+                        )
+
+                    val classLevel =
+                        enumValueOrDefault(
+                            backStackEntry.arguments
+                                ?.getString("classLevel")
+                                ?: ClassLevel.CLASS_12.name,
+                            ClassLevel.CLASS_12
+                        )
+
+                    QuestionScreen(
+                        subjectId = subjectId,
+                        chapterId = chapterId,
+                        board = board,
+                        classLevel = classLevel,
+                        onBack = {
+                            navController.popBackStack()
                         }
-                    }
+                    )
                 }
-            )
-        }
 
-        composable(Screen.Bookmarks.route) {
-            BookmarksScreen(
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
+                composable(Screen.TestResult.route) {
+                    TestResultScreen(
+                        total = latestTestResult.total,
+                        answered = latestTestResult.answered,
+                        correct = latestTestResult.correct,
+                        wrong = latestTestResult.wrong,
+                        unattempted = latestTestResult.unattempted,
+                        marked = latestTestResult.marked,
+                        onRestart = {
+                            latestTestResult =
+                                NavigationTestResult()
 
-        composable(Screen.TestHistory.route) {
-            TestHistoryScreen(
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
+                            navController.navigate(
+                                Screen.Tests.route
+                            ) {
+                                popUpTo(
+                                    Screen.Tests.route
+                                ) {
+                                    inclusive = true
+                                }
+                            }
+                        },
+                        onBackToTests = {
+                            latestTestResult =
+                                NavigationTestResult()
 
-        composable(Screen.Achievements.route) {
-            AchievementsScreen(
-                onBack = {
-                    navController.popBackStack()
+                            navController.navigate(
+                                Screen.Tests.route
+                            ) {
+                                popUpTo(
+                                    Screen.Tests.route
+                                ) {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                    )
                 }
-            )
-        }
 
-        composable(Screen.Settings.route) {
-            SettingsScreen(
-                onBack = {
-                    navController.popBackStack()
+                composable(Screen.Bookmarks.route) {
+                    BookmarksScreen(
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
-            )
+
+                composable(Screen.TestHistory.route) {
+                    TestHistoryScreen(
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
+
+                composable(Screen.Achievements.route) {
+                    AchievementsScreen(
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
+
+                composable(Screen.Settings.route) {
+                    SettingsScreen(
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
+            }
         }
     }
 }
@@ -554,6 +679,7 @@ private fun toQuestionSubjectId(
     subjectId: String
 ): String {
     return when (subjectId) {
+
         CurriculumContentIds.MP_BOARD_CLASS_12_ECONOMICS_MICRO,
         CurriculumContentIds.MP_BOARD_CLASS_12_ECONOMICS_MACRO,
         CurriculumContentIds.CBSE_CLASS_12_ECONOMICS_INDIAN,
@@ -571,6 +697,7 @@ private fun getSubjectDisplayName(
     board: Board,
     classLevel: ClassLevel
 ): String {
+
     return when (subjectId) {
 
         CurriculumContentIds.MP_BOARD_CLASS_12_ECONOMICS_MICRO ->
