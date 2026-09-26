@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.commerzo.app.data.model.profile.StudentProfile
 import com.commerzo.app.data.repository.auth.AuthRepositoryProvider
+import com.commerzo.app.data.repository.auth.AuthUser
 import com.commerzo.app.data.repository.profile.UserProfileRepositoryProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -104,14 +105,8 @@ class ProfileViewModel(
 
                     } else {
 
-                        /*
-                         * Firestore may be temporarily
-                         * unavailable/offline.
-                         *
-                         * Authentication data is still
-                         * available locally, so keep the
-                         * profile screen usable.
-                         */
+                        // Keep the profile usable even when
+                        // Firestore is temporarily unavailable.
                         _profileState.value =
                             ProfileState.Success(
                                 newProfile
@@ -121,11 +116,9 @@ class ProfileViewModel(
 
             }.onFailure {
 
-                /*
-                 * Firestore read can fail while the device
-                 * is offline. Do not hide the authenticated
-                 * user's profile in that situation.
-                 */
+                // Offline-safe fallback:
+                // show the authenticated user's profile data
+                // instead of displaying a Firestore error screen.
                 val fallbackProfile =
                     createProfileFromAuthUser(
                         authUser
@@ -212,10 +205,8 @@ class ProfileViewModel(
 
             } else {
 
-                /*
-                 * Keep the UI usable when Firestore
-                 * is temporarily unavailable.
-                 */
+                // Keep UI responsive even when Firestore
+                // is temporarily offline.
                 val updatedProfile =
                     applyLocalUpdates(
                         profile = currentProfile,
@@ -231,7 +222,7 @@ class ProfileViewModel(
     }
 
     private fun createProfileFromAuthUser(
-        authUser: com.commerzo.app.data.repository.auth.AuthUser
+        authUser: AuthUser
     ): StudentProfile {
 
         return StudentProfile(
