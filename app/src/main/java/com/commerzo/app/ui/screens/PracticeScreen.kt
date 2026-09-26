@@ -11,12 +11,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.Quiz
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -34,349 +44,489 @@ import com.commerzo.app.data.repository.SubjectRepository
 
 @Composable
 fun PracticeScreen(
-onNavigate: (String) -> Unit = {}
+    onNavigate: (String) -> Unit = {}
 ) {
-var selectedBoard by remember {
-mutableStateOf(Board.MP_BOARD)
-}
+    var selectedBoard by remember {
+        mutableStateOf(Board.MP_BOARD)
+    }
 
-var selectedClass by remember {
-    mutableStateOf(ClassLevel.CLASS_12)
-}
+    var selectedClass by remember {
+        mutableStateOf(ClassLevel.CLASS_12)
+    }
 
-val subjectRepository = remember {
-    SubjectRepository()
-}
+    var searchQuery by remember {
+        mutableStateOf("")
+    }
 
-val subjects = remember(
-    selectedBoard,
-    selectedClass
-) {
-    subjectRepository.getSubjects(
-        board = selectedBoard,
-        classLevel = selectedClass
-    )
-}
+    val subjectRepository = remember {
+        SubjectRepository()
+    }
 
-Scaffold(
-    topBar = {
-        TopAppBar(
-            title = {
-                Text(
-                    text = "Practice",
-                    fontWeight = FontWeight.Bold
-                )
-            }
+    val subjects = remember(
+        selectedBoard,
+        selectedClass
+    ) {
+        subjectRepository.getSubjects(
+            board = selectedBoard,
+            classLevel = selectedClass
         )
     }
-) { paddingValues ->
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .padding(horizontal = 16.dp),
-        verticalArrangement =
-            Arrangement.spacedBy(12.dp)
+    val filteredSubjects = remember(
+        subjects,
+        searchQuery
     ) {
-
-        item {
-            Spacer(
-                modifier = Modifier.height(8.dp)
-            )
-
-            Text(
-                text = "Chapter-wise Practice",
-                style =
-                    MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(
-                modifier = Modifier.height(4.dp)
-            )
-
-            Text(
-                text =
-                    "Select your board and class, then choose a subject.",
-                style =
-                    MaterialTheme.typography.bodyMedium,
-                color =
-                    MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(
-                modifier = Modifier.height(16.dp)
-            )
-
-            Text(
-                text = "Board",
-                style =
-                    MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Spacer(
-                modifier = Modifier.height(8.dp)
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement =
-                    Arrangement.spacedBy(8.dp)
-            ) {
-
-                BoardButton(
-                    text = "MP Board",
-                    selected =
-                        selectedBoard == Board.MP_BOARD,
-                    onClick = {
-                        selectedBoard = Board.MP_BOARD
-                    },
-                    modifier = Modifier.weight(1f)
-                )
-
-                BoardButton(
-                    text = "CBSE",
-                    selected =
-                        selectedBoard == Board.CBSE,
-                    onClick = {
-                        selectedBoard = Board.CBSE
-                    },
-                    modifier = Modifier.weight(1f)
+        if (searchQuery.isBlank()) {
+            subjects
+        } else {
+            subjects.filter {
+                it.name.contains(
+                    searchQuery.trim(),
+                    ignoreCase = true
                 )
             }
+        }
+    }
 
-            Spacer(
-                modifier = Modifier.height(16.dp)
-            )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column {
+                        Text(
+                            text = "Practice",
+                            fontWeight = FontWeight.ExtraBold
+                        )
 
-            Text(
-                text = "Class",
-                style =
-                    MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Spacer(
-                modifier = Modifier.height(8.dp)
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement =
-                    Arrangement.spacedBy(8.dp)
-            ) {
-
-                BoardButton(
-                    text = "Class 11",
-                    selected =
-                        selectedClass ==
-                            ClassLevel.CLASS_11,
-                    onClick = {
-                        selectedClass =
-                            ClassLevel.CLASS_11
-                    },
-                    modifier = Modifier.weight(1f)
-                )
-
-                BoardButton(
-                    text = "Class 12",
-                    selected =
-                        selectedClass ==
-                            ClassLevel.CLASS_12,
-                    onClick = {
-                        selectedClass =
-                            ClassLevel.CLASS_12
-                    },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            Spacer(
-                modifier = Modifier.height(20.dp)
-            )
-
-            Text(
-                text =
-                    "${selectedBoard.displayName()} • " +
-                        selectedClass.displayName(),
-                style =
-                    MaterialTheme.typography.bodyMedium,
-                color =
-                    MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Medium
-            )
-
-            Spacer(
-                modifier = Modifier.height(8.dp)
+                        Text(
+                            text = "Test your knowledge and improve.",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             )
         }
+    ) { paddingValues ->
 
-        if (subjects.isEmpty()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 8.dp,
+                bottom = 28.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
 
             item {
-                Card(
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = {
+                        searchQuery = it
+                    },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor =
-                            MaterialTheme.colorScheme
-                                .surfaceVariant
-                    )
+                    singleLine = true,
+                    shape = RoundedCornerShape(18.dp),
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search"
+                        )
+                    },
+                    placeholder = {
+                        Text("Search subjects, chapters...")
+                    }
+                )
+            }
+
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text =
-                            "No subjects available for this selection.",
-                        modifier =
-                            Modifier.padding(18.dp),
-                        color =
-                            MaterialTheme.colorScheme
-                                .onSurfaceVariant
+                    FilterChip(
+                        selected = selectedClass == ClassLevel.CLASS_12,
+                        onClick = {
+                            selectedClass = ClassLevel.CLASS_12
+                        },
+                        label = {
+                            Text("Class 12")
+                        }
+                    )
+
+                    FilterChip(
+                        selected = selectedClass == ClassLevel.CLASS_11,
+                        onClick = {
+                            selectedClass = ClassLevel.CLASS_11
+                        },
+                        label = {
+                            Text("Class 11")
+                        }
                     )
                 }
             }
 
-        } else {
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = selectedBoard == Board.MP_BOARD,
+                        onClick = {
+                            selectedBoard = Board.MP_BOARD
+                        },
+                        label = {
+                            Text("MP Board")
+                        }
+                    )
 
-            items(
-                items = subjects,
-                key = { it.id }
-            ) { subject ->
+                    FilterChip(
+                        selected = selectedBoard == Board.CBSE,
+                        onClick = {
+                            selectedBoard = Board.CBSE
+                        },
+                        label = {
+                            Text("CBSE")
+                        }
+                    )
+                }
+            }
 
-                PracticeSubjectCard(
-                    name = subject.name,
-                    emoji = subject.emoji,
-                    chaptersCount =
-                        subject.chaptersCount,
-                    onClick = {
-                        onNavigate(
-                            "chapters/" +
-                                "${subject.id}/" +
-                                "${selectedBoard.name}/" +
-                                "${selectedClass.name}"
+            item {
+                PracticeIntroCard()
+            }
+
+            item {
+                SectionTitle(
+                    title = "Practice by Subject",
+                    subtitle = "${filteredSubjects.size} subjects available"
+                )
+            }
+
+            if (filteredSubjects.isEmpty()) {
+
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
                         )
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(22.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "No subjects found",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Spacer(
+                                modifier = Modifier.height(4.dp)
+                            )
+
+                            Text(
+                                text = "Try another search or change your selection.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
+            } else {
+
+                items(
+                    items = filteredSubjects,
+                    key = { it.id }
+                ) { subject ->
+
+                    PracticeSubjectCard(
+                        name = subject.name,
+                        emoji = subject.emoji,
+                        chaptersCount = subject.chaptersCount,
+                        onClick = {
+                            onNavigate(
+                                "chapters/" +
+                                    "${subject.id}/" +
+                                    "${selectedBoard.name}/" +
+                                    "${selectedClass.name}"
+                            )
+                        }
+                    )
+                }
+            }
+
+            item {
+                SectionTitle(
+                    title = "Test Series",
+                    subtitle = "More practice options"
+                )
+            }
+
+            item {
+                TestSeriesCard(
+                    title = "Full Syllabus Test",
+                    subtitle = "Practice complete syllabus",
+                    icon = Icons.Default.WorkspacePremium,
+                    onClick = {
+                        onNavigate("tests")
+                    }
+                )
+            }
+
+            item {
+                TestSeriesCard(
+                    title = "Chapter Wise Test",
+                    subtitle = "Focus on individual chapters",
+                    icon = Icons.Default.Quiz,
+                    onClick = {
+                        onNavigate("tests")
+                    }
+                )
+            }
+
+            item {
+                TestSeriesCard(
+                    title = "Quick MCQ Practice",
+                    subtitle = "Start a fast practice session",
+                    icon = Icons.Default.CheckCircle,
+                    onClick = {
+                        onNavigate("tests")
                     }
                 )
             }
         }
+    }
+}
 
-        item {
+@Composable
+private fun PracticeIntroCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surface.copy(
+                    alpha = 0.75f
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.MenuBook,
+                    contentDescription = "Practice",
+                    modifier = Modifier.padding(13.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
             Spacer(
-                modifier = Modifier.height(16.dp)
+                modifier = Modifier.width(14.dp)
             )
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Practice smarter",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+
+                Spacer(
+                    modifier = Modifier.height(3.dp)
+                )
+
+                Text(
+                    text = "Build accuracy with subject and chapter-wise MCQs.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
         }
     }
 }
 
-}
-
 @Composable
-private fun BoardButton(
-text: String,
-selected: Boolean,
-onClick: () -> Unit,
-modifier: Modifier
+private fun SectionTitle(
+    title: String,
+    subtitle: String
 ) {
-if (selected) {
-Button(
-onClick = onClick,
-modifier = modifier
-) {
-Text(text)
-}
-} else {
-OutlinedButton(
-onClick = onClick,
-modifier = modifier
-) {
-Text(text)
-}
-}
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.ExtraBold
+        )
+
+        Spacer(
+            modifier = Modifier.height(3.dp)
+        )
+
+        Text(
+            text = subtitle,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
 }
 
 @Composable
 private fun PracticeSubjectCard(
-name: String,
-emoji: String,
-chaptersCount: Int,
-onClick: () -> Unit
+    name: String,
+    emoji: String,
+    chaptersCount: Int,
+    onClick: () -> Unit
 ) {
-Card(
-modifier = Modifier.fillMaxWidth(),
-onClick = onClick,
-colors = CardDefaults.cardColors(
-containerColor =
-MaterialTheme.colorScheme.surface
-)
-) {
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(18.dp),
-        verticalAlignment =
-            Alignment.CenterVertically
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
-
-        Text(
-            text = emoji,
-            style =
-                MaterialTheme.typography.headlineSmall
-        )
-
-        Spacer(
-            modifier = Modifier.width(14.dp)
-        )
-
-        Column(
-            modifier = Modifier.weight(1f)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
 
-            Text(
-                text = name,
-                style =
-                    MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
+            Surface(
+                modifier = Modifier.padding(end = 14.dp),
+                shape = RoundedCornerShape(15.dp),
+                color = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                Text(
+                    text = emoji,
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
 
-            Spacer(
-                modifier = Modifier.height(3.dp)
-            )
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold
+                )
 
-            Text(
-                text =
-                    "$chaptersCount chapters • " +
-                        "Practice MCQs",
-                style =
-                    MaterialTheme.typography.bodySmall,
-                color =
-                    MaterialTheme.colorScheme
-                        .onSurfaceVariant
+                Spacer(
+                    modifier = Modifier.height(3.dp)
+                )
+
+                Text(
+                    text = "$chaptersCount chapters • Practice MCQs",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = "Open $name",
+                tint = MaterialTheme.colorScheme.primary
             )
         }
-
-        Text(
-            text = "›",
-            style =
-                MaterialTheme.typography.headlineMedium,
-            color =
-                MaterialTheme.colorScheme.primary
-        )
     }
 }
 
+@Composable
+private fun TestSeriesCard(
+    title: String,
+    subtitle: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    modifier = Modifier.padding(11.dp),
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
+
+            Spacer(
+                modifier = Modifier.width(13.dp)
+            )
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(
+                    modifier = Modifier.height(2.dp)
+                )
+
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = "Open $title"
+            )
+        }
+    }
 }
 
 private fun Board.displayName(): String {
-return when (this) {
-Board.MP_BOARD -> "MP Board"
-Board.CBSE -> "CBSE"
-}
+    return when (this) {
+        Board.MP_BOARD -> "MP Board"
+        Board.CBSE -> "CBSE"
+    }
 }
 
 private fun ClassLevel.displayName(): String {
-return when (this) {
-ClassLevel.CLASS_11 -> "Class 11"
-ClassLevel.CLASS_12 -> "Class 12"
-}
+    return when (this) {
+        ClassLevel.CLASS_11 -> "Class 11"
+        ClassLevel.CLASS_12 -> "Class 12"
+    }
 }
