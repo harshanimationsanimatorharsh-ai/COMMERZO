@@ -3,9 +3,9 @@ package com.commerzo.app.ui.viewmodel.profile
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.commerzo.app.data.model.auth.AuthUser
 import com.commerzo.app.data.model.profile.StudentProfile
 import com.commerzo.app.data.repository.auth.AuthRepositoryProvider
-import com.commerzo.app.data.repository.auth.AuthUser
 import com.commerzo.app.data.repository.profile.UserProfileRepositoryProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 sealed class ProfileState {
+
     data object Loading : ProfileState()
 
     data class Success(
@@ -60,6 +61,7 @@ class ProfileViewModel(
                 authRepository.getCurrentUser()
 
             if (authUser == null) {
+
                 _profileState.value =
                     ProfileState.Error(
                         "No signed-in user found."
@@ -105,8 +107,6 @@ class ProfileViewModel(
 
                     } else {
 
-                        // Keep the profile usable even when
-                        // Firestore is temporarily unavailable.
                         _profileState.value =
                             ProfileState.Success(
                                 newProfile
@@ -116,9 +116,6 @@ class ProfileViewModel(
 
             }.onFailure {
 
-                // Offline-safe fallback:
-                // show the authenticated user's profile data
-                // instead of displaying a Firestore error screen.
                 val fallbackProfile =
                     createProfileFromAuthUser(
                         authUser
@@ -205,8 +202,6 @@ class ProfileViewModel(
 
             } else {
 
-                // Keep UI responsive even when Firestore
-                // is temporarily offline.
                 val updatedProfile =
                     applyLocalUpdates(
                         profile = currentProfile,
@@ -243,6 +238,7 @@ class ProfileViewModel(
     ): StudentProfile {
 
         return profile.copy(
+
             displayName =
                 if (updates.containsKey("displayName")) {
                     updates["displayName"]
