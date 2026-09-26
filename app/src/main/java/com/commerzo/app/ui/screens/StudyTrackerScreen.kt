@@ -41,7 +41,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -57,6 +56,12 @@ import java.util.Locale
 @Composable
 fun StudyTrackerScreen(
     onBack: () -> Unit,
+    onStartStudy: (
+        board: String,
+        classLevel: String,
+        subjectId: String,
+        chapterId: String?
+    ) -> Unit = { _, _, _, _ -> },
     viewModel: StudyTrackerViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -110,10 +115,11 @@ fun StudyTrackerScreen(
                 StudyTrackerContent(
                     uiState = uiState,
                     onStart = {
-                        viewModel.startSession(
-                            board = "general",
-                            classLevel = "12",
-                            subjectId = "general"
+                        onStartStudy(
+                            "",
+                            "",
+                            "",
+                            null
                         )
                     },
                     onStop = {
@@ -137,7 +143,7 @@ private fun StudyTrackerContent(
 ) {
     LazyColumn(
         modifier = modifier,
-        contentPadding = PaddingValues(
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(
             horizontal = 16.dp,
             vertical = 16.dp
         ),
@@ -152,9 +158,7 @@ private fun StudyTrackerContent(
         }
 
         item {
-            StudyOverviewCard(
-                uiState = uiState
-            )
+            StudyOverviewCard(uiState)
         }
 
         item {
@@ -209,9 +213,7 @@ private fun StudyTrackerContent(
                 items = uiState.recentSessions,
                 key = { it.sessionId }
             ) { session ->
-                RecentSessionCard(
-                    session = session
-                )
+                RecentSessionCard(session)
             }
         }
 
@@ -227,7 +229,8 @@ private fun StudyTrackerContent(
                     Text(
                         text = message,
                         modifier = Modifier.padding(16.dp),
-                        color = MaterialTheme.colorScheme.onErrorContainer
+                        color =
+                            MaterialTheme.colorScheme.onErrorContainer
                     )
                 }
             }
@@ -276,9 +279,9 @@ private fun ActiveSessionCard(
 
                     Text(
                         text = if (session == null) {
-                            "Start a session and COMMERZO will track your time."
+                            "Select a subject and chapter to start tracking."
                         } else {
-                            "${session.subjectId} • ${session.classLevel}"
+                            buildSessionLabel(session)
                         },
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -329,7 +332,7 @@ private fun ActiveSessionCard(
                         modifier = Modifier.size(8.dp)
                     )
 
-                    Text("Start Studying")
+                    Text("Select Subject & Start")
                 }
             }
         }
@@ -665,6 +668,23 @@ private fun EmptyTrackerState(
             modifier = Modifier.padding(24.dp),
             style = MaterialTheme.typography.bodyLarge
         )
+    }
+}
+
+private fun buildSessionLabel(
+    session: StudySession
+): String {
+    val subject = session.subjectId
+        .takeIf { it.isNotBlank() }
+        ?: "Subject"
+
+    val chapter = session.chapterId
+        ?.takeIf { it.isNotBlank() }
+
+    return if (chapter != null) {
+        "$subject • $chapter"
+    } else {
+        "$subject • ${session.classLevel}"
     }
 }
 
