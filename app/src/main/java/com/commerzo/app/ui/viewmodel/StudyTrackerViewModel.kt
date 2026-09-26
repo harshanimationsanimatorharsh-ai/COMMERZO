@@ -47,7 +47,10 @@ class StudyTrackerViewModel(
     }
 
     /**
-     * Starts a real study session.
+     * Starts a real chapter-specific study session.
+     *
+     * New sessions require all curriculum context values.
+     * In particular, chapterId must never be blank.
      */
     fun startSession(
         board: String,
@@ -55,12 +58,37 @@ class StudyTrackerViewModel(
         subjectId: String,
         chapterId: String? = null
     ) {
+        val cleanBoard = board.trim()
+        val cleanClassLevel = classLevel.trim()
+        val cleanSubjectId = subjectId.trim()
+        val cleanChapterId = chapterId?.trim()
+
+        if (cleanBoard.isBlank()) {
+            updateError("Board information is required to start a study session.")
+            return
+        }
+
+        if (cleanClassLevel.isBlank()) {
+            updateError("Class information is required to start a study session.")
+            return
+        }
+
+        if (cleanSubjectId.isBlank()) {
+            updateError("Subject information is required to start a study session.")
+            return
+        }
+
+        if (cleanChapterId.isNullOrBlank()) {
+            updateError("Chapter information is required to start a study session.")
+            return
+        }
+
         viewModelScope.launch {
             val result = manager.startSession(
-                board = board,
-                classLevel = classLevel,
-                subjectId = subjectId,
-                chapterId = chapterId
+                board = cleanBoard,
+                classLevel = cleanClassLevel,
+                subjectId = cleanSubjectId,
+                chapterId = cleanChapterId
             )
 
             result
@@ -210,7 +238,8 @@ class StudyTrackerViewModel(
      * Calculates current and longest qualifying-day streak.
      *
      * A day qualifies when the user has at least one
-     * completed study session on that calendar day.
+     * completed study session on that calendar day
+     * with a duration greater than zero.
      */
     private fun calculateStreaks(
         sessions: List<StudySession>
@@ -220,27 +249,15 @@ class StudyTrackerViewModel(
             return 0 to 0
         }
 
-        val calendar = Calendar.getInstance()
-
         val qualifyingDays = sessions
+            .asSequence()
             .filter {
                 it.status == StudySession.STATUS_COMPLETED &&
                     it.startedAt > 0L &&
                     it.durationSeconds > 0L
             }
             .map {
-                calendar.apply {
-                    timeInMillis = it.startedAt
-                }
-
-                dayKey(
-                    calendar.get(
-                        Calendar.YEAR
-                    ),
-                    calendar.get(
-                        Calendar.DAY_OF_YEAR
-                    )
-                )
+                calendarDayKey(it.startedAt)
             }
             .toSet()
 
@@ -248,41 +265,33 @@ class StudyTrackerViewModel(
             return 0 to 0
         }
 
-        val sortedDays = qualifyingDays
-            .sortedDescending()
+        val today = Calendar.getInstance()
 
-        val todayCalendar = Calendar.getInstance()
-
-        val todayKey = dayKey(
-            todayCalendar.get(Calendar.YEAR),
-            todayCalendar.get(Calendar.DAY_OF_YEAR)
+        val todayKey = calendarDayKey(
+            today.timeInMillis
         )
 
-        val yesterdayCalendar =
-            Calendar.getInstance().apply {
-                add(
-                    Calendar.DAY_OF_YEAR,
-                    -1
-                )
-            }
+        val yesterday = today.clone() as Calendar
+        yesterday.add(
+            Calendar.DAY_OF_YEAR,
+            -1
+        )
 
-        val yesterdayKey = dayKey(
-            yesterdayCalendar.get(Calendar.YEAR),
-            yesterdayCalendar.get(Calendar.DAY_OF_YEAR)
+        val yesterdayKey = calendarDayKey(
+            yesterday.timeInMillis
         )
 
         var currentStreak = 0
 
-        var cursor = when {
-            todayKey in qualifyingDays -> todayCalendar
-            yesterdayKey in qualifyingDays -> yesterdayCalendar
+        var cursor: Calendar? = when {
+            todayKey in qualifyingDays -> today
+            yesterdayKey in qualifyingDays -> yesterday
             else -> null
         }
 
         while (cursor != null) {
-            val key = dayKey(
-                cursor.get(Calendar.YEAR),
-                cursor.get(Calendar.DAY_OF_YEAR)
+            val key = calendarDayKey(
+                cursor.timeInMillis
             )
 
             if (key !in qualifyingDays) {
@@ -291,44 +300,79 @@ class StudyTrackerViewModel(
 
             currentStreak++
 
-            cursor = cursor.clone() as Calendar
-            cursor.add(
-                Calendar.DAY_OF_YEAR,
-                -1
-            )
+            cursor = (
+                cursor.clone() as Calendar
+            ).apply {
+                add(
+                    Calendar.DAY_OF_YEAR,
+                    -1
+                )
+            }
         }
+
+        /**
+         * Longest streak:
+         *
+         * Sort unique calendar days chronologically.
+         * Consecutive dates differ by exactly one calendar day.
+         *
+         * This intentionally uses Calendar date fields instead
+         * of raw 24-hour milliseconds so daylight-saving changes
+         * cannot create an incorrect streak gap.
+         */
+        val sortedDayCalendars = qualifyingDays
+            .map { key ->
+                dayKeyToCalendar(key)
+            }
+            .sortedBy {
+                calendarDayNumber(it)
+            }
 
         var longestStreak = 1
         var runningStreak = 1
 
-        for (index in 1 until sortedDays.size) {
-            val previous = dayKeyToCalendar(
-                sortedDays[index - 1]
+        for (index in 1 until sortedDayCalendars.size) {
+            val previous = sortedDayCalendars[index - 1]
+            val current = sortedDayCalendars[index]
+
+            val expectedNextDay =
+                previous.clone() as Calendar
+
+            expectedNextDay.add(
+                Calendar.DAY_OF_YEAR,
+                1
             )
 
-            val current = dayKeyToCalendar(
-                sortedDays[index]
-            )
-
-            val difference =
-                dayDifference(
-                    current,
-                    previous
+            if (sameCalendarDate(
+                    expectedNextDay,
+                    current
                 )
-
-            if (difference == 1) {
+            ) {
                 runningStreak++
-                longestStreak =
-                    maxOf(
-                        longestStreak,
-                        runningStreak
-                    )
+
+                longestStreak = maxOf(
+                    longestStreak,
+                    runningStreak
+                )
             } else {
                 runningStreak = 1
             }
         }
 
         return currentStreak to longestStreak
+    }
+
+    private fun calendarDayKey(
+        timestamp: Long
+    ): String {
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = timestamp
+        }
+
+        return dayKey(
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.DAY_OF_YEAR)
+        )
     }
 
     private fun startOfToday(
@@ -376,6 +420,7 @@ class StudyTrackerViewModel(
         return Calendar.getInstance().apply {
             timeInMillis = timestamp
             firstDayOfWeek = Calendar.MONDAY
+
             set(
                 Calendar.HOUR_OF_DAY,
                 0
@@ -416,6 +461,7 @@ class StudyTrackerViewModel(
     ): Long {
         return Calendar.getInstance().apply {
             timeInMillis = timestamp
+
             set(
                 Calendar.DAY_OF_MONTH,
                 1
@@ -476,6 +522,10 @@ class StudyTrackerViewModel(
     ): Calendar {
         val parts = key.split("-")
 
+        require(parts.size == 2) {
+            "Invalid study tracker day key: $key"
+        }
+
         return Calendar.getInstance().apply {
             clear()
 
@@ -491,19 +541,24 @@ class StudyTrackerViewModel(
         }
     }
 
-    private fun dayDifference(
+    private fun calendarDayNumber(
+        calendar: Calendar
+    ): Long {
+        return calendar.get(
+            Calendar.YEAR
+        ).toLong() * 1000L +
+            calendar.get(
+                Calendar.DAY_OF_YEAR
+            ).toLong()
+    }
+
+    private fun sameCalendarDate(
         first: Calendar,
         second: Calendar
-    ): Int {
-        val firstDay = first.timeInMillis
-        val secondDay = second.timeInMillis
-
-        val difference =
-            firstDay - secondDay
-
-        return (
-            difference /
-                (24L * 60L * 60L * 1000L)
-            ).toInt()
+    ): Boolean {
+        return first.get(Calendar.YEAR) ==
+            second.get(Calendar.YEAR) &&
+            first.get(Calendar.DAY_OF_YEAR) ==
+            second.get(Calendar.DAY_OF_YEAR)
     }
 }
