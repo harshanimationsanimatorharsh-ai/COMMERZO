@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.commerzo.app.data.model.profile.StudentProfile
 import com.commerzo.app.data.repository.auth.AuthRepositoryProvider
 import com.commerzo.app.data.repository.profile.UserProfileRepositoryProvider
-import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -56,10 +55,10 @@ class ProfileViewModel(
             _profileState.value =
                 ProfileState.Loading
 
-            val firebaseUser =
+            val authUser =
                 authRepository.getCurrentUser()
 
-            if (firebaseUser == null) {
+            if (authUser == null) {
                 _profileState.value =
                     ProfileState.Error(
                         "No signed-in user found."
@@ -68,29 +67,33 @@ class ProfileViewModel(
                 return@launch
             }
 
+            val userId =
+                authUser.userId
+
             val result =
-                profileRepository.getProfile(
-                    firebaseUser.uid
-                )
+                profileRepository.getProfile(userId)
 
             result.onSuccess { profile ->
 
                 if (profile != null) {
 
                     _profileState.value =
-                        ProfileState.Success(profile)
+                        ProfileState.Success(
+                            profile
+                        )
 
                 } else {
 
                     val newProfile =
-                        createProfileFromFirebaseUser(
-                            firebaseUser
+                        createProfileFromAuthUser(
+                            authUser
                         )
 
                     val createResult =
-                        profileRepository.createOrUpdateProfile(
-                            newProfile
-                        )
+                        profileRepository
+                            .createOrUpdateProfile(
+                                newProfile
+                            )
 
                     if (createResult.isSuccess) {
 
@@ -101,9 +104,14 @@ class ProfileViewModel(
 
                     } else {
 
-                        // Firestore may be temporarily offline.
-                        // Keep the authenticated Firebase
-                        // user visible instead of showing an error.
+                        /*
+                         * Firestore may be temporarily
+                         * unavailable/offline.
+                         *
+                         * Authentication data is still
+                         * available locally, so keep the
+                         * profile screen usable.
+                         */
                         _profileState.value =
                             ProfileState.Success(
                                 newProfile
@@ -114,15 +122,13 @@ class ProfileViewModel(
             }.onFailure {
 
                 /*
-                 * Firestore can temporarily be offline.
-                 *
-                 * Firebase Authentication already contains
-                 * the user's basic profile information, so use
-                 * that information as a safe local fallback.
+                 * Firestore read can fail while the device
+                 * is offline. Do not hide the authenticated
+                 * user's profile in that situation.
                  */
                 val fallbackProfile =
-                    createProfileFromFirebaseUser(
-                        firebaseUser
+                    createProfileFromAuthUser(
+                        authUser
                     )
 
                 _profileState.value =
@@ -136,7 +142,8 @@ class ProfileViewModel(
     fun updateDisplayName(
         displayName: String
     ) {
-        val name = displayName.trim()
+        val name =
+            displayName.trim()
 
         if (name.isBlank()) {
             return
@@ -177,14 +184,14 @@ class ProfileViewModel(
     ) {
         viewModelScope.launch {
 
-            val currentState =
-                _profileState.value
-
             val currentProfile =
-                (currentState as? ProfileState.Success)
-                    ?.profile
+                (
+                    _profileState.value
+                        as? ProfileState.Success
+                    )?.profile
 
             if (currentProfile == null) {
+
                 _profileState.value =
                     ProfileState.Error(
                         "Student profile is not loaded yet."
@@ -206,10 +213,8 @@ class ProfileViewModel(
             } else {
 
                 /*
-                 * Optimistic local update.
-                 *
-                 * If Firestore is offline, the user should
-                 * still see the updated information locally.
+                 * Keep the UI usable when Firestore
+                 * is temporarily unavailable.
                  */
                 val updatedProfile =
                     applyLocalUpdates(
@@ -225,20 +230,16 @@ class ProfileViewModel(
         }
     }
 
-    private fun createProfileFromFirebaseUser(
-        firebaseUser: FirebaseUser
+    private fun createProfileFromAuthUser(
+        authUser: com.commerzo.app.data.repository.auth.AuthUser
     ): StudentProfile {
 
         return StudentProfile(
-            userId = firebaseUser.uid,
-            displayName =
-                firebaseUser.displayName.orEmpty(),
-            email =
-                firebaseUser.email.orEmpty(),
-            phoneNumber =
-                firebaseUser.phoneNumber,
-            photoUrl =
-                firebaseUser.photoUrl?.toString(),
+            userId = authUser.userId,
+            displayName = authUser.displayName.orEmpty(),
+            email = authUser.email.orEmpty(),
+            phoneNumber = authUser.phoneNumber,
+            photoUrl = authUser.photoUrl,
             role = "student",
             createdAt = System.currentTimeMillis(),
             updatedAt = System.currentTimeMillis()
@@ -252,9 +253,13 @@ class ProfileViewModel(
 
         return profile.copy(
             displayName =
-                updates["displayName"]
-                    ?.toString()
-                    ?: profile.displayName,
+                if (updates.containsKey("displayName")) {
+                    updates["displayName"]
+                        ?.toString()
+                        ?: profile.displayName
+                } else {
+                    profile.displayName
+                },
 
             phoneNumber =
                 if (updates.containsKey("phoneNumber")) {
