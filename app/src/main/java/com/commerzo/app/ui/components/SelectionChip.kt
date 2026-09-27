@@ -3,11 +3,13 @@ package com.commerzo.app.ui.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.commerzo.app.ui.theme.CommerzoDimensions
 
 @Composable
 fun SelectionChip(
@@ -15,21 +17,38 @@ fun SelectionChip(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-
     Surface(
-        modifier = Modifier.clickable {
-            onClick()
+        modifier = Modifier.clickable(
+            onClick = onClick
+        ),
+        shape = RoundedCornerShape(50),
+        color = if (selected) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceVariant
         },
-        shape = RoundedCornerShape(50.dp),
-        tonalElevation = if (selected) 4.dp else 1.dp
+        contentColor = if (selected) {
+            MaterialTheme.colorScheme.onPrimaryContainer
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        },
+        tonalElevation = if (selected) {
+            CommerzoDimensions.Space2
+        } else {
+            0.dp
+        }
     ) {
-
         Text(
-            text = if (selected) "✓ $text" else text,
+            text = if (selected) {
+                "✓ $text"
+            } else {
+                text
+            },
             modifier = Modifier.padding(
-                horizontal = 18.dp,
-                vertical = 10.dp
-            )
+                horizontal = CommerzoDimensions.Space16,
+                vertical = CommerzoDimensions.Space10
+            ),
+            style = MaterialTheme.typography.labelLarge
         )
     }
 }
