@@ -28,18 +28,26 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.commerzo.app.ui.theme.CommerzoDimensions
 import com.commerzo.app.ui.viewmodel.settings.SettingsViewModel
+
+// ============================================================
+// COMMERZO — Settings Screen
+// Phase 7 — Professional UI/UX Overhaul
+// ============================================================
 
 @Composable
 fun SettingsScreen(
@@ -53,10 +61,15 @@ fun SettingsScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(
+                            CommerzoDimensions.Space2
+                        )
+                    ) {
                         Text(
                             text = "Settings",
-                            fontWeight = FontWeight.ExtraBold
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
                         )
 
                         Text(
@@ -65,7 +78,31 @@ fun SettingsScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                }
+                },
+                navigationIcon = {
+                    Surface(
+                        onClick = onBack,
+                        modifier = Modifier
+                            .padding(start = CommerzoDimensions.Space8)
+                            .size(40.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "‹",
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         }
     ) { paddingValues ->
@@ -75,17 +112,24 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+                .padding(
+                    horizontal = CommerzoDimensions.ScreenHorizontal,
+                    vertical = CommerzoDimensions.Space12
+                ),
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space16
+            )
         ) {
 
-            Spacer(
-                modifier = Modifier.height(4.dp)
-            )
+            SettingsIntroCard()
+
+            // ------------------------------------------------
+            // Appearance
+            // ------------------------------------------------
 
             SettingsSectionTitle(
                 title = "Appearance",
-                subtitle = "Make the app comfortable for you"
+                subtitle = "Make COMMERZO comfortable to use"
             )
 
             SettingsToggleCard(
@@ -98,6 +142,10 @@ fun SettingsScreen(
                 }
             )
 
+            // ------------------------------------------------
+            // Notifications
+            // ------------------------------------------------
+
             SettingsSectionTitle(
                 title = "Notifications",
                 subtitle = "Stay updated with your learning"
@@ -105,13 +153,17 @@ fun SettingsScreen(
 
             SettingsToggleCard(
                 icon = Icons.Default.Notifications,
-                title = "Notifications",
-                subtitle = "Receive learning reminders and updates",
+                title = "Learning Notifications",
+                subtitle = "Receive reminders and important updates",
                 checked = notificationsEnabled,
                 onCheckedChange = {
                     viewModel.setNotificationsEnabled(it)
                 }
             )
+
+            // ------------------------------------------------
+            // Account
+            // ------------------------------------------------
 
             SettingsSectionTitle(
                 title = "Account",
@@ -121,16 +173,18 @@ fun SettingsScreen(
             SettingsActionCard(
                 icon = Icons.Default.Person,
                 title = "Student Profile",
-                subtitle = "View and update your profile",
-                onClick = {}
+                subtitle = "View and update your profile"
             )
 
             SettingsActionCard(
                 icon = Icons.Default.SwapHoriz,
                 title = "Learning Preferences",
-                subtitle = "Board, class and study preferences",
-                onClick = {}
+                subtitle = "Board, class and study preferences"
             )
+
+            // ------------------------------------------------
+            // Help & Support
+            // ------------------------------------------------
 
             SettingsSectionTitle(
                 title = "Help & Support",
@@ -140,11 +194,14 @@ fun SettingsScreen(
             SettingsActionCard(
                 icon = Icons.Default.SupportAgent,
                 title = "Support Team",
-                subtitle = "Get help from the COMMERZO team",
-                onClick = {}
+                subtitle = "Get help from the COMMERZO team"
             )
 
             SupportEmailCard()
+
+            // ------------------------------------------------
+            // Information
+            // ------------------------------------------------
 
             SettingsSectionTitle(
                 title = "Information",
@@ -154,40 +211,115 @@ fun SettingsScreen(
             SettingsActionCard(
                 icon = Icons.Default.Info,
                 title = "About COMMERZO",
-                subtitle = "Learn more about the app",
-                onClick = {}
+                subtitle = "Learn more about the app"
             )
 
             SettingsActionCard(
                 icon = Icons.Default.Policy,
                 title = "Privacy & Security",
-                subtitle = "Understand how your account is protected",
-                onClick = {}
+                subtitle = "Understand how your account is protected"
             )
 
-            SurfaceVersionCard()
+            VersionCard()
 
             Spacer(
-                modifier = Modifier.height(16.dp)
+                modifier = Modifier.height(
+                    CommerzoDimensions.Space24
+                )
             )
         }
     }
 }
+
+// ============================================================
+// Intro Card
+// ============================================================
+
+@Composable
+private fun SettingsIntroCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = CommerzoDimensions.Space2
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(CommerzoDimensions.CardPaddingLarge),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                modifier = Modifier.size(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.primary.copy(
+                    alpha = 0.12f
+                )
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "⚙",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            Spacer(
+                modifier = Modifier.width(
+                    CommerzoDimensions.Space16
+                )
+            )
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space4
+                )
+            ) {
+                Text(
+                    text = "Your preferences",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+
+                Text(
+                    text = "Personalize your learning experience and account settings.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+    }
+}
+
+// ============================================================
+// Section Title
+// ============================================================
 
 @Composable
 private fun SettingsSectionTitle(
     title: String,
     subtitle: String
 ) {
-    Column {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(
+            CommerzoDimensions.Space4
+        )
+    ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.ExtraBold
-        )
-
-        Spacer(
-            modifier = Modifier.height(3.dp)
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Text(
@@ -198,9 +330,13 @@ private fun SettingsSectionTitle(
     }
 }
 
+// ============================================================
+// Toggle Card
+// ============================================================
+
 @Composable
 private fun SettingsToggleCard(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     title: String,
     subtitle: String,
     checked: Boolean,
@@ -211,34 +347,38 @@ private fun SettingsToggleCard(
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = CommerzoDimensions.Space2
         )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(CommerzoDimensions.CardPadding),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
-            SurfaceIcon(
-                icon = icon
+            SettingsIcon(
+                icon = icon,
+                selected = checked
             )
 
             Spacer(
-                modifier = Modifier.width(13.dp)
+                modifier = Modifier.width(
+                    CommerzoDimensions.Space12
+                )
             )
 
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space4
+                )
             ) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(
-                    modifier = Modifier.height(3.dp)
+                    fontWeight = FontWeight.SemiBold
                 )
 
                 Text(
@@ -248,6 +388,12 @@ private fun SettingsToggleCard(
                 )
             }
 
+            Spacer(
+                modifier = Modifier.width(
+                    CommerzoDimensions.Space8
+                )
+            )
+
             Switch(
                 checked = checked,
                 onCheckedChange = onCheckedChange
@@ -256,44 +402,53 @@ private fun SettingsToggleCard(
     }
 }
 
+// ============================================================
+// Action Card
+// ============================================================
+
 @Composable
 private fun SettingsActionCard(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     title: String,
-    subtitle: String,
-    onClick: () -> Unit
+    subtitle: String
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        onClick = onClick,
-        shape = RoundedCornerShape(18.dp)
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = CommerzoDimensions.Space2
+        ),
+        onClick = {}
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(CommerzoDimensions.CardPadding),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
-            SurfaceIcon(
+            SettingsIcon(
                 icon = icon
             )
 
             Spacer(
-                modifier = Modifier.width(13.dp)
+                modifier = Modifier.width(
+                    CommerzoDimensions.Space12
+                )
             )
 
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space4
+                )
             ) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(
-                    modifier = Modifier.height(3.dp)
+                    fontWeight = FontWeight.SemiBold
                 )
 
                 Text(
@@ -312,14 +467,23 @@ private fun SettingsActionCard(
     }
 }
 
+// ============================================================
+// Settings Icon
+// ============================================================
+
 @Composable
-private fun SurfaceIcon(
-    icon: androidx.compose.ui.graphics.vector.ImageVector
+private fun SettingsIcon(
+    icon: ImageVector,
+    selected: Boolean = false
 ) {
-    androidx.compose.material3.Surface(
-        modifier = Modifier.size(44.dp),
-        shape = RoundedCornerShape(13.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant
+    Surface(
+        modifier = Modifier.size(46.dp),
+        shape = RoundedCornerShape(14.dp),
+        color = if (selected) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceVariant
+        }
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -328,12 +492,22 @@ private fun SurfaceIcon(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.size(21.dp),
-                tint = MaterialTheme.colorScheme.primary
+                modifier = Modifier.size(
+                    CommerzoDimensions.IconMedium
+                ),
+                tint = if (selected) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                }
             )
         }
     }
 }
+
+// ============================================================
+// Support Email
+// ============================================================
 
 @Composable
 private fun SupportEmailCard() {
@@ -342,21 +516,21 @@ private fun SupportEmailCard() {
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = CommerzoDimensions.Space2
         )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(17.dp),
+                .padding(CommerzoDimensions.CardPadding),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
-            androidx.compose.material3.Surface(
-                modifier = Modifier.size(44.dp),
-                shape = RoundedCornerShape(13.dp),
-                color = MaterialTheme.colorScheme.surface.copy(
-                    alpha = 0.75f
-                )
+            Surface(
+                modifier = Modifier.size(46.dp),
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.surface
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -365,68 +539,78 @@ private fun SupportEmailCard() {
                     Icon(
                         imageVector = Icons.Default.Email,
                         contentDescription = "Support email",
+                        modifier = Modifier.size(
+                            CommerzoDimensions.IconMedium
+                        ),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
 
             Spacer(
-                modifier = Modifier.width(13.dp)
+                modifier = Modifier.width(
+                    CommerzoDimensions.Space12
+                )
             )
 
-            Column {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space4
+                )
+            ) {
                 Text(
                     text = "Support Email",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(
-                    modifier = Modifier.height(3.dp)
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
 
                 Text(
                     text = SettingsViewModel.SUPPORT_EMAIL,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
         }
     }
 }
 
+// ============================================================
+// Version Card
+// ============================================================
+
 @Composable
-private fun SurfaceVersionCard() {
-    androidx.compose.material3.Surface(
+private fun VersionCard() {
+    Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Column(
-            modifier = Modifier.padding(18.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.padding(
+                CommerzoDimensions.CardPaddingLarge
+            ),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space4
+            )
         ) {
             Text(
                 text = "COMMERZO",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.ExtraBold
-            )
-
-            Spacer(
-                modifier = Modifier.height(3.dp)
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Text(
                 text = "Learn. Practice. Score.",
-                style = MaterialTheme.typography.bodySmall
-            )
-
-            Spacer(
-                modifier = Modifier.height(4.dp)
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Text(
-                text = "Version 5.3.0",
+                text = "Version 5.3.1",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
