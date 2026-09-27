@@ -44,7 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import com.commerzo.app.ui.theme.CommerzoDimensions
 
 @Composable
 fun HomeScreen(
@@ -72,7 +72,11 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(
+                            CommerzoDimensions.Space2
+                        )
+                    ) {
                         Text(
                             text = "COMMERZO",
                             style = MaterialTheme.typography.titleLarge,
@@ -89,8 +93,8 @@ fun HomeScreen(
                 actions = {
                     Surface(
                         modifier = Modifier
-                            .padding(end = 12.dp)
-                            .size(42.dp),
+                            .padding(end = CommerzoDimensions.Space12)
+                            .size(44.dp),
                         shape = CircleShape,
                         color = MaterialTheme.colorScheme.primaryContainer,
                         onClick = onProfileClick
@@ -115,12 +119,12 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(paddingValues),
             contentPadding = PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
-                top = 8.dp,
-                bottom = 28.dp
+                horizontal = CommerzoDimensions.ScreenHorizontal,
+                vertical = CommerzoDimensions.Space12
             ),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.SectionSpacing
+            )
         ) {
 
             item {
@@ -167,8 +171,12 @@ fun HomeScreen(
 
             item {
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(end = 4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(
+                        CommerzoDimensions.CardSpacing
+                    ),
+                    contentPadding = PaddingValues(
+                        end = CommerzoDimensions.Space4
+                    )
                 ) {
                     item {
                         QuickActionTile(
@@ -256,15 +264,16 @@ private fun WelcomeHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space4
+            )
         ) {
             Text(
                 text = "Welcome back 👋",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.ExtraBold
             )
-
-            Spacer(modifier = Modifier.height(5.dp))
 
             Text(
                 text = "Let's make today a productive study day.",
@@ -274,7 +283,7 @@ private fun WelcomeHeader(
         }
 
         Surface(
-            modifier = Modifier.size(50.dp),
+            modifier = Modifier.size(48.dp),
             shape = CircleShape,
             color = MaterialTheme.colorScheme.primaryContainer,
             onClick = onProfileClick
@@ -307,13 +316,19 @@ private fun ProgressOverview(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp)
+                .padding(CommerzoDimensions.CardPaddingLarge),
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space16
+            )
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(
+                        CommerzoDimensions.Space4
+                    )
                 ) {
                     Text(
                         text = "YOUR PROGRESS",
@@ -322,16 +337,12 @@ private fun ProgressOverview(
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
 
-                    Spacer(modifier = Modifier.height(5.dp))
-
                     Text(
                         text = "Level 1 • Beginner",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
-
-                    Spacer(modifier = Modifier.height(3.dp))
 
                     Text(
                         text = "Keep learning to unlock more XP",
@@ -343,24 +354,26 @@ private fun ProgressOverview(
 
                 Surface(
                     shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
+                    color = MaterialTheme.colorScheme.surface.copy(
+                        alpha = 0.85f
+                    )
                 ) {
                     Icon(
                         imageVector = Icons.Default.EmojiEvents,
                         contentDescription = "Achievements",
                         modifier = Modifier
-                            .padding(12.dp)
-                            .size(24.dp),
+                            .padding(CommerzoDimensions.Space12)
+                            .size(CommerzoDimensions.IconMedium),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(18.dp))
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space8
+                )
             ) {
                 ProgressStat(
                     modifier = Modifier.weight(1f),
@@ -393,22 +406,25 @@ private fun ProgressStat(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+        color = MaterialTheme.colorScheme.surface.copy(
+            alpha = 0.7f
+        )
     ) {
         Column(
             modifier = Modifier.padding(
-                vertical = 12.dp,
-                horizontal = 8.dp
+                vertical = CommerzoDimensions.Space12,
+                horizontal = CommerzoDimensions.Space8
             ),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space2
+            )
         ) {
             Text(
                 text = value,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.ExtraBold
             )
-
-            Spacer(modifier = Modifier.height(2.dp))
 
             Text(
                 text = label,
@@ -428,7 +444,7 @@ private fun DailyStreakCard() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(18.dp),
+                .padding(CommerzoDimensions.CardPaddingLarge),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
@@ -447,18 +463,23 @@ private fun DailyStreakCard() {
                 }
             }
 
-            Spacer(modifier = Modifier.width(14.dp))
+            Spacer(
+                modifier = Modifier.width(
+                    CommerzoDimensions.Space12
+                )
+            )
 
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space4
+                )
             ) {
                 Text(
                     text = "Study Streak",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.ExtraBold
                 )
-
-                Spacer(modifier = Modifier.height(3.dp))
 
                 Text(
                     text = "Start today and build your streak.",
@@ -490,11 +511,14 @@ private fun CurriculumCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(18.dp),
+                .padding(CommerzoDimensions.CardPaddingLarge),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space4
+                )
             ) {
                 Text(
                     text = "CURRENT CURRICULUM",
@@ -503,15 +527,11 @@ private fun CurriculumCard(
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                Spacer(modifier = Modifier.height(6.dp))
-
                 Text(
                     text = "MP Board • Class 12",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.ExtraBold
                 )
-
-                Spacer(modifier = Modifier.height(3.dp))
 
                 Text(
                     text = "Your selected learning path",
@@ -519,6 +539,12 @@ private fun CurriculumCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+
+            Spacer(
+                modifier = Modifier.width(
+                    CommerzoDimensions.Space12
+                )
+            )
 
             OutlinedButton(
                 onClick = onChangeClick
@@ -544,7 +570,10 @@ private fun ContinueLearningCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(19.dp),
+                .padding(
+                    horizontal = CommerzoDimensions.CardPaddingLarge,
+                    vertical = CommerzoDimensions.CardPadding
+                ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
@@ -563,18 +592,23 @@ private fun ContinueLearningCard(
                 }
             }
 
-            Spacer(modifier = Modifier.width(14.dp))
+            Spacer(
+                modifier = Modifier.width(
+                    CommerzoDimensions.Space12
+                )
+            )
 
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space4
+                )
             ) {
                 Text(
                     text = "Start Practice",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.ExtraBold
                 )
-
-                Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
                     text = "Practice chapter-wise MCQs and improve your score.",
@@ -585,7 +619,8 @@ private fun ContinueLearningCard(
 
             Icon(
                 imageVector = Icons.Default.ArrowForward,
-                contentDescription = "Open practice"
+                contentDescription = "Open practice",
+                tint = MaterialTheme.colorScheme.primary
             )
         }
     }
@@ -604,7 +639,12 @@ private fun QuickActionTile(
         shape = RoundedCornerShape(22.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(
+                CommerzoDimensions.CardPadding
+            ),
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space4
+            )
         ) {
             Surface(
                 modifier = Modifier.size(46.dp),
@@ -622,15 +662,17 @@ private fun QuickActionTile(
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(
+                modifier = Modifier.height(
+                    CommerzoDimensions.Space8
+                )
+            )
 
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.ExtraBold
             )
-
-            Spacer(modifier = Modifier.height(3.dp))
 
             Text(
                 text = subtitle,
@@ -649,11 +691,15 @@ private fun LearningToolsGrid(
     onSettingsClick: () -> Unit
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(
+            CommerzoDimensions.Space10
+        )
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space10
+            )
         ) {
             LearningToolCard(
                 modifier = Modifier.weight(1f),
@@ -672,7 +718,9 @@ private fun LearningToolsGrid(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space10
+            )
         ) {
             LearningToolCard(
                 modifier = Modifier.weight(1f),
@@ -706,8 +754,14 @@ private fun LearningToolCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(15.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(
+                    horizontal = CommerzoDimensions.Space12,
+                    vertical = CommerzoDimensions.Space16
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space10
+            )
         ) {
             Surface(
                 modifier = Modifier.size(40.dp),
@@ -720,12 +774,13 @@ private fun LearningToolCard(
                     Icon(
                         imageVector = icon,
                         contentDescription = title,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(
+                            CommerzoDimensions.IconSmall
+                        ),
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.width(10.dp))
 
             Text(
                 text = title,
@@ -741,14 +796,16 @@ private fun SectionHeader(
     title: String,
     subtitle: String
 ) {
-    Column {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(
+            CommerzoDimensions.Space4
+        )
+    ) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.ExtraBold
         )
-
-        Spacer(modifier = Modifier.height(3.dp))
 
         Text(
             text = subtitle,
@@ -771,7 +828,7 @@ private fun HomeSubjectCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(17.dp),
+                .padding(CommerzoDimensions.CardPadding),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -789,18 +846,23 @@ private fun HomeSubjectCard(
                 )
             }
 
-            Spacer(modifier = Modifier.width(14.dp))
+            Spacer(
+                modifier = Modifier.width(
+                    CommerzoDimensions.Space12
+                )
+            )
 
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space4
+                )
             ) {
                 Text(
                     text = subject.name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.ExtraBold
                 )
-
-                Spacer(modifier = Modifier.height(3.dp))
 
                 Text(
                     text = "Chapters • Practice • Tests",
@@ -811,7 +873,8 @@ private fun HomeSubjectCard(
 
             Icon(
                 imageVector = Icons.Default.ArrowForward,
-                contentDescription = "Open ${subject.name}"
+                contentDescription = "Open ${subject.name}",
+                tint = MaterialTheme.colorScheme.primary
             )
         }
     }
@@ -825,7 +888,12 @@ private fun BrandFooter() {
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Column(
-            modifier = Modifier.padding(18.dp)
+            modifier = Modifier.padding(
+                CommerzoDimensions.CardPaddingLarge
+            ),
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space4
+            )
         ) {
             Text(
                 text = "COMMERZO",
@@ -833,14 +901,10 @@ private fun BrandFooter() {
                 fontWeight = FontWeight.ExtraBold
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
-
             Text(
                 text = "Learn. Practice. Score.",
                 style = MaterialTheme.typography.bodyMedium
             )
-
-            Spacer(modifier = Modifier.height(5.dp))
 
             Text(
                 text = "A focused learning space for Commerce students.",
