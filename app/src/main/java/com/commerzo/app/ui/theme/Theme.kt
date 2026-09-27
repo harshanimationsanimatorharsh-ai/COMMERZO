@@ -1,12 +1,18 @@
 package com.commerzo.app.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
+
+// ============================================================
+// COMMERZO — Professional Material 3 Theme
+// Phase 7 — Professional Design System
+// ============================================================
 
 private val LightColors = lightColorScheme(
     primary = CommerzoPrimary,
@@ -29,6 +35,7 @@ private val LightColors = lightColorScheme(
 
     surface = CommerzoSurface,
     onSurface = CommerzoOnSurface,
+
     surfaceVariant = CommerzoSurfaceVariant,
     onSurfaceVariant = CommerzoOnSurfaceVariant,
 
@@ -44,16 +51,16 @@ private val LightColors = lightColorScheme(
 private val DarkColors = darkColorScheme(
     primary = CommerzoPrimaryDark,
     onPrimary = CommerzoBlack,
-    primaryContainer = CommerzoOnPrimaryContainer,
-    onPrimaryContainer = CommerzoPrimaryContainer,
+    primaryContainer = CommerzoPrimaryContainer,
+    onPrimaryContainer = CommerzoOnPrimaryContainer,
 
     secondary = CommerzoSecondary,
     onSecondary = CommerzoBlack,
-    secondaryContainer = CommerzoSecondaryContainer,
+    secondaryContainer = CommerzoDarkSecondaryContainer,
     onSecondaryContainer = CommerzoSecondary,
 
     tertiary = CommerzoTertiary,
-    onTertiary = CommerzoWhite,
+    onTertiary = CommerzoBlack,
     tertiaryContainer = CommerzoTertiaryContainer,
     onTertiaryContainer = CommerzoTertiary,
 
@@ -62,25 +69,34 @@ private val DarkColors = darkColorScheme(
 
     surface = CommerzoDarkSurface,
     onSurface = CommerzoDarkOnSurface,
+
     surfaceVariant = CommerzoDarkSurfaceVariant,
     onSurfaceVariant = CommerzoDarkOnSurfaceVariant,
 
     outline = CommerzoDarkOutline,
-    outlineVariant = CommerzoDarkOutlineVariant,
+    outlineVariant = CommerzoDarkOutline,
 
     error = CommerzoError,
     onError = CommerzoWhite,
     errorContainer = CommerzoErrorContainer,
-    onErrorContainer = CommerzoError
+    onErrorContainer = CommerzoOnErrorContainer
 )
 
+// ============================================================
+// Centralized Shape System
+// ============================================================
+
 private val CommerzoShapes = Shapes(
-    extraSmall = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
-    small = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
-    medium = androidx.compose.foundation.shape.RoundedCornerShape(18.dp),
-    large = androidx.compose.foundation.shape.RoundedCornerShape(24.dp),
-    extraLarge = androidx.compose.foundation.shape.RoundedCornerShape(30.dp)
+    extraSmall = RoundedCornerShape(8.dp),
+    small = RoundedCornerShape(12.dp),
+    medium = RoundedCornerShape(18.dp),
+    large = RoundedCornerShape(24.dp),
+    extraLarge = RoundedCornerShape(30.dp)
 )
+
+// ============================================================
+// Root Theme
+// ============================================================
 
 @Composable
 fun CommerzoTheme(
