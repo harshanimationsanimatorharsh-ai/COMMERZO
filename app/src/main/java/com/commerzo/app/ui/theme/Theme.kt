@@ -56,7 +56,7 @@ private val DarkColors = darkColorScheme(
 
     secondary = CommerzoSecondary,
     onSecondary = CommerzoBlack,
-    secondaryContainer = CommerzoDarkSecondaryContainer,
+    secondaryContainer = CommerzoDarkSurfaceVariant,
     onSecondaryContainer = CommerzoSecondary,
 
     tertiary = CommerzoTertiary,
