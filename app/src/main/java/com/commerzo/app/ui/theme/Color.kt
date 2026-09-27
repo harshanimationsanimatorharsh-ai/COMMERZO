@@ -2,71 +2,74 @@ package com.commerzo.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-/*
- * COMMERZO Design System
- *
- * Primary brand:
- * - Indigo / violet
- * - Clean educational feel
- * - Works well with both light and dark surfaces
- */
+// ============================================================
+// COMMERZO — Semantic Color System
+// Phase 7 — Professional Design System
+// ============================================================
 
+// ---------- Brand ----------
 val CommerzoPrimary = Color(0xFF5B5FEF)
-val CommerzoPrimaryDark = Color(0xFF7C7FF7)
-val CommerzoPrimaryContainer = Color(0xFFE9E9FF)
-val CommerzoOnPrimaryContainer = Color(0xFF17184A)
+val CommerzoPrimaryDark = Color(0xFF8B8FFF)
 
-val CommerzoSecondary = Color(0xFF3F8CFF)
-val CommerzoSecondaryContainer = Color(0xFFE5F0FF)
-val CommerzoOnSecondaryContainer = Color(0xFF102C4F)
+val CommerzoSecondary = Color(0xFF00A896)
+val CommerzoTertiary = Color(0xFFFFA62B)
 
-val CommerzoTertiary = Color(0xFF8B5CF6)
-val CommerzoTertiaryContainer = Color(0xFFF0E9FF)
-val CommerzoOnTertiaryContainer = Color(0xFF2C155C)
+// ---------- Primary Containers ----------
+val CommerzoPrimaryContainer = Color(0xFFE8E8FF)
+val CommerzoOnPrimaryContainer = Color(0xFF17174A)
 
+val CommerzoSecondaryContainer = Color(0xFFD7F5F0)
+val CommerzoOnSecondaryContainer = Color(0xFF003D37)
+
+val CommerzoTertiaryContainer = Color(0xFFFFE8C7)
+val CommerzoOnTertiaryContainer = Color(0xFF4A2800)
+
+// ---------- Light Theme ----------
 val CommerzoBackground = Color(0xFFF8F9FC)
+val CommerzoOnBackground = Color(0xFF17181C)
+
 val CommerzoSurface = Color(0xFFFFFFFF)
-val CommerzoSurfaceVariant = Color(0xFFF1F3F8)
+val CommerzoOnSurface = Color(0xFF17181C)
 
-val CommerzoOnBackground = Color(0xFF171923)
-val CommerzoOnSurface = Color(0xFF171923)
-val CommerzoOnSurfaceVariant = Color(0xFF686B78)
+val CommerzoSurfaceVariant = Color(0xFFEDEEF3)
+val CommerzoOnSurfaceVariant = Color(0xFF5F626B)
 
-val CommerzoOutline = Color(0xFFD9DBE5)
-val CommerzoOutlineVariant = Color(0xFFE9EAF0)
+val CommerzoOutline = Color(0xFF777983)
+val CommerzoOutlineVariant = Color(0xFFD9DAE1)
 
-val CommerzoSuccess = Color(0xFF16A36A)
-val CommerzoSuccessContainer = Color(0xFFE1F7ED)
-val CommerzoOnSuccessContainer = Color(0xFF083D29)
+// ---------- Dark Theme ----------
+val CommerzoDarkBackground = Color(0xFF0F1015)
+val CommerzoDarkOnBackground = Color(0xFFF1F1F5)
 
+val CommerzoDarkSurface = Color(0xFF17181F)
+val CommerzoDarkOnSurface = Color(0xFFF1F1F5)
+
+val CommerzoDarkSurfaceVariant = Color(0xFF292A33)
+val CommerzoDarkOnSurfaceVariant = Color(0xFFC5C6CE)
+
+val CommerzoDarkOutline = Color(0xFF90919A)
+
+// ---------- Status ----------
+val CommerzoSuccess = Color(0xFF16A34A)
 val CommerzoWarning = Color(0xFFF59E0B)
-val CommerzoWarningContainer = Color(0xFFFFF3D8)
-val CommerzoOnWarningContainer = Color(0xFF4A3000)
+val CommerzoInfo = Color(0xFF2563EB)
+val CommerzoError = Color(0xFFDC2626)
 
-val CommerzoError = Color(0xFFE5484D)
-val CommerzoErrorContainer = Color(0xFFFFE7E8)
-val CommerzoOnErrorContainer = Color(0xFF5C1014)
+val CommerzoErrorContainer = Color(0xFFFFDAD6)
+val CommerzoOnErrorContainer = Color(0xFF410002)
 
-val CommerzoInfo = Color(0xFF2496FF)
-val CommerzoInfoContainer = Color(0xFFE5F2FF)
-val CommerzoOnInfoContainer = Color(0xFF0B365C)
-
-val CommerzoXp = Color(0xFFFFB020)
-val CommerzoStreak = Color(0xFFFF7043)
-
-val CommerzoBlack = Color(0xFF0B0B0F)
+// ---------- Common ----------
 val CommerzoWhite = Color(0xFFFFFFFF)
+val CommerzoBlack = Color(0xFF0B0B0F)
 
-/*
- * Dark theme surfaces
- */
-val CommerzoDarkBackground = Color(0xFF0D0F16)
-val CommerzoDarkSurface = Color(0xFF151821)
-val CommerzoDarkSurfaceVariant = Color(0xFF20232D)
+// ---------- Gamification ----------
+val CommerzoXp = Color(0xFFFFB020)
+val CommerzoLevel = Color(0xFF7C3AED)
+val CommerzoStreak = Color(0xFFFF6B35)
 
-val CommerzoDarkOnBackground = Color(0xFFF4F5FA)
-val CommerzoDarkOnSurface = Color(0xFFF4F5FA)
-val CommerzoDarkOnSurfaceVariant = Color(0xFFB8BBC8)
-
-val CommerzoDarkOutline = Color(0xFF3B3E49)
-val CommerzoDarkOutlineVariant = Color(0xFF292C35)
+// ---------- Study / Learning ----------
+val CommerzoStudy = Color(0xFF2563EB)
+val CommerzoPractice = Color(0xFF00A896)
+val CommerzoTest = Color(0xFF7C3AED)
+val CommerzoNotes = Color(0xFFF59E0B)
+val CommerzoPdf = Color(0xFFDC2626)
