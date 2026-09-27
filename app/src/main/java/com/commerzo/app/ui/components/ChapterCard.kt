@@ -1,6 +1,7 @@
 package com.commerzo.app.ui.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,8 +16,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.commerzo.app.data.model.ChapterData
+import com.commerzo.app.ui.theme.CommerzoDimensions
 
 @Composable
 fun ChapterCard(
@@ -26,35 +27,47 @@ fun ChapterCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = CommerzoDimensions.Space2
         )
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(CommerzoDimensions.CardPadding),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Text(
-                text = "${chapter.chapterNumber}",
-                style = MaterialTheme.typography.titleLarge
+                text = chapter.chapterNumber.toString(),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary
             )
 
             Spacer(
-                modifier = Modifier.width(16.dp)
+                modifier = Modifier.width(CommerzoDimensions.Space16)
             )
 
-            Column {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space4
+                )
+            ) {
                 Text(
                     text = chapter.title,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Text(
                     text = "Practice MCQs",
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
