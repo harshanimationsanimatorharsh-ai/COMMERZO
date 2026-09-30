@@ -17,8 +17,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,7 +29,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
-import com.commerzo.app.data.model.auth.AuthState
 import com.commerzo.app.data.model.content.CurriculumContentIds
 import com.commerzo.app.data.repository.SubjectRepository
 import com.commerzo.app.ui.screens.AchievementsScreen
@@ -49,8 +46,6 @@ import com.commerzo.app.ui.screens.TestHistoryScreen
 import com.commerzo.app.ui.screens.TestResultScreen
 import com.commerzo.app.ui.screens.TestScreen
 import com.commerzo.app.ui.screens.TestSelectionScreen
-import com.commerzo.app.ui.screens.auth.CreateAccountScreen
-import com.commerzo.app.ui.screens.auth.LoginScreen
 import com.commerzo.app.ui.viewmodel.auth.AuthViewModel
 
 data class NavigationTestResult(
@@ -105,8 +100,6 @@ fun AppNavigation(
         mutableStateOf(NavigationTestResult())
     }
 
-    val authState by authViewModel.authState.collectAsState()
-
     val currentBackStackEntry by
         navController.currentBackStackEntryAsState()
 
@@ -119,72 +112,8 @@ fun AppNavigation(
         }
 
     val showBottomBar =
-        authState is AuthState.LoggedIn &&
-            bottomNavItems.any { item ->
-                item.route == currentRoute
-            }
-
-    LaunchedEffect(authState) {
-        when (authState) {
-
-            is AuthState.LoggedIn -> {
-                if (
-                    currentRoute == AuthRoutes.LOGIN ||
-                    currentRoute == AuthRoutes.CREATE_ACCOUNT ||
-                    currentRoute == null
-                ) {
-                    navController.navigate(
-                        Screen.Home.route
-                    ) {
-                        popUpTo(
-                            AuthRoutes.LOGIN
-                        ) {
-                            inclusive = true
-                        }
-
-                        launchSingleTop = true
-                    }
-                }
-            }
-
-            is AuthState.LoggedOut -> {
-                if (
-                    currentRoute != AuthRoutes.LOGIN &&
-                    currentRoute != AuthRoutes.CREATE_ACCOUNT
-                ) {
-                    navController.navigate(
-                        AuthRoutes.LOGIN
-                    ) {
-                        popUpTo(
-                            Screen.Home.route
-                        ) {
-                            inclusive = true
-                        }
-
-                        launchSingleTop = true
-                    }
-                }
-            }
-
-            is AuthState.Loading -> {
-                // Authentication state is still resolving.
-            }
-
-            is AuthState.PhoneOtpSent -> {
-                // OTP flow is handled by LoginScreen.
-            }
-
-            is AuthState.Error -> {
-                // Authentication screens handle their own errors.
-            }
-        }
-    }
-
-    val initialDestination =
-        if (authState is AuthState.LoggedIn) {
-            Screen.Home.route
-        } else {
-            AuthRoutes.LOGIN
+        bottomNavItems.any { item ->
+            item.route == currentRoute
         }
 
     Scaffold(
@@ -249,52 +178,8 @@ fun AppNavigation(
 
             NavHost(
                 navController = navController,
-                startDestination = initialDestination
+                startDestination = Screen.Home.route
             ) {
-
-                composable(AuthRoutes.LOGIN) {
-                    LoginScreen(
-                        onLoginSuccess = {
-                            navController.navigate(
-                                Screen.Home.route
-                            ) {
-                                popUpTo(
-                                    AuthRoutes.LOGIN
-                                ) {
-                                    inclusive = true
-                                }
-
-                                launchSingleTop = true
-                            }
-                        },
-                        onCreateAccount = {
-                            navController.navigate(
-                                AuthRoutes.CREATE_ACCOUNT
-                            )
-                        }
-                    )
-                }
-
-                composable(AuthRoutes.CREATE_ACCOUNT) {
-                    CreateAccountScreen(
-                        onBack = {
-                            navController.popBackStack()
-                        },
-                        onAccountCreated = {
-                            navController.navigate(
-                                Screen.Home.route
-                            ) {
-                                popUpTo(
-                                    AuthRoutes.CREATE_ACCOUNT
-                                ) {
-                                    inclusive = true
-                                }
-
-                                launchSingleTop = true
-                            }
-                        }
-                    )
-                }
 
                 composable(Screen.Home.route) {
                     HomeScreen(
