@@ -13,13 +13,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.commerzo.app.ui.theme.CommerzoDimensions
 
 @Composable
 fun TestQuestionOption(
     index: Int,
     text: String,
-    isSelected: Boolean,
+    selected: Boolean,
     isCorrect: Boolean = false,
     isWrong: Boolean = false,
     enabled: Boolean = true,
@@ -28,14 +29,14 @@ fun TestQuestionOption(
     val containerColor = when {
         isCorrect -> MaterialTheme.colorScheme.primaryContainer
         isWrong -> MaterialTheme.colorScheme.errorContainer
-        isSelected -> MaterialTheme.colorScheme.secondaryContainer
+        selected -> MaterialTheme.colorScheme.secondaryContainer
         else -> MaterialTheme.colorScheme.surface
     }
 
     val contentColor = when {
         isCorrect -> MaterialTheme.colorScheme.onPrimaryContainer
         isWrong -> MaterialTheme.colorScheme.onErrorContainer
-        isSelected -> MaterialTheme.colorScheme.onSecondaryContainer
+        selected -> MaterialTheme.colorScheme.onSecondaryContainer
         else -> MaterialTheme.colorScheme.onSurface
     }
 
