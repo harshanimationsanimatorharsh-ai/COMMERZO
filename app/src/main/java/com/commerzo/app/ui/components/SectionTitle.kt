@@ -1,8 +1,10 @@
 package com.commerzo.app.ui.components
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.commerzo.app.ui.theme.CommerzoDimensions
 
 @Composable
@@ -13,7 +15,7 @@ fun SectionTitle(
         text = title,
         style = MaterialTheme.typography.titleLarge,
         color = MaterialTheme.colorScheme.onSurface,
-        modifier = androidx.compose.ui.Modifier.padding(
+        modifier = Modifier.padding(
             vertical = CommerzoDimensions.Space4
         )
     )
