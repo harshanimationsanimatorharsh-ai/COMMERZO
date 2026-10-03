@@ -23,21 +23,18 @@ import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.commerzo.app.ui.theme.CommerzoDimensions
@@ -76,13 +73,15 @@ fun HomeScreen(
                         Text(
                             text = "Good Morning 👋",
                             style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.ExtraBold
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
                         )
 
                         Text(
                             text = "Ready to learn today?",
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
                         )
                     }
                 },
@@ -90,7 +89,7 @@ fun HomeScreen(
                     Surface(
                         modifier = Modifier
                             .padding(end = CommerzoDimensions.Space12)
-                            .size(42.dp),
+                            .size(44.dp),
                         shape = CircleShape,
                         color = MaterialTheme.colorScheme.primaryContainer,
                         onClick = onProfileClick
@@ -122,44 +121,19 @@ fun HomeScreen(
                 vertical = CommerzoDimensions.Space12
             ),
             verticalArrangement = Arrangement.spacedBy(
-                CommerzoDimensions.SectionSpacing
+                CommerzoDimensions.Space20
             )
         ) {
-
-            /*
-             * 1. CONTINUE LEARNING
-             *
-             * Primary Home action.
-             */
             item {
                 ContinueLearningCard(
                     onClick = onPracticeClick
                 )
             }
 
-            /*
-             * 2. TODAY'S PROGRESS
-             */
             item {
                 SectionHeader(
-                    title = "Today's Progress",
-                    subtitle = "Keep your study momentum going"
-                )
-            }
-
-            item {
-                TodayProgressCard()
-            }
-
-            /*
-             * 3. QUICK ACTIONS
-             *
-             * Only the most important actions stay here.
-             */
-            item {
-                SectionHeader(
-                    title = "Quick Actions",
-                    subtitle = "Start exactly what you need"
+                    title = "Quick Start",
+                    subtitle = "Choose how you want to study"
                 )
             }
 
@@ -183,18 +157,9 @@ fun HomeScreen(
 
                     item {
                         QuickActionTile(
-                            title = "Test",
+                            title = "Tests",
                             subtitle = "Check your score",
                             icon = Icons.Default.Assessment,
-                            onClick = onTestsClick
-                        )
-                    }
-
-                    item {
-                        QuickActionTile(
-                            title = "PYQ",
-                            subtitle = "Previous papers",
-                            icon = Icons.Default.School,
                             onClick = onTestsClick
                         )
                     }
@@ -210,15 +175,10 @@ fun HomeScreen(
                 }
             }
 
-            /*
-             * 4. SUBJECTS
-             *
-             * Compact horizontal list instead of six large cards.
-             */
             item {
                 SectionHeader(
-                    title = "Subjects",
-                    subtitle = "Choose a subject to continue"
+                    title = "Your Subjects",
+                    subtitle = "Pick a subject to continue"
                 )
             }
 
@@ -235,7 +195,6 @@ fun HomeScreen(
                         items = subjects,
                         key = { it.id }
                     ) { subject ->
-
                         CompactSubjectCard(
                             subject = subject,
                             onClick = {
@@ -246,20 +205,12 @@ fun HomeScreen(
                 }
             }
 
-            /*
-             * 5. DAILY GOAL
-             */
             item {
-                DailyGoalCard()
+                StudyGoalCard()
             }
 
-            /*
-             * 6. RECOMMENDATION
-             *
-             * Later this will become dynamic based on weak topics.
-             */
             item {
-                RecommendationCard(
+                PracticeRecommendationCard(
                     onClick = onPracticeClick
                 )
             }
@@ -288,7 +239,7 @@ private fun ContinueLearningCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
-        shape = RoundedCornerShape(26.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primary
         )
@@ -303,7 +254,7 @@ private fun ContinueLearningCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(58.dp),
+                modifier = Modifier.size(56.dp),
                 shape = RoundedCornerShape(18.dp),
                 color = MaterialTheme.colorScheme.onPrimary.copy(
                     alpha = 0.14f
@@ -314,7 +265,7 @@ private fun ContinueLearningCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Continue learning",
+                        contentDescription = null,
                         modifier = Modifier.size(
                             CommerzoDimensions.IconLarge
                         ),
@@ -338,22 +289,23 @@ private fun ContinueLearningCard(
                 Text(
                     text = "Continue Learning",
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.ExtraBold,
+                    fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimary
                 )
 
                 Text(
-                    text = "Pick up your practice from where you left off.",
+                    text = "Jump back into your practice.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onPrimary.copy(
                         alpha = 0.82f
-                    )
+                    ),
+                    maxLines = 2
                 )
             }
 
             Icon(
                 imageVector = Icons.Default.ArrowForward,
-                contentDescription = "Continue",
+                contentDescription = null,
                 tint = MaterialTheme.colorScheme.onPrimary
             )
         }
@@ -361,110 +313,16 @@ private fun ContinueLearningCard(
 }
 
 @Composable
-private fun TodayProgressCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    CommerzoDimensions.CardPaddingLarge
-                ),
-            verticalArrangement = Arrangement.spacedBy(
-                CommerzoDimensions.Space16
-            )
-        ) {
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = "0 min",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.ExtraBold
-                    )
-
-                    Text(
-                        text = "Studied today",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                ProgressMiniStat(
-                    value = "0",
-                    label = "Questions"
-                )
-
-                Spacer(
-                    modifier = Modifier.width(
-                        CommerzoDimensions.Space12
-                    )
-                )
-
-                ProgressMiniStat(
-                    value = "0",
-                    label = "Tests"
-                )
-            }
-
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(100.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(8.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ProgressMiniStat(
-    value: String,
-    label: String
-) {
-    Column(
-        horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.spacedBy(
-            CommerzoDimensions.Space2
-        )
-    ) {
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.ExtraBold
-        )
-
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
 private fun QuickActionTile(
     title: String,
     subtitle: String,
-    icon: ImageVector,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
     onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.width(142.dp),
+        modifier = Modifier.width(148.dp),
         onClick = onClick,
-        shape = RoundedCornerShape(22.dp)
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(
             modifier = Modifier.padding(
@@ -484,7 +342,7 @@ private fun QuickActionTile(
                 ) {
                     Icon(
                         imageVector = icon,
-                        contentDescription = title,
+                        contentDescription = null,
                         tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
@@ -492,20 +350,22 @@ private fun QuickActionTile(
 
             Spacer(
                 modifier = Modifier.height(
-                    CommerzoDimensions.Space4
+                    CommerzoDimensions.Space2
                 )
             )
 
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.ExtraBold
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1
             )
 
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
             )
         }
     }
@@ -517,9 +377,9 @@ private fun CompactSubjectCard(
     onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.width(142.dp),
+        modifier = Modifier.width(148.dp),
         onClick = onClick,
-        shape = RoundedCornerShape(22.dp)
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(
             modifier = Modifier.padding(
@@ -529,37 +389,43 @@ private fun CompactSubjectCard(
                 CommerzoDimensions.Space8
             )
         ) {
-            Box(
+            Surface(
                 modifier = Modifier.size(46.dp),
-                contentAlignment = Alignment.Center
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.primaryContainer
             ) {
-                Text(
-                    text = subject.emoji,
-                    style = MaterialTheme.typography.headlineSmall
-                )
+                Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = subject.emoji,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                }
             }
 
             Text(
                 text = subject.name,
                 style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.ExtraBold,
+                fontWeight = FontWeight.SemiBold,
                 maxLines = 2
             )
 
             Text(
                 text = "Open subject",
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1
             )
         }
     }
 }
 
 @Composable
-private fun DailyGoalCard() {
+private fun StudyGoalCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
@@ -582,7 +448,7 @@ private fun DailyGoalCard() {
                 ) {
                     Icon(
                         imageVector = Icons.Default.Timer,
-                        contentDescription = "Daily goal",
+                        contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -601,20 +467,20 @@ private fun DailyGoalCard() {
                 )
             ) {
                 Text(
-                    text = "Daily Goal",
+                    text = "Daily Study Goal",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold
+                    fontWeight = FontWeight.SemiBold
                 )
 
                 Text(
-                    text = "Complete 30 minutes of focused study.",
+                    text = "30 minutes of focused study",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
             Text(
-                text = "0 / 30 min",
+                text = "30 min",
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -624,13 +490,13 @@ private fun DailyGoalCard() {
 }
 
 @Composable
-private fun RecommendationCard(
+private fun PracticeRecommendationCard(
     onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
-        shape = RoundedCornerShape(24.dp)
+        shape = RoundedCornerShape(22.dp)
     ) {
         Row(
             modifier = Modifier
@@ -643,15 +509,15 @@ private fun RecommendationCard(
             Surface(
                 modifier = Modifier.size(50.dp),
                 shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.primaryContainer
+                color = MaterialTheme.colorScheme.secondaryContainer
             ) {
                 Box(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.MenuBook,
-                        contentDescription = "Recommended practice",
-                        tint = MaterialTheme.colorScheme.primary
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.secondary
                     )
                 }
             }
@@ -669,21 +535,22 @@ private fun RecommendationCard(
                 )
             ) {
                 Text(
-                    text = "Recommended for You",
+                    text = "Start Practice",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold
+                    fontWeight = FontWeight.SemiBold
                 )
 
                 Text(
-                    text = "Practice a topic and strengthen your concepts.",
+                    text = "Practice chapter MCQs and strengthen concepts.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2
                 )
             }
 
             Icon(
                 imageVector = Icons.Default.ArrowForward,
-                contentDescription = "Open recommendation",
+                contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary
             )
         }
@@ -703,13 +570,16 @@ private fun SectionHeader(
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.ExtraBold
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1
         )
 
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2
         )
     }
 }
