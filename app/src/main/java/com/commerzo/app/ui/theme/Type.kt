@@ -6,51 +6,66 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 // ============================================================
-// COMMERZO — Professional Typography System
-// Phase 7 — Professional Design System
+// COMMERZO — Premium Typography System
+// Clean • Modern • Readable • Professional
+// Phase 7 — Premium Design System
 // ============================================================
 
 val CommerzoTypography = Typography(
 
-    // Large page / hero heading
+    // ─────────────────────────────────────────────────────────
+    // DISPLAY — Hero / Major Brand Moments
+    // ─────────────────────────────────────────────────────────
+
     displayLarge = TextStyle(
-        fontSize = 36.sp,
-        lineHeight = 44.sp,
-        fontWeight = FontWeight.Bold
+        fontSize = 34.sp,
+        lineHeight = 40.sp,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = (-0.5).sp
     ),
 
     displayMedium = TextStyle(
-        fontSize = 32.sp,
-        lineHeight = 40.sp,
-        fontWeight = FontWeight.Bold
+        fontSize = 30.sp,
+        lineHeight = 36.sp,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = (-0.35).sp
     ),
 
     displaySmall = TextStyle(
-        fontSize = 28.sp,
-        lineHeight = 36.sp,
-        fontWeight = FontWeight.Bold
+        fontSize = 26.sp,
+        lineHeight = 32.sp,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = (-0.2).sp
     ),
 
-    // Screen and section headings
+    // ─────────────────────────────────────────────────────────
+    // HEADLINE — Screen / Primary Section Hierarchy
+    // ─────────────────────────────────────────────────────────
+
     headlineLarge = TextStyle(
-        fontSize = 26.sp,
-        lineHeight = 34.sp,
-        fontWeight = FontWeight.Bold
+        fontSize = 24.sp,
+        lineHeight = 30.sp,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = (-0.2).sp
     ),
 
     headlineMedium = TextStyle(
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        fontWeight = FontWeight.Bold
+        fontSize = 21.sp,
+        lineHeight = 27.sp,
+        fontWeight = FontWeight.SemiBold,
+        letterSpacing = (-0.1).sp
     ),
 
     headlineSmall = TextStyle(
-        fontSize = 20.sp,
-        lineHeight = 26.sp,
+        fontSize = 19.sp,
+        lineHeight = 25.sp,
         fontWeight = FontWeight.SemiBold
     ),
 
-    // Card / section titles
+    // ─────────────────────────────────────────────────────────
+    // TITLE — Cards / Components / Sections
+    // ─────────────────────────────────────────────────────────
+
     titleLarge = TextStyle(
         fontSize = 18.sp,
         lineHeight = 24.sp,
@@ -66,44 +81,57 @@ val CommerzoTypography = Typography(
     titleSmall = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
-        fontWeight = FontWeight.SemiBold
+        fontWeight = FontWeight.Medium,
+        letterSpacing = 0.1.sp
     ),
 
-    // Main readable content
+    // ─────────────────────────────────────────────────────────
+    // BODY — Learning Content / Questions / Descriptions
+    // ─────────────────────────────────────────────────────────
+
     bodyLarge = TextStyle(
         fontSize = 16.sp,
         lineHeight = 24.sp,
-        fontWeight = FontWeight.Normal
+        fontWeight = FontWeight.Normal,
+        letterSpacing = 0.sp
     ),
 
     bodyMedium = TextStyle(
         fontSize = 14.sp,
-        lineHeight = 20.sp,
-        fontWeight = FontWeight.Normal
+        lineHeight = 21.sp,
+        fontWeight = FontWeight.Normal,
+        letterSpacing = 0.05.sp
     ),
 
     bodySmall = TextStyle(
         fontSize = 12.sp,
         lineHeight = 18.sp,
-        fontWeight = FontWeight.Normal
+        fontWeight = FontWeight.Normal,
+        letterSpacing = 0.1.sp
     ),
 
-    // Labels / buttons / compact UI
+    // ─────────────────────────────────────────────────────────
+    // LABEL — Buttons / Chips / Metadata / Navigation
+    // ─────────────────────────────────────────────────────────
+
     labelLarge = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
-        fontWeight = FontWeight.SemiBold
+        fontWeight = FontWeight.SemiBold,
+        letterSpacing = 0.1.sp
     ),
 
     labelMedium = TextStyle(
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        fontWeight = FontWeight.SemiBold
+        fontWeight = FontWeight.Medium,
+        letterSpacing = 0.2.sp
     ),
 
     labelSmall = TextStyle(
         fontSize = 11.sp,
         lineHeight = 14.sp,
-        fontWeight = FontWeight.Medium
+        fontWeight = FontWeight.Medium,
+        letterSpacing = 0.25.sp
     )
 )
