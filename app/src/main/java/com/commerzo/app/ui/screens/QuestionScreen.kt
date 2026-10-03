@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,7 +45,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -75,9 +75,8 @@ fun QuestionScreen(
     val progressPercent by viewModel.progressPercent.collectAsState()
 
     /*
-     * Content architecture uses stable Economics IDs.
-     * The existing question system still uses the legacy
-     * "economics" subject ID.
+     * Economics curriculum IDs are mapped to the legacy
+     * question-bank subject ID used by the existing practice system.
      */
     val questionSubjectId = remember(subjectId) {
         when (subjectId) {
@@ -113,26 +112,6 @@ fun QuestionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(
-                            CommerzoDimensions.Space2
-                        )
-                    ) {
-                        Text(
-                            text = "Practice",
-                            fontWeight = FontWeight.ExtraBold
-                        )
-
-                        if (currentQuestion != null) {
-                            Text(
-                                text = "Question ${currentIndex + 1} of $totalQuestions",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -141,12 +120,33 @@ fun QuestionScreen(
                         )
                     }
                 },
+                title = {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(
+                            CommerzoDimensions.Space2
+                        )
+                    ) {
+                        Text(
+                            text = "Practice",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
+                        )
+
+                        if (currentQuestion != null) {
+                            Text(
+                                text = "Question ${currentIndex + 1} of $totalQuestions",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1
+                            )
+                        }
+                    }
+                },
                 actions = {
                     if (currentQuestion != null) {
                         IconButton(
-                            onClick = {
-                                viewModel.toggleBookmark()
-                            }
+                            onClick = viewModel::toggleBookmark
                         ) {
                             Icon(
                                 imageVector = if (isCurrentBookmarked) {
@@ -158,6 +158,11 @@ fun QuestionScreen(
                                     "Remove bookmark"
                                 } else {
                                     "Bookmark question"
+                                },
+                                tint = if (isCurrentBookmarked) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
                                 }
                             )
                         }
@@ -273,11 +278,12 @@ private fun QuestionContent(
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(
-                CommerzoDimensions.Space8
+                CommerzoDimensions.Space10
             )
         ) {
             currentQuestion.options.forEachIndexed { index, option ->
                 val isSelected = selectedAnswer == index
+
                 val isCorrect = submitted &&
                     index == currentQuestion.correctAnswer
 
@@ -355,7 +361,7 @@ private fun QuestionProgressHeader(
                         vertical = CommerzoDimensions.Space6
                     ),
                     style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.ExtraBold,
+                    fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
@@ -370,7 +376,7 @@ private fun QuestionProgressHeader(
         LinearProgressIndicator(
             progress = {
                 if (totalQuestions > 0) {
-                    progressPercent / 100f
+                    (progressPercent / 100f).coerceIn(0f, 1f)
                 } else {
                     0f
                 }
@@ -416,12 +422,21 @@ private fun QuestionCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
-                Text(
-                    text = "Question",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Text(
+                        text = "QUESTION",
+                        modifier = Modifier.padding(
+                            horizontal = CommerzoDimensions.Space10,
+                            vertical = CommerzoDimensions.Space6
+                        ),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
 
                 if (isBookmarked) {
                     Icon(
@@ -438,7 +453,8 @@ private fun QuestionCard(
             Text(
                 text = questionText,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -452,15 +468,24 @@ private fun AnswerExplanationCard(
 ) {
     val isCorrect = selectedAnswer == correctAnswer
 
+    val containerColor = if (isCorrect) {
+        MaterialTheme.colorScheme.secondaryContainer
+    } else {
+        MaterialTheme.colorScheme.errorContainer
+    }
+
+    val contentColor = if (isCorrect) {
+        MaterialTheme.colorScheme.onSecondaryContainer
+    } else {
+        MaterialTheme.colorScheme.onErrorContainer
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isCorrect) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.errorContainer
-            }
+            containerColor = containerColor,
+            contentColor = contentColor
         )
     ) {
         Column(
@@ -495,7 +520,7 @@ private fun AnswerExplanationCard(
                     } else {
                         "Correct answer: ${optionLetter(correctAnswer)}"
                     },
-                    fontWeight = FontWeight.ExtraBold
+                    fontWeight = FontWeight.Bold
                 )
             }
 
@@ -528,13 +553,14 @@ private fun QuestionBottomActions(
             ),
         horizontalArrangement = Arrangement.spacedBy(
             CommerzoDimensions.Space8
-        )
+        ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         OutlinedButton(
             onClick = onPrevious,
             enabled = currentIndex > 0,
-            modifier = Modifier.weight(1f),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            modifier = Modifier.weight(0.8f),
+            contentPadding = PaddingValues(
                 horizontal = CommerzoDimensions.Space8
             )
         ) {
@@ -549,18 +575,19 @@ private fun QuestionBottomActions(
                 )
             )
 
-            Text("Previous")
+            Text("Back")
         }
 
-        OutlinedButton(
-            onClick = onSkip,
-            enabled = !submitted,
-            modifier = Modifier.weight(1f),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                horizontal = CommerzoDimensions.Space8
-            )
-        ) {
-            Text("Skip")
+        if (!submitted) {
+            OutlinedButton(
+                onClick = onSkip,
+                modifier = Modifier.weight(0.8f),
+                contentPadding = PaddingValues(
+                    horizontal = CommerzoDimensions.Space8
+                )
+            ) {
+                Text("Skip")
+            }
         }
 
         Button(
@@ -576,8 +603,8 @@ private fun QuestionBottomActions(
             } else {
                 selectedAnswer != null
             },
-            modifier = Modifier.weight(1f),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            modifier = Modifier.weight(1.4f),
+            contentPadding = PaddingValues(
                 horizontal = CommerzoDimensions.Space8
             )
         ) {
@@ -586,7 +613,8 @@ private fun QuestionBottomActions(
                     !submitted -> "Check Answer"
                     currentIndex == totalQuestions - 1 -> "Finish"
                     else -> "Next"
-                }
+                },
+                maxLines = 1
             )
 
             if (submitted) {
@@ -618,10 +646,33 @@ private fun EmptyQuestionState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        Surface(
+            modifier = Modifier.size(72.dp),
+            shape = RoundedCornerShape(22.dp),
+            color = MaterialTheme.colorScheme.primaryContainer
+        ) {
+            Box(
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Lightbulb,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+        }
+
+        Spacer(
+            modifier = Modifier.height(
+                CommerzoDimensions.Space20
+            )
+        )
+
         Text(
             text = "No questions available",
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.ExtraBold
+            fontWeight = FontWeight.Bold
         )
 
         Spacer(
@@ -642,7 +693,9 @@ private fun EmptyQuestionState(
             )
         )
 
-        Button(onClick = onBack) {
+        Button(
+            onClick = onBack
+        ) {
             Text("Go Back")
         }
     }
@@ -659,28 +712,43 @@ private fun OptionCard(
     onClick: () -> Unit
 ) {
     val containerColor = when {
-        isCorrect -> Color(0xFF1B5E20)
-        isWrong -> Color(0xFFB71C1C)
+        isCorrect -> MaterialTheme.colorScheme.secondaryContainer
+        isWrong -> MaterialTheme.colorScheme.errorContainer
         isSelected -> MaterialTheme.colorScheme.primaryContainer
         else -> MaterialTheme.colorScheme.surface
     }
 
     val contentColor = when {
-        isCorrect || isWrong -> Color.White
+        isCorrect -> MaterialTheme.colorScheme.onSecondaryContainer
+        isWrong -> MaterialTheme.colorScheme.onErrorContainer
+        isSelected -> MaterialTheme.colorScheme.onPrimaryContainer
         else -> MaterialTheme.colorScheme.onSurface
+    }
+
+    val letterColor = when {
+        isCorrect -> MaterialTheme.colorScheme.secondary
+        isWrong -> MaterialTheme.colorScheme.error
+        isSelected -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
         enabled = enabled,
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
             containerColor = containerColor,
-            contentColor = contentColor
+            contentColor = contentColor,
+            disabledContainerColor = containerColor,
+            disabledContentColor = contentColor
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isSelected) 3.dp else 1.dp
+            defaultElevation = if (isSelected || isCorrect || isWrong) {
+                2.dp
+            } else {
+                1.dp
+            }
         )
     ) {
         Row(
@@ -688,17 +756,27 @@ private fun OptionCard(
                 .fillMaxWidth()
                 .padding(
                     horizontal = CommerzoDimensions.CardPadding,
-                    vertical = CommerzoDimensions.Space12
+                    vertical = CommerzoDimensions.Space14
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
                 modifier = Modifier.size(40.dp),
                 shape = RoundedCornerShape(12.dp),
-                color = if (isCorrect || isWrong) {
-                    Color.White.copy(alpha = 0.16f)
-                } else {
-                    MaterialTheme.colorScheme.primaryContainer
+                color = when {
+                    isCorrect -> MaterialTheme.colorScheme.secondary.copy(
+                        alpha = 0.14f
+                    )
+
+                    isWrong -> MaterialTheme.colorScheme.error.copy(
+                        alpha = 0.14f
+                    )
+
+                    isSelected -> MaterialTheme.colorScheme.primary.copy(
+                        alpha = 0.12f
+                    )
+
+                    else -> MaterialTheme.colorScheme.surfaceVariant
                 }
             ) {
                 Box(
@@ -706,12 +784,8 @@ private fun OptionCard(
                 ) {
                     Text(
                         text = optionLetter(optionIndex),
-                        fontWeight = FontWeight.ExtraBold,
-                        color = if (isCorrect || isWrong) {
-                            Color.White
-                        } else {
-                            MaterialTheme.colorScheme.primary
-                        }
+                        fontWeight = FontWeight.Bold,
+                        color = letterColor
                     )
                 }
             }
@@ -725,33 +799,38 @@ private fun OptionCard(
             Text(
                 text = optionText,
                 modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                color = contentColor
             )
 
-            if (isCorrect) {
-                Spacer(
-                    modifier = Modifier.width(
-                        CommerzoDimensions.Space8
+            when {
+                isCorrect -> {
+                    Spacer(
+                        modifier = Modifier.width(
+                            CommerzoDimensions.Space8
+                        )
                     )
-                )
 
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = "Correct"
-                )
-            }
-
-            if (isWrong) {
-                Spacer(
-                    modifier = Modifier.width(
-                        CommerzoDimensions.Space8
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Correct",
+                        tint = MaterialTheme.colorScheme.secondary
                     )
-                )
+                }
 
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Wrong"
-                )
+                isWrong -> {
+                    Spacer(
+                        modifier = Modifier.width(
+                            CommerzoDimensions.Space8
+                        )
+                    )
+
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Wrong",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }
@@ -777,18 +856,48 @@ private fun PracticeResultContent(
         modifier = Modifier
             .fillMaxSize()
             .padding(
-                CommerzoDimensions.ScreenHorizontal
+                horizontal = CommerzoDimensions.ScreenHorizontal,
+                vertical = CommerzoDimensions.Space24
             ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CircularProgressIndicator(
-            progress = {
-                percentage / 100f
-            },
-            modifier = Modifier.size(96.dp),
-            strokeWidth = 8.dp
+        Spacer(
+            modifier = Modifier.height(
+                CommerzoDimensions.Space16
+            )
         )
+
+        Box(
+            modifier = Modifier.size(112.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                progress = {
+                    (percentage / 100f).coerceIn(0f, 1f)
+                },
+                modifier = Modifier.fillMaxSize(),
+                strokeWidth = 9.dp,
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "$percentage%",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Text(
+                    text = "Score",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
 
         Spacer(
             modifier = Modifier.height(
@@ -809,19 +918,6 @@ private fun PracticeResultContent(
         )
 
         Text(
-            text = "$percentage%",
-            style = MaterialTheme.typography.displaySmall,
-            fontWeight = FontWeight.ExtraBold,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(
-            modifier = Modifier.height(
-                CommerzoDimensions.Space4
-            )
-        )
-
-        Text(
             text = "$progressPercent% questions attempted",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -835,9 +931,12 @@ private fun PracticeResultContent(
 
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(22.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 1.dp
             )
         ) {
             Column(
@@ -845,22 +944,40 @@ private fun PracticeResultContent(
                     CommerzoDimensions.CardPaddingLarge
                 ),
                 verticalArrangement = Arrangement.spacedBy(
-                    CommerzoDimensions.Space8
+                    CommerzoDimensions.Space10
                 )
             ) {
                 Text(
                     text = "Practice Summary",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold
+                    fontWeight = FontWeight.Bold
                 )
 
-                SummaryRow("Total questions", totalQuestions.toString())
-                SummaryRow("Answered", answeredQuestions.toString())
-                SummaryRow("Correct", correctAnswers.toString())
-                SummaryRow("Wrong", wrongAnswers.toString())
                 SummaryRow(
-                    "Unattempted",
-                    (totalQuestions - answeredQuestions).toString()
+                    label = "Total questions",
+                    value = totalQuestions.toString()
+                )
+
+                SummaryRow(
+                    label = "Answered",
+                    value = answeredQuestions.toString()
+                )
+
+                SummaryRow(
+                    label = "Correct",
+                    value = correctAnswers.toString()
+                )
+
+                SummaryRow(
+                    label = "Wrong",
+                    value = wrongAnswers.toString()
+                )
+
+                SummaryRow(
+                    label = "Unattempted",
+                    value = (
+                        totalQuestions - answeredQuestions
+                    ).coerceAtLeast(0).toString()
                 )
             }
         }
@@ -900,16 +1017,20 @@ private fun SummaryRow(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = label,
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Text(
             text = value,
-            fontWeight = FontWeight.Bold
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
