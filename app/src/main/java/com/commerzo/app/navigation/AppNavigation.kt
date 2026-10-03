@@ -5,8 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoStories
-import androidx.compose.material.icons.filled.Gamepad
+import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayCircle
@@ -63,6 +62,16 @@ private data class BottomNavItem(
     val icon: androidx.compose.ui.graphics.vector.ImageVector
 )
 
+/**
+ * COMMERZO root navigation.
+ *
+ * Final target bottom navigation:
+ *
+ * HOME | PRACTICE | TESTS | PROFILE
+ *
+ * Subjects/Learn and Games remain available as internal destinations
+ * for compatibility, but they are intentionally NOT root bottom tabs.
+ */
 private val bottomNavItems = listOf(
     BottomNavItem(
         route = Screen.Home.route,
@@ -70,19 +79,14 @@ private val bottomNavItems = listOf(
         icon = Icons.Default.Home
     ),
     BottomNavItem(
-        route = Screen.Subjects.route,
-        label = "Learn",
-        icon = Icons.Default.AutoStories
-    ),
-    BottomNavItem(
         route = Screen.Practice.route,
         label = "Practice",
         icon = Icons.Default.PlayCircle
     ),
     BottomNavItem(
-        route = Screen.Games.route,
-        label = "Games",
-        icon = Icons.Default.Gamepad
+        route = Screen.Tests.route,
+        label = "Tests",
+        icon = Icons.Default.Assignment
     ),
     BottomNavItem(
         route = Screen.Profile.route,
@@ -181,6 +185,10 @@ fun AppNavigation(
                 startDestination = Screen.Home.route
             ) {
 
+                // ─────────────────────────────────────────────────
+                // HOME
+                // ─────────────────────────────────────────────────
+
                 composable(Screen.Home.route) {
                     HomeScreen(
                         onSubjectClick = { subjectId ->
@@ -240,6 +248,10 @@ fun AppNavigation(
                     )
                 }
 
+                // ─────────────────────────────────────────────────
+                // PRACTICE
+                // ─────────────────────────────────────────────────
+
                 composable(Screen.Practice.route) {
                     PracticeScreen(
                         onNavigate = { route ->
@@ -247,6 +259,10 @@ fun AppNavigation(
                         }
                     )
                 }
+
+                // ─────────────────────────────────────────────────
+                // TEST CENTER
+                // ─────────────────────────────────────────────────
 
                 composable(Screen.Tests.route) {
                     TestSelectionScreen(
@@ -272,6 +288,10 @@ fun AppNavigation(
                         }
                     )
                 }
+
+                // ─────────────────────────────────────────────────
+                // TEST SESSION
+                // ─────────────────────────────────────────────────
 
                 composable(Screen.TestSession.route) { backStackEntry ->
 
@@ -341,9 +361,20 @@ fun AppNavigation(
                     )
                 }
 
+                // ─────────────────────────────────────────────────
+                // GAMES
+                //
+                // Internal destination only.
+                // NOT a bottom-navigation destination.
+                // ─────────────────────────────────────────────────
+
                 composable(Screen.Games.route) {
                     GamesScreen()
                 }
+
+                // ─────────────────────────────────────────────────
+                // PROFILE
+                // ─────────────────────────────────────────────────
 
                 composable(Screen.Profile.route) {
                     ProfileScreen(
@@ -377,6 +408,10 @@ fun AppNavigation(
                         }
                     )
                 }
+
+                // ─────────────────────────────────────────────────
+                // STUDY TRACKER
+                // ─────────────────────────────────────────────────
 
                 composable(Screen.StudyTracker.route) {
                     StudyTrackerScreen(
@@ -429,6 +464,13 @@ fun AppNavigation(
                     )
                 }
 
+                // ─────────────────────────────────────────────────
+                // SUBJECTS / LEARNING
+                //
+                // Internal destination.
+                // NOT a bottom-navigation destination.
+                // ─────────────────────────────────────────────────
+
                 composable(Screen.Subjects.route) {
                     SubjectSelectionScreen(
                         viewModel = viewModel(),
@@ -444,6 +486,10 @@ fun AppNavigation(
                         }
                     )
                 }
+
+                // ─────────────────────────────────────────────────
+                // CHAPTERS
+                // ─────────────────────────────────────────────────
 
                 composable(Screen.Chapters.route) { backStackEntry ->
 
@@ -523,6 +569,10 @@ fun AppNavigation(
                     )
                 }
 
+                // ─────────────────────────────────────────────────
+                // QUESTIONS
+                // ─────────────────────────────────────────────────
+
                 composable(Screen.Questions.route) { backStackEntry ->
 
                     val rawSubjectId =
@@ -573,6 +623,10 @@ fun AppNavigation(
                     )
                 }
 
+                // ─────────────────────────────────────────────────
+                // TEST RESULT
+                // ─────────────────────────────────────────────────
+
                 composable(Screen.TestResult.route) {
                     TestResultScreen(
                         total = latestTestResult.total,
@@ -612,6 +666,10 @@ fun AppNavigation(
                     )
                 }
 
+                // ─────────────────────────────────────────────────
+                // BOOKMARKS
+                // ─────────────────────────────────────────────────
+
                 composable(Screen.Bookmarks.route) {
                     BookmarksScreen(
                         onBack = {
@@ -619,6 +677,10 @@ fun AppNavigation(
                         }
                     )
                 }
+
+                // ─────────────────────────────────────────────────
+                // TEST HISTORY
+                // ─────────────────────────────────────────────────
 
                 composable(Screen.TestHistory.route) {
                     TestHistoryScreen(
@@ -628,6 +690,10 @@ fun AppNavigation(
                     )
                 }
 
+                // ─────────────────────────────────────────────────
+                // ACHIEVEMENTS
+                // ─────────────────────────────────────────────────
+
                 composable(Screen.Achievements.route) {
                     AchievementsScreen(
                         onBack = {
@@ -635,6 +701,10 @@ fun AppNavigation(
                         }
                     )
                 }
+
+                // ─────────────────────────────────────────────────
+                // SETTINGS
+                // ─────────────────────────────────────────────────
 
                 composable(Screen.Settings.route) {
                     SettingsScreen(
