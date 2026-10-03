@@ -20,9 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -88,8 +86,8 @@ fun PracticeScreen(
         if (query.isBlank()) {
             subjects
         } else {
-            subjects.filter {
-                it.name.contains(
+            subjects.filter { subject ->
+                subject.name.contains(
                     query,
                     ignoreCase = true
                 )
@@ -114,7 +112,7 @@ fun PracticeScreen(
                         )
 
                         Text(
-                            text = "Learn by solving. Improve by practicing.",
+                            text = "Practice smart. Build strong concepts.",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1
@@ -138,71 +136,41 @@ fun PracticeScreen(
             )
         ) {
 
+            // ========================================================
+            // PRIMARY PRACTICE ACTION
+            // ========================================================
+
             item {
-                SectionHeader(
-                    title = "Practice",
-                    subtitle = "Choose a way to strengthen your concepts"
+                PrimaryPracticeCard(
+                    onClick = {
+                        onNavigate(
+                            Screen.Subjects.route
+                        )
+                    }
                 )
             }
 
+            // ========================================================
+            // SECONDARY PRACTICE ACTION
+            // ========================================================
+
             item {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(
-                        CommerzoDimensions.CardSpacing
-                    ),
-                    contentPadding = PaddingValues(
-                        end = CommerzoDimensions.Space4
-                    )
-                ) {
-                    item {
-                        PracticeModeCard(
-                            title = "Chapter Practice",
-                            subtitle = "Practice MCQs chapter by chapter",
-                            icon = Icons.Default.MenuBook,
-                            onClick = {
-                                onNavigate(Screen.Subjects.route)
-                            }
+                SavedQuestionsCard(
+                    onClick = {
+                        onNavigate(
+                            Screen.Bookmarks.route
                         )
                     }
-
-                    item {
-                        PracticeModeCard(
-                            title = "Mixed Practice",
-                            subtitle = "Practice questions across topics",
-                            icon = Icons.Default.PlayArrow,
-                            onClick = {
-                                onNavigate(Screen.Tests.route)
-                            }
-                        )
-                    }
-
-                    item {
-                        PracticeModeCard(
-                            title = "Bookmarks",
-                            subtitle = "Practice saved questions",
-                            icon = Icons.Default.Bookmark,
-                            onClick = {
-                                onNavigate(Screen.Bookmarks.route)
-                            }
-                        )
-                    }
-
-                    item {
-                        PracticeModeCard(
-                            title = "Games",
-                            subtitle = "Learning challenges",
-                            icon = Icons.Default.SportsEsports,
-                            onClick = {
-                                onNavigate(Screen.Games.route)
-                            }
-                        )
-                    }
-                }
+                )
             }
+
+            // ========================================================
+            // CURRICULUM
+            // ========================================================
 
             item {
                 SectionHeader(
-                    title = "Your Curriculum",
+                    title = "Choose Curriculum",
                     subtitle = "Select your board and class"
                 )
             }
@@ -219,6 +187,10 @@ fun PracticeScreen(
                     }
                 )
             }
+
+            // ========================================================
+            // SEARCH
+            // ========================================================
 
             item {
                 OutlinedTextField(
@@ -243,16 +215,26 @@ fun PracticeScreen(
                 )
             }
 
+            // ========================================================
+            // SUBJECTS
+            // ========================================================
+
             item {
                 SectionHeader(
                     title = "Subjects",
-                    subtitle = "${filteredSubjects.size} subjects available"
+                    subtitle = if (searchQuery.isBlank()) {
+                        "Choose a subject to start practicing"
+                    } else {
+                        "${filteredSubjects.size} matching subjects"
+                    }
                 )
             }
 
             if (filteredSubjects.isEmpty()) {
                 item {
-                    EmptyPracticeState()
+                    EmptyPracticeState(
+                        hasSearchQuery = searchQuery.isNotBlank()
+                    )
                 }
             } else {
                 items(
@@ -289,56 +271,151 @@ fun PracticeScreen(
 }
 
 @Composable
-private fun PracticeModeCard(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
+private fun PrimaryPracticeCard(
     onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.width(158.dp),
+        modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.primary
         )
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(CommerzoDimensions.CardPadding),
-            verticalArrangement = Arrangement.spacedBy(
-                CommerzoDimensions.Space8
-            )
+                .padding(
+                    horizontal = CommerzoDimensions.CardPaddingLarge,
+                    vertical = CommerzoDimensions.Space20
+                ),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(44.dp),
-                shape = RoundedCornerShape(14.dp),
-                color = MaterialTheme.colorScheme.primaryContainer
+                modifier = Modifier.size(56.dp),
+                shape = RoundedCornerShape(18.dp),
+                color = MaterialTheme.colorScheme.onPrimary.copy(
+                    alpha = 0.14f
+                )
             ) {
                 Box(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = icon,
+                        imageVector = Icons.Default.MenuBook,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        modifier = Modifier.size(
+                            CommerzoDimensions.IconLarge
+                        ),
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
 
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1
+            Spacer(
+                modifier = Modifier.width(
+                    CommerzoDimensions.Space16
+                )
             )
 
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 2
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space4
+                )
+            ) {
+                Text(
+                    text = "Start Practice",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+
+                Text(
+                    text = "Choose a subject and practice chapter-wise MCQs.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimary.copy(
+                        alpha = 0.82f
+                    ),
+                    maxLines = 2
+                )
+            }
+
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+    }
+}
+
+@Composable
+private fun SavedQuestionsCard(
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                modifier = Modifier.size(50.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Bookmark,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.secondary
+                    )
+                }
+            }
+
+            Spacer(
+                modifier = Modifier.width(
+                    CommerzoDimensions.Space12
+                )
+            )
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space4
+                )
+            ) {
+                Text(
+                    text = "Saved Questions",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Text(
+                    text = "Review questions you bookmarked.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2
+                )
+            }
+
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
             )
         }
     }
@@ -373,7 +450,9 @@ private fun CurriculumSelector(
                     text = "MP Board",
                     selected = selectedBoard == Board.MP_BOARD,
                     onClick = {
-                        onBoardSelected(Board.MP_BOARD)
+                        onBoardSelected(
+                            Board.MP_BOARD
+                        )
                     }
                 )
             }
@@ -383,7 +462,9 @@ private fun CurriculumSelector(
                     text = "CBSE",
                     selected = selectedBoard == Board.CBSE,
                     onClick = {
-                        onBoardSelected(Board.CBSE)
+                        onBoardSelected(
+                            Board.CBSE
+                        )
                     }
                 )
             }
@@ -405,7 +486,9 @@ private fun CurriculumSelector(
                     text = "Class 11",
                     selected = selectedClass == ClassLevel.CLASS_11,
                     onClick = {
-                        onClassSelected(ClassLevel.CLASS_11)
+                        onClassSelected(
+                            ClassLevel.CLASS_11
+                        )
                     }
                 )
             }
@@ -415,7 +498,9 @@ private fun CurriculumSelector(
                     text = "Class 12",
                     selected = selectedClass == ClassLevel.CLASS_12,
                     onClick = {
-                        onClassSelected(ClassLevel.CLASS_12)
+                        onClassSelected(
+                            ClassLevel.CLASS_12
+                        )
                     }
                 )
             }
@@ -441,7 +526,9 @@ private fun PracticeSubjectCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(CommerzoDimensions.CardPaddingLarge),
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
@@ -496,7 +583,9 @@ private fun PracticeSubjectCard(
 }
 
 @Composable
-private fun EmptyPracticeState() {
+private fun EmptyPracticeState(
+    hasSearchQuery: Boolean
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -507,20 +596,30 @@ private fun EmptyPracticeState() {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(CommerzoDimensions.CardPaddingLarge),
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(
                 CommerzoDimensions.Space6
             )
         ) {
             Text(
-                text = "No subjects found",
+                text = if (hasSearchQuery) {
+                    "No matching subjects"
+                } else {
+                    "No subjects available"
+                },
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
 
             Text(
-                text = "Try another search or curriculum.",
+                text = if (hasSearchQuery) {
+                    "Try a different subject name."
+                } else {
+                    "Try another board or class."
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
