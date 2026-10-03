@@ -1,6 +1,5 @@
 package com.commerzo.app.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,27 +20,23 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Assessment
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SportsEsports
-import androidx.compose.material.icons.filled.Whatshot
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -79,14 +74,14 @@ fun HomeScreen(
                         )
                     ) {
                         Text(
-                            text = "COMMERZO",
+                            text = "Good Morning 👋",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.ExtraBold
                         )
 
                         Text(
-                            text = "Learn. Practice. Score.",
-                            style = MaterialTheme.typography.labelSmall,
+                            text = "Ready to learn today?",
+                            style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -95,7 +90,7 @@ fun HomeScreen(
                     Surface(
                         modifier = Modifier
                             .padding(end = CommerzoDimensions.Space12)
-                            .size(44.dp),
+                            .size(42.dp),
                         shape = CircleShape,
                         color = MaterialTheme.colorScheme.primaryContainer,
                         onClick = onProfileClick
@@ -106,6 +101,9 @@ fun HomeScreen(
                             Icon(
                                 imageVector = Icons.Default.Person,
                                 contentDescription = "Profile",
+                                modifier = Modifier.size(
+                                    CommerzoDimensions.IconMedium
+                                ),
                                 tint = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
@@ -128,45 +126,40 @@ fun HomeScreen(
             )
         ) {
 
-            item {
-                WelcomeHeader(
-                    onProfileClick = onProfileClick
-                )
-            }
-
-            item {
-                ProgressOverview(
-                    onAchievementsClick = onAchievementsClick
-                )
-            }
-
-            item {
-                DailyStreakCard()
-            }
-
-            item {
-                CurriculumCard(
-                    onChangeClick = onSubjectsClick
-                )
-            }
-
-            item {
-                SectionHeader(
-                    title = "Continue Learning",
-                    subtitle = "Keep building your Commerce skills"
-                )
-            }
-
+            /*
+             * 1. CONTINUE LEARNING
+             *
+             * Primary Home action.
+             */
             item {
                 ContinueLearningCard(
                     onClick = onPracticeClick
                 )
             }
 
+            /*
+             * 2. TODAY'S PROGRESS
+             */
+            item {
+                SectionHeader(
+                    title = "Today's Progress",
+                    subtitle = "Keep your study momentum going"
+                )
+            }
+
+            item {
+                TodayProgressCard()
+            }
+
+            /*
+             * 3. QUICK ACTIONS
+             *
+             * Only the most important actions stay here.
+             */
             item {
                 SectionHeader(
                     title = "Quick Actions",
-                    subtitle = "Jump into your favourite activities"
+                    subtitle = "Start exactly what you need"
                 )
             }
 
@@ -182,7 +175,7 @@ fun HomeScreen(
                     item {
                         QuickActionTile(
                             title = "Practice",
-                            subtitle = "MCQs",
+                            subtitle = "Chapter MCQs",
                             icon = Icons.Default.MenuBook,
                             onClick = onPracticeClick
                         )
@@ -190,8 +183,8 @@ fun HomeScreen(
 
                     item {
                         QuickActionTile(
-                            title = "Tests",
-                            subtitle = "Full tests",
+                            title = "Test",
+                            subtitle = "Check your score",
                             icon = Icons.Default.Assessment,
                             onClick = onTestsClick
                         )
@@ -199,31 +192,29 @@ fun HomeScreen(
 
                     item {
                         QuickActionTile(
-                            title = "Games",
-                            subtitle = "Mind games",
-                            icon = Icons.Default.SportsEsports,
-                            onClick = onGamesClick
+                            title = "PYQ",
+                            subtitle = "Previous papers",
+                            icon = Icons.Default.School,
+                            onClick = onTestsClick
+                        )
+                    }
+
+                    item {
+                        QuickActionTile(
+                            title = "Subjects",
+                            subtitle = "Explore chapters",
+                            icon = Icons.Default.MenuBook,
+                            onClick = onSubjectsClick
                         )
                     }
                 }
             }
 
-            item {
-                SectionHeader(
-                    title = "Your Learning",
-                    subtitle = "Track and manage your progress"
-                )
-            }
-
-            item {
-                LearningToolsGrid(
-                    onBookmarksClick = onBookmarksClick,
-                    onTestHistoryClick = onTestHistoryClick,
-                    onAchievementsClick = onAchievementsClick,
-                    onSettingsClick = onSettingsClick
-                )
-            }
-
+            /*
+             * 4. SUBJECTS
+             *
+             * Compact horizontal list instead of six large cards.
+             */
             item {
                 SectionHeader(
                     title = "Subjects",
@@ -231,20 +222,54 @@ fun HomeScreen(
                 )
             }
 
-            items(
-                items = subjects,
-                key = { it.id }
-            ) { subject ->
-                HomeSubjectCard(
-                    subject = subject,
-                    onClick = {
-                        onSubjectClick(subject.id)
+            item {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(
+                        CommerzoDimensions.CardSpacing
+                    ),
+                    contentPadding = PaddingValues(
+                        end = CommerzoDimensions.Space4
+                    )
+                ) {
+                    items(
+                        items = subjects,
+                        key = { it.id }
+                    ) { subject ->
+
+                        CompactSubjectCard(
+                            subject = subject,
+                            onClick = {
+                                onSubjectClick(subject.id)
+                            }
+                        )
                     }
+                }
+            }
+
+            /*
+             * 5. DAILY GOAL
+             */
+            item {
+                DailyGoalCard()
+            }
+
+            /*
+             * 6. RECOMMENDATION
+             *
+             * Later this will become dynamic based on weak topics.
+             */
+            item {
+                RecommendationCard(
+                    onClick = onPracticeClick
                 )
             }
 
             item {
-                BrandFooter()
+                Spacer(
+                    modifier = Modifier.height(
+                        CommerzoDimensions.Space8
+                    )
+                )
             }
         }
     }
@@ -257,315 +282,15 @@ private data class HomeSubject(
 )
 
 @Composable
-private fun WelcomeHeader(
-    onProfileClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(
-                CommerzoDimensions.Space4
-            )
-        ) {
-            Text(
-                text = "Welcome back 👋",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.ExtraBold
-            )
-
-            Text(
-                text = "Let's make today a productive study day.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        Surface(
-            modifier = Modifier.size(48.dp),
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.primaryContainer,
-            onClick = onProfileClick
-        ) {
-            Box(
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Profile",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ProgressOverview(
-    onAchievementsClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(26.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        ),
-        onClick = onAchievementsClick
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(CommerzoDimensions.CardPaddingLarge),
-            verticalArrangement = Arrangement.spacedBy(
-                CommerzoDimensions.Space16
-            )
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(
-                        CommerzoDimensions.Space4
-                    )
-                ) {
-                    Text(
-                        text = "YOUR PROGRESS",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-
-                    Text(
-                        text = "Level 1 • Beginner",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-
-                    Text(
-                        text = "Keep learning to unlock more XP",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                            .copy(alpha = 0.75f)
-                    )
-                }
-
-                Surface(
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surface.copy(
-                        alpha = 0.85f
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.EmojiEvents,
-                        contentDescription = "Achievements",
-                        modifier = Modifier
-                            .padding(CommerzoDimensions.Space12)
-                            .size(CommerzoDimensions.IconMedium),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(
-                    CommerzoDimensions.Space8
-                )
-            ) {
-                ProgressStat(
-                    modifier = Modifier.weight(1f),
-                    value = "0",
-                    label = "XP"
-                )
-
-                ProgressStat(
-                    modifier = Modifier.weight(1f),
-                    value = "0",
-                    label = "Tests"
-                )
-
-                ProgressStat(
-                    modifier = Modifier.weight(1f),
-                    value = "0",
-                    label = "Days"
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ProgressStat(
-    modifier: Modifier,
-    value: String,
-    label: String
-) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface.copy(
-            alpha = 0.7f
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(
-                vertical = CommerzoDimensions.Space12,
-                horizontal = CommerzoDimensions.Space8
-            ),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(
-                CommerzoDimensions.Space2
-            )
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.ExtraBold
-            )
-
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-private fun DailyStreakCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(CommerzoDimensions.CardPaddingLarge),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                modifier = Modifier.size(48.dp),
-                shape = RoundedCornerShape(15.dp),
-                color = MaterialTheme.colorScheme.primaryContainer
-            ) {
-                Box(
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Whatshot,
-                        contentDescription = "Study streak",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
-            Spacer(
-                modifier = Modifier.width(
-                    CommerzoDimensions.Space12
-                )
-            )
-
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(
-                    CommerzoDimensions.Space4
-                )
-            ) {
-                Text(
-                    text = "Study Streak",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold
-                )
-
-                Text(
-                    text = "Start today and build your streak.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Text(
-                text = "0 days",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-}
-
-@Composable
-private fun CurriculumCard(
-    onChangeClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(CommerzoDimensions.CardPaddingLarge),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(
-                    CommerzoDimensions.Space4
-                )
-            ) {
-                Text(
-                    text = "CURRENT CURRICULUM",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Text(
-                    text = "MP Board • Class 12",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold
-                )
-
-                Text(
-                    text = "Your selected learning path",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Spacer(
-                modifier = Modifier.width(
-                    CommerzoDimensions.Space12
-                )
-            )
-
-            OutlinedButton(
-                onClick = onChangeClick
-            ) {
-                Text("Change")
-            }
-        }
-    }
-}
-
-@Composable
 private fun ContinueLearningCard(
     onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(26.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.primary
         )
     ) {
         Row(
@@ -573,29 +298,34 @@ private fun ContinueLearningCard(
                 .fillMaxWidth()
                 .padding(
                     horizontal = CommerzoDimensions.CardPaddingLarge,
-                    vertical = CommerzoDimensions.CardPadding
+                    vertical = CommerzoDimensions.Space20
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(54.dp),
-                shape = RoundedCornerShape(17.dp),
-                color = MaterialTheme.colorScheme.primaryContainer
+                modifier = Modifier.size(58.dp),
+                shape = RoundedCornerShape(18.dp),
+                color = MaterialTheme.colorScheme.onPrimary.copy(
+                    alpha = 0.14f
+                )
             ) {
                 Box(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.MenuBook,
+                        imageVector = Icons.Default.PlayArrow,
                         contentDescription = "Continue learning",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        modifier = Modifier.size(
+                            CommerzoDimensions.IconLarge
+                        ),
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
 
             Spacer(
                 modifier = Modifier.width(
-                    CommerzoDimensions.Space12
+                    CommerzoDimensions.Space16
                 )
             )
 
@@ -606,24 +336,121 @@ private fun ContinueLearningCard(
                 )
             ) {
                 Text(
-                    text = "Start Practice",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold
+                    text = "Continue Learning",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
 
                 Text(
-                    text = "Practice chapter-wise MCQs and improve your score.",
+                    text = "Pick up your practice from where you left off.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onPrimary.copy(
+                        alpha = 0.82f
+                    )
                 )
             }
 
             Icon(
                 imageVector = Icons.Default.ArrowForward,
-                contentDescription = "Open practice",
-                tint = MaterialTheme.colorScheme.primary
+                contentDescription = "Continue",
+                tint = MaterialTheme.colorScheme.onPrimary
             )
         }
+    }
+}
+
+@Composable
+private fun TodayProgressCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space16
+            )
+        ) {
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = "0 min",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+
+                    Text(
+                        text = "Studied today",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                ProgressMiniStat(
+                    value = "0",
+                    label = "Questions"
+                )
+
+                Spacer(
+                    modifier = Modifier.width(
+                        CommerzoDimensions.Space12
+                    )
+                )
+
+                ProgressMiniStat(
+                    value = "0",
+                    label = "Tests"
+                )
+            }
+
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(100.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProgressMiniStat(
+    value: String,
+    label: String
+) {
+    Column(
+        horizontalAlignment = Alignment.End,
+        verticalArrangement = Arrangement.spacedBy(
+            CommerzoDimensions.Space2
+        )
+    ) {
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.ExtraBold
+        )
+
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -635,7 +462,7 @@ private fun QuickActionTile(
     onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.width(148.dp),
+        modifier = Modifier.width(142.dp),
         onClick = onClick,
         shape = RoundedCornerShape(22.dp)
     ) {
@@ -644,12 +471,12 @@ private fun QuickActionTile(
                 CommerzoDimensions.CardPadding
             ),
             verticalArrangement = Arrangement.spacedBy(
-                CommerzoDimensions.Space4
+                CommerzoDimensions.Space6
             )
         ) {
             Surface(
-                modifier = Modifier.size(46.dp),
-                shape = RoundedCornerShape(15.dp),
+                modifier = Modifier.size(44.dp),
+                shape = RoundedCornerShape(14.dp),
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
                 Box(
@@ -665,7 +492,7 @@ private fun QuickActionTile(
 
             Spacer(
                 modifier = Modifier.height(
-                    CommerzoDimensions.Space8
+                    CommerzoDimensions.Space4
                 )
             )
 
@@ -685,108 +512,179 @@ private fun QuickActionTile(
 }
 
 @Composable
-private fun LearningToolsGrid(
-    onBookmarksClick: () -> Unit,
-    onTestHistoryClick: () -> Unit,
-    onAchievementsClick: () -> Unit,
-    onSettingsClick: () -> Unit
+private fun CompactSubjectCard(
+    subject: HomeSubject,
+    onClick: () -> Unit
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(
-            CommerzoDimensions.Space10
-        )
+    Card(
+        modifier = Modifier.width(142.dp),
+        onClick = onClick,
+        shape = RoundedCornerShape(22.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(
-                CommerzoDimensions.Space10
+        Column(
+            modifier = Modifier.padding(
+                CommerzoDimensions.CardPadding
+            ),
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space8
             )
         ) {
-            LearningToolCard(
-                modifier = Modifier.weight(1f),
-                title = "Bookmarks",
-                icon = Icons.Default.Bookmark,
-                onClick = onBookmarksClick
+            Box(
+                modifier = Modifier.size(46.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = subject.emoji,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
+
+            Text(
+                text = subject.name,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.ExtraBold,
+                maxLines = 2
             )
 
-            LearningToolCard(
-                modifier = Modifier.weight(1f),
-                title = "History",
-                icon = Icons.Default.History,
-                onClick = onTestHistoryClick
-            )
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(
-                CommerzoDimensions.Space10
-            )
-        ) {
-            LearningToolCard(
-                modifier = Modifier.weight(1f),
-                title = "Achievements",
-                icon = Icons.Default.EmojiEvents,
-                onClick = onAchievementsClick
-            )
-
-            LearningToolCard(
-                modifier = Modifier.weight(1f),
-                title = "Settings",
-                icon = Icons.Default.Settings,
-                onClick = onSettingsClick
+            Text(
+                text = "Open subject",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }
 }
 
 @Composable
-private fun LearningToolCard(
-    modifier: Modifier,
-    title: String,
-    icon: ImageVector,
-    onClick: () -> Unit
-) {
+private fun DailyGoalCard() {
     Card(
-        modifier = modifier,
-        onClick = onClick,
-        shape = RoundedCornerShape(19.dp)
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    horizontal = CommerzoDimensions.Space12,
-                    vertical = CommerzoDimensions.Space16
+                    CommerzoDimensions.CardPaddingLarge
                 ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(
-                CommerzoDimensions.Space10
-            )
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(40.dp),
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceVariant
+                modifier = Modifier.size(50.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.primaryContainer
             ) {
                 Box(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = icon,
-                        contentDescription = title,
-                        modifier = Modifier.size(
-                            CommerzoDimensions.IconSmall
-                        ),
+                        imageVector = Icons.Default.Timer,
+                        contentDescription = "Daily goal",
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
 
+            Spacer(
+                modifier = Modifier.width(
+                    CommerzoDimensions.Space12
+                )
+            )
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space4
+                )
+            ) {
+                Text(
+                    text = "Daily Goal",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold
+                )
+
+                Text(
+                    text = "Complete 30 minutes of focused study.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
             Text(
-                text = title,
+                text = "0 / 30 min",
                 style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+@Composable
+private fun RecommendationCard(
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                modifier = Modifier.size(50.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MenuBook,
+                        contentDescription = "Recommended practice",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            Spacer(
+                modifier = Modifier.width(
+                    CommerzoDimensions.Space12
+                )
+            )
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space4
+                )
+            ) {
+                Text(
+                    text = "Recommended for You",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold
+                )
+
+                Text(
+                    text = "Practice a topic and strengthen your concepts.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = "Open recommendation",
+                tint = MaterialTheme.colorScheme.primary
             )
         }
     }
@@ -813,105 +711,5 @@ private fun SectionHeader(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-    }
-}
-
-@Composable
-private fun HomeSubjectCard(
-    subject: HomeSubject,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = onClick,
-        shape = RoundedCornerShape(21.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(CommerzoDimensions.CardPadding),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(52.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
-                        MaterialTheme.colorScheme.primaryContainer
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = subject.emoji,
-                    style = MaterialTheme.typography.titleLarge
-                )
-            }
-
-            Spacer(
-                modifier = Modifier.width(
-                    CommerzoDimensions.Space12
-                )
-            )
-
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(
-                    CommerzoDimensions.Space4
-                )
-            ) {
-                Text(
-                    text = subject.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold
-                )
-
-                Text(
-                    text = "Chapters • Practice • Tests",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Icon(
-                imageVector = Icons.Default.ArrowForward,
-                contentDescription = "Open ${subject.name}",
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
-    }
-}
-
-@Composable
-private fun BrandFooter() {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant
-    ) {
-        Column(
-            modifier = Modifier.padding(
-                CommerzoDimensions.CardPaddingLarge
-            ),
-            verticalArrangement = Arrangement.spacedBy(
-                CommerzoDimensions.Space4
-            )
-        ) {
-            Text(
-                text = "COMMERZO",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.ExtraBold
-            )
-
-            Text(
-                text = "Learn. Practice. Score.",
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-            Text(
-                text = "A focused learning space for Commerce students.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
     }
 }
