@@ -1,6 +1,7 @@
 package com.commerzo.app.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -18,17 +19,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SportsEsports
-import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -50,6 +46,7 @@ import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.repository.SubjectRepository
 import com.commerzo.app.navigation.Screen
+import com.commerzo.app.ui.components.SelectionChip
 import com.commerzo.app.ui.theme.CommerzoDimensions
 
 @Composable
@@ -86,12 +83,14 @@ fun PracticeScreen(
         subjects,
         searchQuery
     ) {
-        if (searchQuery.isBlank()) {
+        val query = searchQuery.trim()
+
+        if (query.isBlank()) {
             subjects
         } else {
             subjects.filter {
                 it.name.contains(
-                    searchQuery.trim(),
+                    query,
                     ignoreCase = true
                 )
             }
@@ -110,13 +109,15 @@ fun PracticeScreen(
                         Text(
                             text = "Practice",
                             style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.ExtraBold
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
                         )
 
                         Text(
                             text = "Learn by solving. Improve by practicing.",
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
                         )
                     }
                 }
@@ -133,109 +134,75 @@ fun PracticeScreen(
                 vertical = CommerzoDimensions.Space12
             ),
             verticalArrangement = Arrangement.spacedBy(
-                CommerzoDimensions.SectionSpacing
+                CommerzoDimensions.Space20
             )
         ) {
 
-            /*
-             * PRACTICE MODES
-             *
-             * Keep the outside simple.
-             * Powerful functionality can live inside each mode later.
-             */
             item {
                 SectionHeader(
-                    title = "Practice Modes",
-                    subtitle = "Choose how you want to practice"
+                    title = "Practice",
+                    subtitle = "Choose a way to strengthen your concepts"
                 )
             }
 
             item {
-                PracticeModeCard(
-                    title = "Chapter Practice",
-                    subtitle = "Practice MCQs chapter by chapter",
-                    icon = Icons.Default.MenuBook,
-                    enabled = true,
-                    onClick = {
-                        onNavigate(
-                            Screen.Subjects.route
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(
+                        CommerzoDimensions.CardSpacing
+                    ),
+                    contentPadding = PaddingValues(
+                        end = CommerzoDimensions.Space4
+                    )
+                ) {
+                    item {
+                        PracticeModeCard(
+                            title = "Chapter Practice",
+                            subtitle = "Practice MCQs chapter by chapter",
+                            icon = Icons.Default.MenuBook,
+                            onClick = {
+                                onNavigate(Screen.Subjects.route)
+                            }
                         )
                     }
-                )
-            }
 
-            item {
-                PracticeModeCard(
-                    title = "Mixed Practice",
-                    subtitle = "Practice questions across topics",
-                    icon = Icons.Default.Refresh,
-                    enabled = true,
-                    onClick = {
-                        onNavigate(
-                            Screen.Tests.route
+                    item {
+                        PracticeModeCard(
+                            title = "Mixed Practice",
+                            subtitle = "Practice questions across topics",
+                            icon = Icons.Default.PlayArrow,
+                            onClick = {
+                                onNavigate(Screen.Tests.route)
+                            }
                         )
                     }
-                )
-            }
 
-            item {
-                PracticeModeCard(
-                    title = "Weak Topics",
-                    subtitle = "Target concepts that need improvement",
-                    icon = Icons.Default.Warning,
-                    enabled = false,
-                    onClick = {}
-                )
-            }
-
-            item {
-                PracticeModeCard(
-                    title = "Mistakes",
-                    subtitle = "Review questions you answered incorrectly",
-                    icon = Icons.Default.ErrorOutline,
-                    enabled = false,
-                    onClick = {}
-                )
-            }
-
-            item {
-                PracticeModeCard(
-                    title = "Bookmarks",
-                    subtitle = "Practice questions you saved",
-                    icon = Icons.Default.Bookmark,
-                    enabled = true,
-                    onClick = {
-                        onNavigate(
-                            Screen.Bookmarks.route
+                    item {
+                        PracticeModeCard(
+                            title = "Bookmarks",
+                            subtitle = "Practice saved questions",
+                            icon = Icons.Default.Bookmark,
+                            onClick = {
+                                onNavigate(Screen.Bookmarks.route)
+                            }
                         )
                     }
-                )
-            }
 
-            /*
-             * Games remain accessible from Practice,
-             * but the current Games engine is not yet real.
-             */
-            item {
-                PracticeModeCard(
-                    title = "Games",
-                    subtitle = "Mind games and learning challenges",
-                    icon = Icons.Default.SportsEsports,
-                    enabled = true,
-                    onClick = {
-                        onNavigate(
-                            Screen.Games.route
+                    item {
+                        PracticeModeCard(
+                            title = "Games",
+                            subtitle = "Learning challenges",
+                            icon = Icons.Default.SportsEsports,
+                            onClick = {
+                                onNavigate(Screen.Games.route)
+                            }
                         )
                     }
-                )
+                }
             }
 
-            /*
-             * CURRICULUM FILTER
-             */
             item {
                 SectionHeader(
-                    title = "Choose Subject",
+                    title = "Your Curriculum",
                     subtitle = "Select your board and class"
                 )
             }
@@ -253,9 +220,6 @@ fun PracticeScreen(
                 )
             }
 
-            /*
-             * SEARCH
-             */
             item {
                 OutlinedTextField(
                     value = searchQuery,
@@ -268,7 +232,7 @@ fun PracticeScreen(
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Search,
-                            contentDescription = "Search"
+                            contentDescription = null
                         )
                     },
                     placeholder = {
@@ -279,9 +243,6 @@ fun PracticeScreen(
                 )
             }
 
-            /*
-             * SUBJECT LIST
-             */
             item {
                 SectionHeader(
                     title = "Subjects",
@@ -290,13 +251,10 @@ fun PracticeScreen(
             }
 
             if (filteredSubjects.isEmpty()) {
-
                 item {
                     EmptyPracticeState()
                 }
-
             } else {
-
                 items(
                     items = filteredSubjects,
                     key = { it.id }
@@ -335,99 +293,53 @@ private fun PracticeModeCard(
     title: String,
     subtitle: String,
     icon: ImageVector,
-    enabled: Boolean,
     onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.width(158.dp),
         onClick = onClick,
-        enabled = enabled,
-        shape = RoundedCornerShape(22.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (enabled) {
-                MaterialTheme.colorScheme.surface
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant
-            },
-            disabledContainerColor =
-                MaterialTheme.colorScheme.surfaceVariant.copy(
-                    alpha = 0.65f
-                )
+            containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    CommerzoDimensions.CardPaddingLarge
-                ),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(CommerzoDimensions.CardPadding),
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space8
+            )
         ) {
-
             Surface(
-                modifier = Modifier.size(48.dp),
-                shape = RoundedCornerShape(15.dp),
-                color = if (enabled) {
-                    MaterialTheme.colorScheme.primaryContainer
-                } else {
-                    MaterialTheme.colorScheme.surface
-                }
+                modifier = Modifier.size(44.dp),
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.primaryContainer
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    modifier = Modifier.padding(
-                        CommerzoDimensions.Space12
-                    ),
-                    tint = if (enabled) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    }
-                )
+                Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
             }
 
-            Spacer(
-                modifier = Modifier.width(
-                    CommerzoDimensions.Space12
-                )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1
             )
 
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(
-                    CommerzoDimensions.Space4
-                )
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = if (enabled) {
-                        MaterialTheme.colorScheme.onSurface
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    }
-                )
-
-                Text(
-                    text = if (enabled) {
-                        subtitle
-                    } else {
-                        "$subtitle • Coming soon"
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            if (enabled) {
-                Icon(
-                    imageVector = Icons.Default.ArrowForward,
-                    contentDescription = "Open $title",
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2
+            )
         }
     }
 }
@@ -445,6 +357,11 @@ private fun CurriculumSelector(
             CommerzoDimensions.Space10
         )
     ) {
+        Text(
+            text = "Board",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
 
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(
@@ -452,85 +369,53 @@ private fun CurriculumSelector(
             )
         ) {
             item {
-                FilterChip(
+                SelectionChip(
+                    text = "MP Board",
                     selected = selectedBoard == Board.MP_BOARD,
                     onClick = {
-                        onBoardSelected(
-                            Board.MP_BOARD
-                        )
-                    },
-                    label = {
-                        Text("MP Board")
-                    },
-                    leadingIcon = {
-                        if (selectedBoard == Board.MP_BOARD) {
-                            Icon(
-                                imageVector = Icons.Default.Tune,
-                                contentDescription = null,
-                                modifier = Modifier.size(
-                                    CommerzoDimensions.IconSmall
-                                )
-                            )
-                        }
+                        onBoardSelected(Board.MP_BOARD)
                     }
                 )
             }
 
             item {
-                FilterChip(
+                SelectionChip(
+                    text = "CBSE",
                     selected = selectedBoard == Board.CBSE,
                     onClick = {
-                        onBoardSelected(
-                            Board.CBSE
-                        )
-                    },
-                    label = {
-                        Text("CBSE")
-                    },
-                    leadingIcon = {
-                        if (selectedBoard == Board.CBSE) {
-                            Icon(
-                                imageVector = Icons.Default.Tune,
-                                contentDescription = null,
-                                modifier = Modifier.size(
-                                    CommerzoDimensions.IconSmall
-                                )
-                            )
-                        }
+                        onBoardSelected(Board.CBSE)
                     }
                 )
             }
         }
 
+        Text(
+            text = "Class",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(
                 CommerzoDimensions.Space8
             )
         ) {
             item {
-                FilterChip(
+                SelectionChip(
+                    text = "Class 11",
                     selected = selectedClass == ClassLevel.CLASS_11,
                     onClick = {
-                        onClassSelected(
-                            ClassLevel.CLASS_11
-                        )
-                    },
-                    label = {
-                        Text("Class 11")
+                        onClassSelected(ClassLevel.CLASS_11)
                     }
                 )
             }
 
             item {
-                FilterChip(
+                SelectionChip(
+                    text = "Class 12",
                     selected = selectedClass == ClassLevel.CLASS_12,
                     onClick = {
-                        onClassSelected(
-                            ClassLevel.CLASS_12
-                        )
-                    },
-                    label = {
-                        Text("Class 12")
+                        onClassSelected(ClassLevel.CLASS_12)
                     }
                 )
             }
@@ -548,17 +433,17 @@ private fun PracticeSubjectCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
-        shape = RoundedCornerShape(22.dp)
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    CommerzoDimensions.CardPaddingLarge
-                ),
+                .padding(CommerzoDimensions.CardPaddingLarge),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Surface(
                 modifier = Modifier.size(52.dp),
                 shape = RoundedCornerShape(16.dp),
@@ -589,19 +474,21 @@ private fun PracticeSubjectCard(
                 Text(
                     text = name,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1
                 )
 
                 Text(
                     text = "$chaptersCount chapters • MCQ practice",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
                 )
             }
 
             Icon(
                 imageVector = Icons.Default.ArrowForward,
-                contentDescription = "Open $name",
+                contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary
             )
         }
@@ -612,7 +499,7 @@ private fun PracticeSubjectCard(
 private fun EmptyPracticeState() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
@@ -620,9 +507,7 @@ private fun EmptyPracticeState() {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    CommerzoDimensions.CardPaddingLarge
-                ),
+                .padding(CommerzoDimensions.CardPaddingLarge),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(
                 CommerzoDimensions.Space6
@@ -631,11 +516,11 @@ private fun EmptyPracticeState() {
             Text(
                 text = "No subjects found",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.SemiBold
             )
 
             Text(
-                text = "Try another subject search or curriculum.",
+                text = "Try another search or curriculum.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -657,13 +542,16 @@ private fun SectionHeader(
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.ExtraBold
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1
         )
 
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2
         )
     }
 }
