@@ -12,17 +12,21 @@ object CommerzoDimensions {
 
     // --------------------------------------------------------
     // CORE SPACING
-    // Use these as the primary spacing scale.
+    // Primary spacing scale used throughout the app.
     // --------------------------------------------------------
 
     val Space2 = 2.dp
     val Space4 = 4.dp
     val Space6 = 6.dp
     val Space8 = 8.dp
+    val Space10 = 10.dp
     val Space12 = 12.dp
+    val Space14 = 14.dp
     val Space16 = 16.dp
+    val Space18 = 18.dp
     val Space20 = 20.dp
     val Space24 = 24.dp
+    val Space28 = 28.dp
     val Space32 = 32.dp
     val Space40 = 40.dp
     val Space48 = 48.dp
