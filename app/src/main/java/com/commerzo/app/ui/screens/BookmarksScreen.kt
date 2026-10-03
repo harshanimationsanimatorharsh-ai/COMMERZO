@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,6 +31,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -58,33 +60,34 @@ fun BookmarksScreen(
     val questionDetails by
         viewModel.bookmarkedQuestionDetails.collectAsState()
 
-    var showClearDialog by
-        remember {
-            mutableStateOf(false)
-        }
+    var showClearDialog by remember {
+        mutableStateOf(false)
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(
+                            CommerzoDimensions.Space2
+                        )
+                    ) {
                         Text(
                             text = "Bookmarks",
                             style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.ExtraBold
                         )
 
                         Text(
-                            text = "Your saved questions",
+                            text = "Saved questions for revision",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
                 navigationIcon = {
-                    IconButton(
-                        onClick = onBack
-                    ) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back"
@@ -104,7 +107,10 @@ fun BookmarksScreen(
                             )
                         }
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         }
     ) { paddingValues ->
@@ -145,20 +151,37 @@ fun BookmarksScreen(
                         )
                     }
 
+                    item {
+                        Text(
+                            text = "Saved Questions",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.padding(
+                                top = CommerzoDimensions.Space4
+                            )
+                        )
+                    }
+
                     items(
                         items = questionDetails,
                         key = {
                             it.id
                         }
                     ) { question ->
-
                         BookmarkQuestionCard(
                             question = question,
                             onRemove = {
-                                viewModel.removeBookmark(
-                                    question.id
-                                )
+                                viewModel.removeBookmark(question.id)
                             }
+                        )
+                    }
+
+                    item {
+                        Spacer(
+                            modifier = Modifier.height(
+                                CommerzoDimensions.Space16
+                            )
                         )
                     }
                 }
@@ -173,7 +196,7 @@ fun BookmarksScreen(
             },
             title = {
                 Text(
-                    text = "Clear bookmarks?"
+                    text = "Clear all bookmarks?"
                 )
             },
             text = {
@@ -188,7 +211,10 @@ fun BookmarksScreen(
                         showClearDialog = false
                     }
                 ) {
-                    Text("Clear")
+                    Text(
+                        text = "Clear",
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
             },
             dismissButton = {
@@ -210,9 +236,12 @@ private fun BookmarkSummaryCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp
         )
     ) {
         Row(
@@ -224,29 +253,32 @@ private fun BookmarkSummaryCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(48.dp),
-                shape = RoundedCornerShape(14.dp),
-                color = MaterialTheme.colorScheme.surface.copy(
-                    alpha = 0.75f
-                )
+                modifier = Modifier.size(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surface
             ) {
                 Icon(
                     imageVector = Icons.Default.Bookmark,
                     contentDescription = null,
                     modifier = Modifier.padding(
-                        CommerzoDimensions.Space12
+                        CommerzoDimensions.Space14
                     ),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
 
             Spacer(
-                modifier = Modifier.size(
+                modifier = Modifier.width(
                     CommerzoDimensions.Space12
                 )
             )
 
-            Column {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space4
+                )
+            ) {
                 Text(
                     text = if (count == 1) {
                         "1 saved question"
@@ -254,17 +286,12 @@ private fun BookmarkSummaryCard(
                         "$count saved questions"
                     },
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(
-                    modifier = Modifier.height(
-                        CommerzoDimensions.Space4
-                    )
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
 
                 Text(
-                    text = "Use your bookmarks for quick revision.",
+                    text = "Keep important questions ready for quick revision.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
@@ -280,7 +307,7 @@ private fun BookmarkQuestionCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
@@ -291,35 +318,42 @@ private fun BookmarkQuestionCard(
         Column(
             modifier = Modifier.padding(
                 CommerzoDimensions.CardPadding
+            ),
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space12
             )
         ) {
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Surface(
-                    modifier = Modifier.size(38.dp),
-                    shape = RoundedCornerShape(11.dp),
+                    modifier = Modifier.size(42.dp),
+                    shape = RoundedCornerShape(13.dp),
                     color = MaterialTheme.colorScheme.primaryContainer
                 ) {
                     Icon(
                         imageVector = Icons.Default.Bookmark,
                         contentDescription = null,
                         modifier = Modifier.padding(
-                            CommerzoDimensions.Space8
+                            CommerzoDimensions.Space10
                         ),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
 
                 Spacer(
-                    modifier = Modifier.size(
-                        CommerzoDimensions.Space10
+                    modifier = Modifier.width(
+                        CommerzoDimensions.Space12
                     )
                 )
 
                 Column(
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(
+                        CommerzoDimensions.Space2
+                    )
                 ) {
                     Text(
                         text = subjectDisplayName(
@@ -327,7 +361,7 @@ private fun BookmarkQuestionCard(
                         ),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.Bold
                     )
 
                     Text(
@@ -335,7 +369,8 @@ private fun BookmarkQuestionCard(
                             question.chapterId
                         ),
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2
                     )
                 }
 
@@ -350,128 +385,106 @@ private fun BookmarkQuestionCard(
                 }
             }
 
-            Spacer(
-                modifier = Modifier.height(
-                    CommerzoDimensions.Space12
-                )
-            )
-
             Surface(
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(9.dp),
                 color = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 Text(
                     text = "${question.board.displayName()} • ${question.classLevel.displayName()}",
                     modifier = Modifier.padding(
-                        horizontal = CommerzoDimensions.Space8,
-                        vertical = CommerzoDimensions.Space4
+                        horizontal = CommerzoDimensions.Space10,
+                        vertical = CommerzoDimensions.Space6
                     ),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
-            Spacer(
-                modifier = Modifier.height(
-                    CommerzoDimensions.Space12
-                )
-            )
-
             Text(
                 text = question.question,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
 
-            Spacer(
-                modifier = Modifier.height(
-                    CommerzoDimensions.Space12
+            Column(
+                verticalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space6
                 )
-            )
+            ) {
+                question.options.forEachIndexed { index, option ->
 
-            question.options.forEachIndexed { index, option ->
+                    val isCorrect =
+                        index == question.correctAnswer
 
-                val isCorrect =
-                    index == question.correctAnswer
-
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            vertical = 3.dp
-                        ),
-                    shape = RoundedCornerShape(11.dp),
-                    color = if (isCorrect) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surfaceVariant
-                    }
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                horizontal = CommerzoDimensions.Space12,
-                                vertical = CommerzoDimensions.Space10
-                            ),
-                        verticalAlignment = Alignment.CenterVertically
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(13.dp),
+                        color = if (isCorrect) {
+                            MaterialTheme.colorScheme.primaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.surfaceVariant
+                        }
                     ) {
-                        Text(
-                            text = optionLetter(index),
-                            modifier = Modifier.size(
-                                28.dp
-                            ),
-                            fontWeight = FontWeight.Bold,
-                            color = if (isCorrect) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.onSurface
-                            }
-                        )
-
-                        Text(
-                            text = option,
-                            modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-
-                        if (isCorrect) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    horizontal = CommerzoDimensions.Space12,
+                                    vertical = CommerzoDimensions.Space10
+                                ),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Text(
-                                text = "✓",
+                                text = optionLetter(index),
+                                modifier = Modifier.width(28.dp),
+                                style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                                color = if (isCorrect) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                }
                             )
+
+                            Text(
+                                text = option,
+                                modifier = Modifier.weight(1f),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+
+                            if (isCorrect) {
+                                Text(
+                                    text = "✓",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
                     }
                 }
             }
 
-            Spacer(
-                modifier = Modifier.height(
-                    CommerzoDimensions.Space12
-                )
-            )
-
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(14.dp),
                 color = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 Column(
                     modifier = Modifier.padding(
                         CommerzoDimensions.Space12
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(
+                        CommerzoDimensions.Space4
                     )
                 ) {
                     Text(
                         text = "Explanation",
                         style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Spacer(
-                        modifier = Modifier.height(
-                            CommerzoDimensions.Space4
-                        )
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Text(
@@ -492,14 +505,14 @@ private fun EmptyBookmarksContent(
     Column(
         modifier = modifier
             .padding(
-                CommerzoDimensions.ScreenHorizontal
+                horizontal = CommerzoDimensions.ScreenHorizontal
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Surface(
-            modifier = Modifier.size(72.dp),
-            shape = RoundedCornerShape(22.dp),
+            modifier = Modifier.size(76.dp),
+            shape = RoundedCornerShape(24.dp),
             color = MaterialTheme.colorScheme.primaryContainer
         ) {
             Icon(
@@ -521,7 +534,7 @@ private fun EmptyBookmarksContent(
         Text(
             text = "No bookmarks yet",
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.ExtraBold
         )
 
         Spacer(
@@ -545,14 +558,14 @@ private fun MissingBookmarksContent(
     Column(
         modifier = modifier
             .padding(
-                CommerzoDimensions.ScreenHorizontal
+                horizontal = CommerzoDimensions.ScreenHorizontal
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Surface(
-            modifier = Modifier.size(64.dp),
-            shape = RoundedCornerShape(20.dp),
+            modifier = Modifier.size(68.dp),
+            shape = RoundedCornerShape(22.dp),
             color = MaterialTheme.colorScheme.surfaceVariant
         ) {
             Icon(
@@ -574,7 +587,7 @@ private fun MissingBookmarksContent(
         Text(
             text = "Saved questions unavailable",
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.ExtraBold
         )
 
         Spacer(
