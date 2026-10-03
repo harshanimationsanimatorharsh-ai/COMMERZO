@@ -2,13 +2,14 @@ package com.commerzo.app.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,19 +18,18 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,6 +44,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.model.Question
+import com.commerzo.app.ui.theme.CommerzoDimensions
 import com.commerzo.app.ui.viewmodel.PracticeSessionViewModel
 
 @Composable
@@ -66,10 +67,19 @@ fun BookmarksScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "Bookmarks",
-                        fontWeight = FontWeight.Bold
-                    )
+                    Column {
+                        Text(
+                            text = "Bookmarks",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Text(
+                            text = "Your saved questions",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(
@@ -89,19 +99,12 @@ fun BookmarksScreen(
                             }
                         ) {
                             Icon(
-                                imageVector =
-                                    Icons.Default.DeleteSweep,
-                                contentDescription =
-                                    "Clear all bookmarks"
+                                imageVector = Icons.Default.DeleteSweep,
+                                contentDescription = "Clear all bookmarks"
                             )
                         }
                     }
-                },
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor =
-                            MaterialTheme.colorScheme.surface
-                    )
+                }
             )
         }
     ) { paddingValues ->
@@ -109,73 +112,36 @@ fun BookmarksScreen(
         when {
             bookmarkedQuestions.isEmpty() -> {
                 EmptyBookmarksContent(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
                 )
             }
 
             questionDetails.isEmpty() -> {
                 MissingBookmarksContent(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
                 )
             }
 
             else -> {
                 LazyColumn(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
-                            .padding(horizontal = 16.dp),
-                    verticalArrangement =
-                        Arrangement.spacedBy(14.dp)
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentPadding = PaddingValues(
+                        horizontal = CommerzoDimensions.ScreenHorizontal,
+                        vertical = CommerzoDimensions.ScreenVertical
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(
+                        CommerzoDimensions.CardSpacing
+                    )
                 ) {
                     item {
-                        Spacer(
-                            modifier =
-                                Modifier.height(8.dp)
-                        )
-
-                        Text(
-                            text =
-                                "${bookmarkedQuestions.size} saved " +
-                                    if (
-                                        bookmarkedQuestions.size == 1
-                                    ) {
-                                        "question"
-                                    } else {
-                                        "questions"
-                                    },
-                            style =
-                                MaterialTheme.typography.titleMedium,
-                            fontWeight =
-                                FontWeight.SemiBold
-                        )
-
-                        Spacer(
-                            modifier =
-                                Modifier.height(4.dp)
-                        )
-
-                        Text(
-                            text =
-                                "Your saved questions for quick revision.",
-                            style =
-                                MaterialTheme.typography.bodySmall,
-                            color =
-                                MaterialTheme
-                                    .colorScheme
-                                    .onSurfaceVariant
-                        )
-
-                        Spacer(
-                            modifier =
-                                Modifier.height(4.dp)
+                        BookmarkSummaryCard(
+                            count = bookmarkedQuestions.size
                         )
                     }
 
@@ -195,13 +161,6 @@ fun BookmarksScreen(
                             }
                         )
                     }
-
-                    item {
-                        Spacer(
-                            modifier =
-                                Modifier.height(16.dp)
-                        )
-                    }
                 }
             }
         }
@@ -219,8 +178,7 @@ fun BookmarksScreen(
             },
             text = {
                 Text(
-                    text =
-                        "All saved questions will be removed from your bookmarks."
+                    text = "All saved questions will be removed from your bookmarks."
                 )
             },
             confirmButton = {
@@ -247,83 +205,137 @@ fun BookmarksScreen(
 }
 
 @Composable
+private fun BookmarkSummaryCard(
+    count: Int
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                modifier = Modifier.size(48.dp),
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.surface.copy(
+                    alpha = 0.75f
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Bookmark,
+                    contentDescription = null,
+                    modifier = Modifier.padding(
+                        CommerzoDimensions.Space12
+                    ),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Spacer(
+                modifier = Modifier.size(
+                    CommerzoDimensions.Space12
+                )
+            )
+
+            Column {
+                Text(
+                    text = if (count == 1) {
+                        "1 saved question"
+                    } else {
+                        "$count saved questions"
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(
+                    modifier = Modifier.height(
+                        CommerzoDimensions.Space4
+                    )
+                )
+
+                Text(
+                    text = "Use your bookmarks for quick revision.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun BookmarkQuestionCard(
     question: Question,
     onRemove: () -> Unit
 ) {
     Card(
-        modifier =
-            Modifier.fillMaxWidth(),
-        shape =
-            RoundedCornerShape(18.dp),
-        colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    MaterialTheme.colorScheme.surface
-            )
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
+        )
     ) {
         Column(
-            modifier =
-                Modifier.padding(16.dp)
+            modifier = Modifier.padding(
+                CommerzoDimensions.CardPadding
+            )
         ) {
-
             Row(
-                modifier =
-                    Modifier.fillMaxWidth(),
-                verticalAlignment =
-                    Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector =
-                        Icons.Default.Bookmark,
-                    contentDescription =
-                        "Bookmarked"
-                )
+                Surface(
+                    modifier = Modifier.size(38.dp),
+                    shape = RoundedCornerShape(11.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Bookmark,
+                        contentDescription = null,
+                        modifier = Modifier.padding(
+                            CommerzoDimensions.Space8
+                        ),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
 
                 Spacer(
-                    modifier =
-                        Modifier.width(8.dp)
+                    modifier = Modifier.size(
+                        CommerzoDimensions.Space10
+                    )
                 )
 
                 Column(
-                    modifier =
-                        Modifier.weight(1f)
+                    modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text =
-                            subjectDisplayName(
-                                question.subjectId
-                            ),
-                        style =
-                            MaterialTheme
-                                .typography
-                                .labelLarge,
-                        color =
-                            MaterialTheme
-                                .colorScheme
-                                .primary,
-                        fontWeight =
-                            FontWeight.SemiBold
-                    )
-
-                    Spacer(
-                        modifier =
-                            Modifier.height(2.dp)
+                        text = subjectDisplayName(
+                            question.subjectId
+                        ),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold
                     )
 
                     Text(
-                        text =
-                            chapterDisplayName(
-                                question.chapterId
-                            ),
-                        style =
-                            MaterialTheme
-                                .typography
-                                .labelMedium,
-                        color =
-                            MaterialTheme
-                                .colorScheme
-                                .onSurfaceVariant
+                        text = chapterDisplayName(
+                            question.chapterId
+                        ),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -331,120 +343,103 @@ private fun BookmarkQuestionCard(
                     onClick = onRemove
                 ) {
                     Icon(
-                        imageVector =
-                            Icons.Default.Delete,
-                        contentDescription =
-                            "Remove bookmark"
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Remove bookmark",
+                        tint = MaterialTheme.colorScheme.error
                     )
                 }
             }
 
             Spacer(
-                modifier =
-                    Modifier.height(8.dp)
+                modifier = Modifier.height(
+                    CommerzoDimensions.Space12
+                )
+            )
+
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            ) {
+                Text(
+                    text = "${question.board.displayName()} • ${question.classLevel.displayName()}",
+                    modifier = Modifier.padding(
+                        horizontal = CommerzoDimensions.Space8,
+                        vertical = CommerzoDimensions.Space4
+                    ),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(
+                modifier = Modifier.height(
+                    CommerzoDimensions.Space12
+                )
             )
 
             Text(
-                text =
-                    "${question.board.displayName()} • " +
-                        question.classLevel.displayName(),
-                style =
-                    MaterialTheme
-                        .typography
-                        .labelSmall,
-                color =
-                    MaterialTheme
-                        .colorScheme
-                        .onSurfaceVariant
+                text = question.question,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
             )
 
             Spacer(
-                modifier =
-                    Modifier.height(14.dp)
+                modifier = Modifier.height(
+                    CommerzoDimensions.Space12
+                )
             )
 
-            Text(
-                text =
-                    question.question,
-                style =
-                    MaterialTheme
-                        .typography
-                        .titleMedium,
-                fontWeight =
-                    FontWeight.SemiBold
-            )
-
-            Spacer(
-                modifier =
-                    Modifier.height(14.dp)
-            )
-
-            question.options.forEachIndexed {
-                    index,
-                    option ->
+            question.options.forEachIndexed { index, option ->
 
                 val isCorrect =
                     index == question.correctAnswer
 
-                Card(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                vertical = 4.dp
-                            ),
-                    shape =
-                        RoundedCornerShape(12.dp),
-                    colors =
-                        CardDefaults.cardColors(
-                            containerColor =
-                                if (isCorrect) {
-                                    MaterialTheme
-                                        .colorScheme
-                                        .primaryContainer
-                                } else {
-                                    MaterialTheme
-                                        .colorScheme
-                                        .surfaceVariant
-                                }
-                        )
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            vertical = 3.dp
+                        ),
+                    shape = RoundedCornerShape(11.dp),
+                    color = if (isCorrect) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    }
                 ) {
                     Row(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp),
-                        verticalAlignment =
-                            Alignment.CenterVertically
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                horizontal = CommerzoDimensions.Space12,
+                                vertical = CommerzoDimensions.Space10
+                            ),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text =
-                                optionLetter(index),
-                            fontWeight =
-                                FontWeight.Bold,
-                            modifier =
-                                Modifier.width(28.dp)
+                            text = optionLetter(index),
+                            modifier = Modifier.size(
+                                28.dp
+                            ),
+                            fontWeight = FontWeight.Bold,
+                            color = if (isCorrect) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurface
+                            }
                         )
 
                         Text(
                             text = option,
-                            modifier =
-                                Modifier.weight(1f),
-                            style =
-                                MaterialTheme
-                                    .typography
-                                    .bodyMedium
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.bodyMedium
                         )
 
                         if (isCorrect) {
                             Text(
                                 text = "✓",
-                                color =
-                                    MaterialTheme
-                                        .colorScheme
-                                        .primary,
-                                fontWeight =
-                                    FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
@@ -452,37 +447,40 @@ private fun BookmarkQuestionCard(
             }
 
             Spacer(
-                modifier =
-                    Modifier.height(12.dp)
+                modifier = Modifier.height(
+                    CommerzoDimensions.Space12
+                )
             )
 
-            Text(
-                text = "Explanation",
-                style =
-                    MaterialTheme
-                        .typography
-                        .labelLarge,
-                fontWeight =
-                    FontWeight.Bold
-            )
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            ) {
+                Column(
+                    modifier = Modifier.padding(
+                        CommerzoDimensions.Space12
+                    )
+                ) {
+                    Text(
+                        text = "Explanation",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold
+                    )
 
-            Spacer(
-                modifier =
-                    Modifier.height(4.dp)
-            )
+                    Spacer(
+                        modifier = Modifier.height(
+                            CommerzoDimensions.Space4
+                        )
+                    )
 
-            Text(
-                text =
-                    question.explanation,
-                style =
-                    MaterialTheme
-                        .typography
-                        .bodyMedium,
-                color =
-                    MaterialTheme
-                        .colorScheme
-                        .onSurfaceVariant
-            )
+                    Text(
+                        text = question.explanation,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }
@@ -492,65 +490,51 @@ private fun EmptyBookmarksContent(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier =
-            modifier.padding(24.dp),
-        horizontalAlignment =
-            Alignment.CenterHorizontally,
-        verticalArrangement =
-            Arrangement.Center
+        modifier = modifier
+            .padding(
+                CommerzoDimensions.ScreenHorizontal
+            ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            imageVector =
-                Icons.Default.Bookmark,
-            contentDescription = null,
-            modifier =
-                Modifier.height(56.dp)
-        )
-
-        Spacer(
-            modifier =
-                Modifier.height(16.dp)
-        )
-
-        Text(
-            text = "No Bookmarks Yet",
-            style =
-                MaterialTheme
-                    .typography
-                    .headlineSmall,
-            fontWeight =
-                FontWeight.Bold
-        )
-
-        Spacer(
-            modifier =
-                Modifier.height(8.dp)
-        )
-
-        Text(
-            text =
-                "Save important questions while practicing. They will appear here.",
-            style =
-                MaterialTheme
-                    .typography
-                    .bodyMedium,
-            color =
-                MaterialTheme
-                    .colorScheme
-                    .onSurfaceVariant
-        )
-
-        Spacer(
-            modifier =
-                Modifier.height(20.dp)
-        )
-
-        OutlinedButton(
-            onClick = {},
-            enabled = false
+        Surface(
+            modifier = Modifier.size(72.dp),
+            shape = RoundedCornerShape(22.dp),
+            color = MaterialTheme.colorScheme.primaryContainer
         ) {
-            Text("Start Practice")
+            Icon(
+                imageVector = Icons.Default.Bookmark,
+                contentDescription = null,
+                modifier = Modifier.padding(
+                    CommerzoDimensions.Space20
+                ),
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
+
+        Spacer(
+            modifier = Modifier.height(
+                CommerzoDimensions.Space16
+            )
+        )
+
+        Text(
+            text = "No bookmarks yet",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(
+            modifier = Modifier.height(
+                CommerzoDimensions.Space8
+            )
+        )
+
+        Text(
+            text = "Save important questions while practicing. They will appear here for quick revision.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -559,40 +543,50 @@ private fun MissingBookmarksContent(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier =
-            modifier.padding(24.dp),
-        horizontalAlignment =
-            Alignment.CenterHorizontally,
-        verticalArrangement =
-            Arrangement.Center
+        modifier = modifier
+            .padding(
+                CommerzoDimensions.ScreenHorizontal
+            ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
+        Surface(
+            modifier = Modifier.size(64.dp),
+            shape = RoundedCornerShape(20.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+                modifier = Modifier.padding(
+                    CommerzoDimensions.Space16
+                ),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Spacer(
+            modifier = Modifier.height(
+                CommerzoDimensions.Space16
+            )
+        )
+
         Text(
-            text =
-                "Saved questions unavailable",
-            style =
-                MaterialTheme
-                    .typography
-                    .titleLarge,
-            fontWeight =
-                FontWeight.Bold
+            text = "Saved questions unavailable",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
         )
 
         Spacer(
-            modifier =
-                Modifier.height(8.dp)
+            modifier = Modifier.height(
+                CommerzoDimensions.Space8
+            )
         )
 
         Text(
-            text =
-                "Some bookmarked questions are not currently available in the local question bank.",
-            style =
-                MaterialTheme
-                    .typography
-                    .bodyMedium,
-            color =
-                MaterialTheme
-                    .colorScheme
-                    .onSurfaceVariant
+            text = "Some bookmarked questions are not currently available in the local question bank.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
