@@ -2,18 +2,23 @@ package com.commerzo.app.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -21,7 +26,9 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -29,9 +36,9 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.model.content.ContentChapter
@@ -40,6 +47,7 @@ import com.commerzo.app.data.repository.PracticeProgressRepository
 import com.commerzo.app.data.repository.QuestionBankManager
 import com.commerzo.app.data.repository.content.ContentManager
 import com.commerzo.app.data.repository.content.CurriculumContentMapper
+import com.commerzo.app.ui.theme.CommerzoDimensions
 
 @Composable
 fun ChapterScreen(
@@ -85,12 +93,10 @@ fun ChapterScreen(
     val chapters = chaptersState.value
 
     /*
-     * The new Content architecture uses stable Economics
-     * subject IDs, while the existing question/progress
-     * system still uses the legacy "economics" subject ID.
+     * New Content architecture uses stable Economics IDs.
+     * Existing question/progress systems still use "economics".
      *
-     * Keep that boundary here so QuestionRepository,
-     * QuestionBankManager and progress data remain untouched.
+     * Keep this compatibility boundary here.
      */
     val questionSubjectId = remember(subjectId) {
         when (subjectId) {
@@ -109,10 +115,22 @@ fun ChapterScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = subjectName,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(
+                            CommerzoDimensions.Space2
+                        )
+                    ) {
+                        Text(
+                            text = subjectName,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+
+                        Text(
+                            text = "Chapter-wise learning",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(
@@ -131,66 +149,46 @@ fun ChapterScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(paddingValues),
+            contentPadding = PaddingValues(
+                horizontal = CommerzoDimensions.ScreenHorizontal,
+                vertical = CommerzoDimensions.Space12
+            ),
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.CardSpacing
+            )
         ) {
 
+            /*
+             * SUBJECT HEADER
+             */
             item {
-                Spacer(
-                    modifier = Modifier.height(8.dp)
-                )
-
-                Text(
-                    text = "${board.displayName()} • ${classLevel.displayName()}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(
-                    modifier = Modifier.height(6.dp)
-                )
-
-                Text(
-                    text = "Choose a chapter",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(
-                    modifier = Modifier.height(4.dp)
-                )
-
-                Text(
-                    text = "Practice chapter-wise MCQs and track your study progress.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(
-                    modifier = Modifier.height(8.dp)
+                ChapterHeaderCard(
+                    subjectName = subjectName,
+                    board = board.displayName(),
+                    className = classLevel.displayName(),
+                    chapterCount = chapters.size
                 )
             }
 
+            /*
+             * CHAPTER LIST
+             */
             if (chapters.isEmpty()) {
 
                 item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    ) {
-                        Text(
-                            text = "No chapters available for this subject.",
-                            modifier = Modifier.padding(18.dp),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    EmptyChapterState()
                 }
 
             } else {
+
+                item {
+                    SectionHeader(
+                        title = "Chapters",
+                        subtitle =
+                            "Select a chapter to continue learning"
+                    )
+                }
 
                 items(
                     items = chapters,
@@ -229,13 +227,12 @@ fun ChapterScreen(
                             )
                     }
 
-                    ChapterCard(
+                    ChapterItemCard(
                         chapterNumber = chapter.chapterNumber,
                         title = chapter.title,
                         questionCount = questionCount,
                         progressPercent = progressPercent,
-                        enabled = true,
-                        onClick = {
+                        onOpen = {
                             if (questionCount > 0) {
                                 onChapterClick(
                                     chapter.id,
@@ -244,14 +241,6 @@ fun ChapterScreen(
                             }
                         },
                         onStartStudy = {
-                            /*
-                             * IMPORTANT:
-                             * These are the REAL study-context values.
-                             *
-                             * No "general"
-                             * No empty subject ID
-                             * No null chapter ID
-                             */
                             onStartStudy(
                                 subjectId,
                                 chapter.id,
@@ -266,7 +255,9 @@ fun ChapterScreen(
 
             item {
                 Spacer(
-                    modifier = Modifier.height(16.dp)
+                    modifier = Modifier.height(
+                        CommerzoDimensions.Space16
+                    )
                 )
             }
         }
@@ -274,30 +265,117 @@ fun ChapterScreen(
 }
 
 @Composable
-private fun ChapterCard(
+private fun ChapterHeaderCard(
+    subjectName: String,
+    board: String,
+    className: String,
+    chapterCount: Int
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor =
+                MaterialTheme.colorScheme.primaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Surface(
+                modifier = Modifier.size(54.dp),
+                shape = RoundedCornerShape(17.dp),
+                color =
+                    MaterialTheme.colorScheme.surface.copy(
+                        alpha = 0.82f
+                    )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.MenuBook,
+                    contentDescription = "Subject",
+                    modifier = Modifier.padding(
+                        CommerzoDimensions.Space14
+                    ),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Spacer(
+                modifier = Modifier.width(
+                    CommerzoDimensions.Space12
+                )
+            )
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space4
+                )
+            ) {
+                Text(
+                    text = subjectName,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                    color =
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                )
+
+                Text(
+                    text = "$board • $className",
+                    style = MaterialTheme.typography.bodySmall,
+                    color =
+                        MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                            alpha = 0.78f
+                        )
+                )
+
+                Text(
+                    text = "$chapterCount chapters",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color =
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChapterItemCard(
     chapterNumber: Int,
     title: String,
     questionCount: Int,
     progressPercent: Int,
-    enabled: Boolean,
-    onClick: () -> Unit,
+    onOpen: () -> Unit,
     onStartStudy: () -> Unit
 ) {
+    val hasQuestions = questionCount > 0
+    val isCompleted = progressPercent >= 100
+
     Card(
         modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (enabled) {
+            containerColor =
                 MaterialTheme.colorScheme.surface
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant
-            }
         )
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(18.dp)
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space10
+            )
         ) {
 
             Row(
@@ -305,121 +383,217 @@ private fun ChapterCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
-                Text(
-                    text = chapterNumber.toString(),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = if (enabled) {
-                        MaterialTheme.colorScheme.onSurface
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                Surface(
+                    modifier = Modifier.size(46.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    color =
+                        if (isCompleted) {
+                            MaterialTheme.colorScheme.primaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.surfaceVariant
+                        }
+                ) {
+                    androidx.compose.foundation.layout.Box(
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = chapterNumber.toString(),
+                            style =
+                                MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color =
+                                MaterialTheme.colorScheme.primary
+                        )
                     }
-                )
+                }
 
                 Spacer(
-                    modifier = Modifier.width(14.dp)
+                    modifier = Modifier.width(
+                        CommerzoDimensions.Space12
+                    )
                 )
 
                 Column(
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(
+                        CommerzoDimensions.Space4
+                    )
                 ) {
-
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = if (enabled) {
-                            MaterialTheme.colorScheme.onSurface
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        }
-                    )
-
-                    Spacer(
-                        modifier = Modifier.height(4.dp)
+                        style =
+                            MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.ExtraBold
                     )
 
                     Text(
-                        text = if (questionCount > 0) {
+                        text = if (hasQuestions) {
                             "$questionCount valid MCQs available"
                         } else {
                             "MCQs coming soon"
                         },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style =
+                            MaterialTheme.typography.bodySmall,
+                        color =
+                            MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
-                if (questionCount > 0) {
+                if (isCompleted) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = "Completed",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                } else if (hasQuestions) {
                     IconButton(
-                        onClick = onClick
+                        onClick = onOpen
                     ) {
                         Icon(
-                            imageVector = Icons.Default.ArrowForward,
-                            contentDescription = "Open $title"
+                            imageVector =
+                                Icons.Default.ArrowForward,
+                            contentDescription =
+                                "Open $title",
+                            tint =
+                                MaterialTheme.colorScheme.primary
                         )
                     }
                 }
             }
 
-            if (enabled) {
+            /*
+             * REAL STUDY PROGRESS
+             */
+            LinearProgressIndicator(
+                progress = {
+                    progressPercent
+                        .coerceIn(0, 100) / 100f
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+            )
 
-                Spacer(
-                    modifier = Modifier.height(10.dp)
+            Text(
+                text = when {
+                    progressPercent >= 100 ->
+                        "Completed • 100%"
+
+                    progressPercent > 0 ->
+                        "$progressPercent% completed"
+
+                    else ->
+                        "Not started"
+                },
+                style = MaterialTheme.typography.labelSmall,
+                color =
+                    MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            /*
+             * MAIN ACTION
+             *
+             * Study Tracker remains available even when
+             * question content is not available yet.
+             */
+            OutlinedButton(
+                onClick = onStartStudy,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = null
                 )
 
-                LinearProgressIndicator(
-                    progress = {
-                        progressPercent
-                            .coerceIn(0, 100) / 100f
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(5.dp)
-                )
-
                 Spacer(
-                    modifier = Modifier.height(5.dp)
+                    modifier = Modifier.width(
+                        CommerzoDimensions.Space8
+                    )
                 )
 
                 Text(
-                    text = when {
-                        progressPercent >= 100 ->
-                            "Completed • 100%"
-
-                        progressPercent > 0 ->
-                            "$progressPercent% completed"
-
-                        else ->
-                            "Not started"
+                    text = if (progressPercent > 0) {
+                        "Continue Study"
+                    } else {
+                        "Start Study"
                     },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    fontWeight = FontWeight.Bold
                 )
-
-                Spacer(
-                    modifier = Modifier.height(12.dp)
-                )
-
-                androidx.compose.material3.OutlinedButton(
-                    onClick = onStartStudy,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = null
-                    )
-
-                    Spacer(
-                        modifier = Modifier.width(8.dp)
-                    )
-
-                    Text(
-                        text = "Start Study"
-                    )
-                }
             }
         }
+    }
+}
+
+@Composable
+private fun EmptyChapterState() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor =
+                MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space6
+            )
+        ) {
+            Icon(
+                imageVector = Icons.Default.MenuBook,
+                contentDescription = null,
+                modifier = Modifier.size(
+                    CommerzoDimensions.IconLarge
+                ),
+                tint = MaterialTheme.colorScheme.primary
+            )
+
+            Text(
+                text = "No chapters available",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.ExtraBold
+            )
+
+            Text(
+                text =
+                    "Chapter content is not available for this subject yet.",
+                style = MaterialTheme.typography.bodySmall,
+                color =
+                    MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun SectionHeader(
+    title: String,
+    subtitle: String
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(
+            CommerzoDimensions.Space4
+        )
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.ExtraBold
+        )
+
+        Text(
+            text = subtitle,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
