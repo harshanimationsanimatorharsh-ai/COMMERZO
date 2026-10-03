@@ -17,7 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Assessment
-import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.MenuBook
@@ -30,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -58,6 +58,16 @@ fun ChapterHubScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                navigationIcon = {
+                    IconButton(
+                        onClick = onBack
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                },
                 title = {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(
@@ -66,23 +76,16 @@ fun ChapterHubScreen(
                     ) {
                         Text(
                             text = "Chapter",
-                            fontWeight = FontWeight.ExtraBold
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
                         )
 
                         Text(
                             text = subjectName,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = onBack
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
                         )
                     }
                 }
@@ -99,9 +102,13 @@ fun ChapterHubScreen(
                 vertical = CommerzoDimensions.Space12
             ),
             verticalArrangement = Arrangement.spacedBy(
-                CommerzoDimensions.CardSpacing
+                CommerzoDimensions.Space20
             )
         ) {
+
+            // ========================================================
+            // CHAPTER HEADER
+            // ========================================================
 
             item {
                 ChapterHeroCard(
@@ -112,84 +119,59 @@ fun ChapterHubScreen(
                 )
             }
 
+            // ========================================================
+            // PRIMARY ACTION
+            // ========================================================
+
             item {
                 SectionHeader(
-                    title = "Learn & Practice",
-                    subtitle = "Choose what you want to do"
+                    title = "Start Learning",
+                    subtitle = "Choose how you want to practice"
                 )
             }
 
             item {
-                HubActionCard(
-                    title = "Practice",
-                    subtitle = "Solve chapter-wise MCQs",
+                PrimaryHubActionCard(
+                    title = "Practice MCQs",
+                    subtitle = "Solve chapter-wise questions and strengthen your concepts.",
                     icon = Icons.Default.QuestionAnswer,
-                    enabled = true,
                     onClick = onPractice
                 )
             }
 
             item {
-                HubActionCard(
-                    title = "Test",
-                    subtitle = "Take a chapter test",
+                SecondaryHubActionCard(
+                    title = "Chapter Test",
+                    subtitle = "Test your understanding with a chapter test.",
                     icon = Icons.Default.Assessment,
-                    enabled = true,
                     onClick = onTest
                 )
             }
 
-            item {
-                HubActionCard(
-                    title = "Notes",
-                    subtitle = "Read chapter notes",
-                    icon = Icons.Default.Book,
-                    enabled = false,
-                    onClick = onNotes
-                )
-            }
+            // ========================================================
+            // ADDITIONAL MATERIAL
+            // ========================================================
 
             item {
                 SectionHeader(
                     title = "Study Material",
-                    subtitle = "Additional chapter resources"
+                    subtitle = "More chapter resources will appear here"
                 )
             }
 
             item {
-                HubActionCard(
-                    title = "PDFs",
-                    subtitle = "Chapter PDFs and study material",
-                    icon = Icons.Default.Description,
-                    enabled = false,
-                    onClick = onPdfs
-                )
-            }
-
-            item {
-                HubActionCard(
-                    title = "Previous Year Questions",
-                    subtitle = "Board questions from previous years",
-                    icon = Icons.Default.MenuBook,
-                    enabled = false,
-                    onClick = onPyq
-                )
-            }
-
-            item {
-                HubActionCard(
-                    title = "Bookmarks",
-                    subtitle = "Saved questions from this chapter",
-                    icon = Icons.Default.Bookmark,
-                    enabled = false,
-                    onClick = onBookmarks
+                StudyMaterialCard(
+                    onNotes = onNotes,
+                    onPdfs = onPdfs,
+                    onPyq = onPyq,
+                    onBookmarks = onBookmarks
                 )
             }
 
             item {
                 Spacer(
                     modifier = Modifier.height(
-                        CommerzoDimensions.Space16
+                        CommerzoDimensions.Space8
                     )
                 )
             }
@@ -208,8 +190,7 @@ private fun ChapterHeroCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(26.dp),
         colors = CardDefaults.cardColors(
-            containerColor =
-                MaterialTheme.colorScheme.primaryContainer
+            containerColor = MaterialTheme.colorScheme.primaryContainer
         )
     ) {
         Row(
@@ -220,7 +201,6 @@ private fun ChapterHeroCard(
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Surface(
                 modifier = Modifier.size(56.dp),
                 shape = RoundedCornerShape(17.dp),
@@ -228,14 +208,18 @@ private fun ChapterHeroCard(
                     alpha = 0.82f
                 )
             ) {
-                Icon(
-                    imageVector = Icons.Default.MenuBook,
-                    contentDescription = "Chapter",
-                    modifier = Modifier.padding(
-                        CommerzoDimensions.Space12
-                    ),
-                    tint = MaterialTheme.colorScheme.primary
-                )
+                androidx.compose.foundation.layout.Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MenuBook,
+                        contentDescription = null,
+                        modifier = Modifier.size(
+                            CommerzoDimensions.IconLarge
+                        ),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
 
             Spacer(
@@ -253,28 +237,28 @@ private fun ChapterHeroCard(
                 Text(
                     text = chapterTitle,
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.ExtraBold,
-                    color =
-                        MaterialTheme.colorScheme.onPrimaryContainer
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    maxLines = 3
                 )
 
                 Text(
                     text = subjectName,
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.SemiBold,
-                    color =
-                        MaterialTheme.colorScheme.onPrimaryContainer.copy(
-                            alpha = 0.82f
-                        )
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                        alpha = 0.82f
+                    ),
+                    maxLines = 1
                 )
 
                 Text(
-                    text = "$board • $classLevel",
+                    text = "$classLevel • $board",
                     style = MaterialTheme.typography.labelMedium,
-                    color =
-                        MaterialTheme.colorScheme.onPrimaryContainer.copy(
-                            alpha = 0.72f
-                        )
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                        alpha = 0.72f
+                    ),
+                    maxLines = 1
                 )
             }
         }
@@ -282,61 +266,131 @@ private fun ChapterHeroCard(
 }
 
 @Composable
-private fun HubActionCard(
+private fun PrimaryHubActionCard(
     title: String,
     subtitle: String,
     icon: ImageVector,
-    enabled: Boolean,
     onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
-        enabled = enabled,
-        shape = RoundedCornerShape(21.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor =
-                if (enabled) {
-                    MaterialTheme.colorScheme.surface
-                } else {
-                    MaterialTheme.colorScheme.surfaceVariant
-                },
-            disabledContainerColor =
-                MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.primary
         )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    CommerzoDimensions.CardPadding
+                    horizontal = CommerzoDimensions.CardPaddingLarge,
+                    vertical = CommerzoDimensions.Space20
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Surface(
-                modifier = Modifier.size(48.dp),
-                shape = RoundedCornerShape(15.dp),
-                color =
-                    if (enabled) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surface
-                    }
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    modifier = Modifier.padding(
-                        CommerzoDimensions.Space12
-                    ),
-                    tint =
-                        if (enabled) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        }
+                modifier = Modifier.size(54.dp),
+                shape = RoundedCornerShape(17.dp),
+                color = MaterialTheme.colorScheme.onPrimary.copy(
+                    alpha = 0.14f
                 )
+            ) {
+                androidx.compose.foundation.layout.Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(
+                            CommerzoDimensions.IconMedium
+                        ),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+            }
+
+            Spacer(
+                modifier = Modifier.width(
+                    CommerzoDimensions.Space16
+                )
+            )
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space4
+                )
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimary.copy(
+                        alpha = 0.82f
+                    ),
+                    maxLines = 2
+                )
+            }
+
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+    }
+}
+
+@Composable
+private fun SecondaryHubActionCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                modifier = Modifier.size(50.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer
+            ) {
+                androidx.compose.foundation.layout.Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(
+                            CommerzoDimensions.IconMedium
+                        ),
+                        tint = MaterialTheme.colorScheme.secondary
+                    )
+                }
             }
 
             Spacer(
@@ -354,34 +408,117 @@ private fun HubActionCard(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold,
-                    color =
-                        if (enabled) {
-                            MaterialTheme.colorScheme.onSurface
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        }
+                    fontWeight = FontWeight.SemiBold
                 )
 
                 Text(
-                    text =
-                        if (enabled) {
-                            subtitle
-                        } else {
-                            "$subtitle • Coming soon"
-                        },
+                    text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2
                 )
             }
 
-            if (enabled) {
-                Icon(
-                    imageVector = Icons.Default.ArrowForward,
-                    contentDescription = "Open $title",
-                    tint = MaterialTheme.colorScheme.primary
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+@Composable
+private fun StudyMaterialCard(
+    onNotes: () -> Unit,
+    onPdfs: () -> Unit,
+    onPyq: () -> Unit,
+    onBookmarks: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    CommerzoDimensions.Space8
                 )
-            }
+        ) {
+            MaterialOption(
+                title = "Notes",
+                icon = Icons.Default.MenuBook,
+                enabled = false,
+                onClick = onNotes
+            )
+
+            MaterialOption(
+                title = "PDF Study Material",
+                icon = Icons.Default.Description,
+                enabled = false,
+                onClick = onPdfs
+            )
+
+            MaterialOption(
+                title = "Previous Year Questions",
+                icon = Icons.Default.MenuBook,
+                enabled = false,
+                onClick = onPyq
+            )
+
+            MaterialOption(
+                title = "Bookmarked Questions",
+                icon = Icons.Default.Bookmark,
+                enabled = false,
+                onClick = onBookmarks
+            )
+        }
+    }
+}
+
+@Composable
+private fun MaterialOption(
+    title: String,
+    icon: ImageVector,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    TextButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(
+                    CommerzoDimensions.IconMedium
+                )
+            )
+
+            Spacer(
+                modifier = Modifier.width(
+                    CommerzoDimensions.Space12
+                )
+            )
+
+            Text(
+                text = if (enabled) {
+                    title
+                } else {
+                    "$title • Coming soon"
+                },
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }
@@ -400,13 +537,16 @@ private fun SectionHeader(
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.ExtraBold
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1
         )
 
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2
         )
     }
 }
