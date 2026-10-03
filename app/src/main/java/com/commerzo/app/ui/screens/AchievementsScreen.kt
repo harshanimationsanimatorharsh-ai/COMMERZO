@@ -15,8 +15,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -33,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.commerzo.app.data.repository.TestHistoryRepository
 import com.commerzo.app.ui.theme.CommerzoDimensions
 
@@ -124,15 +127,21 @@ fun AchievementsScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "Achievements",
-                        fontWeight = FontWeight.Bold
-                    )
+                    Column {
+                        Text(
+                            text = "Achievements",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Milestones from your learning journey",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 },
                 navigationIcon = {
-                    IconButton(
-                        onClick = onBack
-                    ) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back"
@@ -163,24 +172,48 @@ fun AchievementsScreen(
             }
 
             item {
-                Column {
-                    Text(
-                        text = "Your Achievements",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Spacer(
-                        modifier = Modifier.height(
-                            CommerzoDimensions.Space4
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = "Your Achievements",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
                         )
-                    )
 
-                    Text(
-                        text = "Milestones you unlock as you keep learning.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                        Spacer(
+                            modifier = Modifier.height(
+                                CommerzoDimensions.Space4
+                            )
+                        )
+
+                        Text(
+                            text = "Keep learning and unlock new milestones.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer
+                    ) {
+                        Text(
+                            text = "$unlockedCount/${achievements.size}",
+                            modifier = Modifier.padding(
+                                horizontal = CommerzoDimensions.Space10,
+                                vertical = CommerzoDimensions.Space6
+                            ),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
 
@@ -196,7 +229,7 @@ fun AchievementsScreen(
             item {
                 Spacer(
                     modifier = Modifier.height(
-                        CommerzoDimensions.Space16
+                        CommerzoDimensions.Space8
                     )
                 )
             }
@@ -217,9 +250,7 @@ private fun AchievementSummaryCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(
-            CommerzoDimensions.Space20
-        ),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         )
@@ -234,21 +265,15 @@ private fun AchievementSummaryCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Surface(
-                    shape = RoundedCornerShape(
-                        CommerzoDimensions.Space12
-                    ),
+                    shape = RoundedCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.primary
                 ) {
                     Icon(
                         imageVector = Icons.Default.EmojiEvents,
                         contentDescription = null,
                         modifier = Modifier
-                            .size(
-                                CommerzoDimensions.IconLarge
-                            )
-                            .padding(
-                                CommerzoDimensions.Space4
-                            ),
+                            .size(52.dp)
+                            .padding(12.dp),
                         tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
@@ -263,7 +288,11 @@ private fun AchievementSummaryCard(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "$unlockedCount / $totalCount Unlocked",
+                        text = if (unlockedCount == 0) {
+                            "Your journey starts here"
+                        } else {
+                            "Great progress!"
+                        },
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -276,12 +305,8 @@ private fun AchievementSummaryCard(
                     )
 
                     Text(
-                        text = if (unlockedCount == 0) {
-                            "Start practicing to earn achievements."
-                        } else {
-                            "Keep learning to unlock more."
-                        },
-                        style = MaterialTheme.typography.bodySmall,
+                        text = "$unlockedCount of $totalCount achievements unlocked",
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
@@ -297,12 +322,48 @@ private fun AchievementSummaryCard(
                 progress = {
                     progress
                 },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(7.dp),
                 color = MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.primary.copy(
                     alpha = 0.18f
                 )
             )
+
+            Spacer(
+                modifier = Modifier.height(
+                    CommerzoDimensions.Space8
+                )
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.TrendingUp,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+
+                Spacer(
+                    modifier = Modifier.width(
+                        CommerzoDimensions.Space4
+                    )
+                )
+
+                Text(
+                    text = if (unlockedCount == totalCount) {
+                        "All milestones unlocked"
+                    } else {
+                        "Keep practicing to unlock more"
+                    },
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
         }
     }
 }
@@ -342,31 +403,30 @@ private fun AchievementCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(
-            CommerzoDimensions.Space16
-        ),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = containerColor
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
         )
     ) {
         Column(
             modifier = Modifier.padding(
-                CommerzoDimensions.CardPadding
+                CommerzoDimensions.CardPaddingLarge
             )
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
                 Surface(
-                    shape = RoundedCornerShape(
-                        CommerzoDimensions.Space12
-                    ),
+                    shape = RoundedCornerShape(14.dp),
                     color = iconContainerColor
                 ) {
                     Icon(
                         imageVector = if (achievement.unlocked) {
-                            Icons.Default.EmojiEvents
+                            Icons.Default.CheckCircle
                         } else {
                             Icons.Default.Lock
                         },
@@ -376,12 +436,8 @@ private fun AchievementCard(
                             "Locked"
                         },
                         modifier = Modifier
-                            .size(
-                                CommerzoDimensions.IconLarge
-                            )
-                            .padding(
-                                CommerzoDimensions.Space4
-                            ),
+                            .size(46.dp)
+                            .padding(10.dp),
                         tint = iconColor
                     )
                 }
@@ -398,7 +454,8 @@ private fun AchievementCard(
                     Text(
                         text = achievement.title,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Spacer(
@@ -421,9 +478,7 @@ private fun AchievementCard(
                 )
 
                 Surface(
-                    shape = RoundedCornerShape(
-                        CommerzoDimensions.Space10
-                    ),
+                    shape = RoundedCornerShape(10.dp),
                     color = if (achievement.unlocked) {
                         MaterialTheme.colorScheme.primaryContainer
                     } else {
@@ -462,7 +517,9 @@ private fun AchievementCard(
                     progress = {
                         progressFraction
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(6.dp),
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.outlineVariant
                 )
