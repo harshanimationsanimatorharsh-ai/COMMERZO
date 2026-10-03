@@ -1,5 +1,6 @@
 package com.commerzo.app.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -89,9 +90,10 @@ fun ProfileScreen(
     }
 
     LaunchedEffect(profileState) {
-        val profile = (profileState as? ProfileState.Success)?.profile
+        val profile =
+            (profileState as? ProfileState.Success)?.profile
 
-        if (profile != null && displayNameInput.isBlank()) {
+        if (profile != null) {
             displayNameInput = profile.displayName
         }
     }
@@ -117,8 +119,8 @@ fun ProfileScreen(
                         )
 
                         Text(
-                            text = "Manage your account and progress.",
-                            style = MaterialTheme.typography.bodySmall,
+                            text = "Your account and learning progress",
+                            style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -141,13 +143,15 @@ fun ProfileScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(
+                    rememberScrollState()
+                )
                 .padding(paddingValues)
                 .padding(
                     horizontal = CommerzoDimensions.ScreenHorizontal
                 ),
             verticalArrangement = Arrangement.spacedBy(
-                CommerzoDimensions.SectionSpacing
+                CommerzoDimensions.Space16
             )
         ) {
 
@@ -180,7 +184,8 @@ fun ProfileScreen(
                     StudentProfileHeroCard(
                         profile = state.profile,
                         onEdit = {
-                            displayNameInput = state.profile.displayName
+                            displayNameInput =
+                                state.profile.displayName
                             showEditDialog = true
                         }
                     )
@@ -190,24 +195,26 @@ fun ProfileScreen(
             }
 
             SectionHeader(
-                title = "Your Progress",
-                subtitle = "Track your learning journey"
+                title = "Learning",
+                subtitle = "Your study activity"
             )
 
             ProfileMenuGroup {
                 ProfileMenuRow(
                     icon = Icons.Default.AccessTime,
                     title = "Study Tracker",
-                    subtitle = "Track study time, goals and progress",
-                    iconBackground = MaterialTheme.colorScheme.secondaryContainer,
-                    iconTint = MaterialTheme.colorScheme.secondary,
+                    subtitle = "Track study time and daily goals",
+                    iconBackground =
+                        MaterialTheme.colorScheme.secondaryContainer,
+                    iconTint =
+                        MaterialTheme.colorScheme.secondary,
                     onClick = onStudyTracker
                 )
             }
 
             SectionHeader(
-                title = "Account",
-                subtitle = "Your COMMERZO account"
+                title = "Your Activity",
+                subtitle = "Saved and completed work"
             )
 
             ProfileMenuGroup {
@@ -216,8 +223,10 @@ fun ProfileScreen(
                     icon = Icons.Default.Bookmark,
                     title = "Bookmarks",
                     subtitle = "View your saved questions",
-                    iconBackground = MaterialTheme.colorScheme.primaryContainer,
-                    iconTint = MaterialTheme.colorScheme.primary,
+                    iconBackground =
+                        MaterialTheme.colorScheme.primaryContainer,
+                    iconTint =
+                        MaterialTheme.colorScheme.primary,
                     onClick = onBookmarks
                 )
 
@@ -227,8 +236,10 @@ fun ProfileScreen(
                     icon = Icons.Default.History,
                     title = "Test History",
                     subtitle = "View your previous test results",
-                    iconBackground = MaterialTheme.colorScheme.tertiaryContainer,
-                    iconTint = MaterialTheme.colorScheme.tertiary,
+                    iconBackground =
+                        MaterialTheme.colorScheme.tertiaryContainer,
+                    iconTint =
+                        MaterialTheme.colorScheme.tertiary,
                     onClick = onTestHistory
                 )
 
@@ -237,16 +248,18 @@ fun ProfileScreen(
                 ProfileMenuRow(
                     icon = Icons.Default.EmojiEvents,
                     title = "Achievements",
-                    subtitle = "Track milestones and achievements",
-                    iconBackground = MaterialTheme.colorScheme.secondaryContainer,
-                    iconTint = MaterialTheme.colorScheme.secondary,
+                    subtitle = "Track your learning milestones",
+                    iconBackground =
+                        MaterialTheme.colorScheme.secondaryContainer,
+                    iconTint =
+                        MaterialTheme.colorScheme.secondary,
                     onClick = onAchievements
                 )
             }
 
             SectionHeader(
-                title = "More",
-                subtitle = "Manage your COMMERZO experience"
+                title = "Account",
+                subtitle = "Manage your COMMERZO account"
             )
 
             ProfileMenuGroup {
@@ -254,9 +267,11 @@ fun ProfileScreen(
                 ProfileMenuRow(
                     icon = Icons.Default.Settings,
                     title = "Settings",
-                    subtitle = "Notifications, appearance and preferences",
-                    iconBackground = MaterialTheme.colorScheme.primaryContainer,
-                    iconTint = MaterialTheme.colorScheme.primary,
+                    subtitle = "Appearance, notifications and preferences",
+                    iconBackground =
+                        MaterialTheme.colorScheme.primaryContainer,
+                    iconTint =
+                        MaterialTheme.colorScheme.primary,
                     onClick = onSettings
                 )
 
@@ -265,11 +280,15 @@ fun ProfileScreen(
                 ProfileMenuRow(
                     icon = Icons.Default.ExitToApp,
                     title = "Logout",
-                    subtitle = "Sign out from your COMMERZO account",
-                    iconBackground = MaterialTheme.colorScheme.errorContainer,
-                    iconTint = MaterialTheme.colorScheme.error,
-                    titleColor = MaterialTheme.colorScheme.error,
-                    arrowTint = MaterialTheme.colorScheme.error,
+                    subtitle = "Sign out from this account",
+                    iconBackground =
+                        MaterialTheme.colorScheme.errorContainer,
+                    iconTint =
+                        MaterialTheme.colorScheme.error,
+                    titleColor =
+                        MaterialTheme.colorScheme.error,
+                    arrowTint =
+                        MaterialTheme.colorScheme.error,
                     onClick = {
                         showLogoutDialog = true
                     }
@@ -313,14 +332,17 @@ fun ProfileScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        val name = displayNameInput.trim()
+                        val name =
+                            displayNameInput.trim()
 
                         if (name.isNotBlank()) {
                             viewModel.updateDisplayName(name)
                             showEditDialog = false
                         }
                     },
-                    enabled = displayNameInput.trim().isNotBlank()
+                    enabled = displayNameInput
+                        .trim()
+                        .isNotBlank()
                 ) {
                     Text("Save")
                 }
@@ -360,7 +382,8 @@ fun ProfileScreen(
                         onLogout()
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
+                        containerColor =
+                            MaterialTheme.colorScheme.error
                     )
                 ) {
                     Text("Logout")
@@ -388,7 +411,8 @@ private fun StudentProfileHeroCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primary
+            containerColor =
+                MaterialTheme.colorScheme.primary
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = CommerzoDimensions.Space4
@@ -434,7 +458,8 @@ private fun StudentProfileHeroCard(
                                     CommerzoDimensions.AvatarMedium
                                 ),
                                 shape = CircleShape,
-                                color = MaterialTheme.colorScheme.primaryContainer
+                                color =
+                                    MaterialTheme.colorScheme.primaryContainer
                             ) {
                                 Box(
                                     contentAlignment = Alignment.Center
@@ -444,9 +469,12 @@ private fun StudentProfileHeroCard(
                                             .firstOrNull()
                                             ?.uppercase()
                                             ?: "C",
-                                        style = MaterialTheme.typography.headlineMedium,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        color = MaterialTheme.colorScheme.primary
+                                        style =
+                                            MaterialTheme.typography.headlineMedium,
+                                        fontWeight =
+                                            FontWeight.ExtraBold,
+                                        color =
+                                            MaterialTheme.colorScheme.primary
                                     )
                                 }
                             }
@@ -466,9 +494,12 @@ private fun StudentProfileHeroCard(
                             text = profile.displayName.ifBlank {
                                 "COMMERZO Student"
                             },
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.onPrimary
+                            style =
+                                MaterialTheme.typography.titleLarge,
+                            fontWeight =
+                                FontWeight.ExtraBold,
+                            color =
+                                MaterialTheme.colorScheme.onPrimary
                         )
 
                         Spacer(
@@ -481,10 +512,12 @@ private fun StudentProfileHeroCard(
                             text = profile.email.ifBlank {
                                 "Email not available"
                             },
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(
-                                alpha = 0.82f
-                            )
+                            style =
+                                MaterialTheme.typography.bodySmall,
+                            color =
+                                MaterialTheme.colorScheme.onPrimary.copy(
+                                    alpha = 0.82f
+                                )
                         )
 
                         Spacer(
@@ -495,24 +528,31 @@ private fun StudentProfileHeroCard(
 
                         Surface(
                             shape = RoundedCornerShape(50.dp),
-                            color = MaterialTheme.colorScheme.onPrimary.copy(
-                                alpha = 0.16f
-                            )
+                            color =
+                                MaterialTheme.colorScheme.onPrimary.copy(
+                                    alpha = 0.16f
+                                )
                         ) {
                             Row(
                                 modifier = Modifier.padding(
-                                    horizontal = CommerzoDimensions.Space10,
-                                    vertical = CommerzoDimensions.Space6
+                                    horizontal =
+                                        CommerzoDimensions.Space10,
+                                    vertical =
+                                        CommerzoDimensions.Space6
                                 ),
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment =
+                                    Alignment.CenterVertically
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Verified,
-                                    contentDescription = "Student",
+                                    imageVector =
+                                        Icons.Default.Verified,
+                                    contentDescription =
+                                        "Student",
                                     modifier = Modifier.size(
                                         CommerzoDimensions.IconSmall
                                     ),
-                                    tint = MaterialTheme.colorScheme.onPrimary
+                                    tint =
+                                        MaterialTheme.colorScheme.onPrimary
                                 )
 
                                 Spacer(
@@ -523,9 +563,12 @@ private fun StudentProfileHeroCard(
 
                                 Text(
                                     text = "Student",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimary
+                                    style =
+                                        MaterialTheme.typography.labelMedium,
+                                    fontWeight =
+                                        FontWeight.Bold,
+                                    color =
+                                        MaterialTheme.colorScheme.onPrimary
                                 )
                             }
                         }
@@ -536,17 +579,21 @@ private fun StudentProfileHeroCard(
                             CommerzoDimensions.IconButtonSize
                         ),
                         shape = RoundedCornerShape(14.dp),
-                        color = MaterialTheme.colorScheme.onPrimary.copy(
-                            alpha = 0.16f
-                        )
+                        color =
+                            MaterialTheme.colorScheme.onPrimary.copy(
+                                alpha = 0.16f
+                            )
                     ) {
                         IconButton(
                             onClick = onEdit
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Edit Profile",
-                                tint = MaterialTheme.colorScheme.onPrimary
+                                imageVector =
+                                    Icons.Default.Edit,
+                                contentDescription =
+                                    "Edit Profile",
+                                tint =
+                                    MaterialTheme.colorScheme.onPrimary
                             )
                         }
                     }
@@ -567,15 +614,18 @@ private fun StudentProfileHeroCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(
-                                horizontal = CommerzoDimensions.Space12,
-                                vertical = CommerzoDimensions.Space12
+                                horizontal =
+                                    CommerzoDimensions.Space12,
+                                vertical =
+                                    CommerzoDimensions.Space12
                             ),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment =
+                            Alignment.CenterVertically
                     ) {
-
                         ProfileStat(
                             icon = Icons.Default.Star,
-                            iconTint = MaterialTheme.colorScheme.secondary,
+                            iconTint =
+                                MaterialTheme.colorScheme.secondary,
                             title = "Level 1",
                             subtitle = "0 / 800 XP",
                             modifier = Modifier.weight(1f)
@@ -585,7 +635,8 @@ private fun StudentProfileHeroCard(
 
                         ProfileStat(
                             icon = Icons.Default.AccessTime,
-                            iconTint = MaterialTheme.colorScheme.primary,
+                            iconTint =
+                                MaterialTheme.colorScheme.primary,
                             title = "Study",
                             subtitle = "Keep going",
                             modifier = Modifier.weight(1f)
@@ -595,7 +646,8 @@ private fun StudentProfileHeroCard(
 
                         ProfileStat(
                             icon = Icons.Default.EmojiEvents,
-                            iconTint = MaterialTheme.colorScheme.tertiary,
+                            iconTint =
+                                MaterialTheme.colorScheme.tertiary,
                             title = "Student",
                             subtitle = "Active",
                             modifier = Modifier.weight(1f)
@@ -677,12 +729,14 @@ private fun StatDivider() {
 private fun XPProgressCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor =
+                MaterialTheme.colorScheme.surfaceVariant
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = CommerzoDimensions.Space2
+            defaultElevation =
+                CommerzoDimensions.Space2
         )
     ) {
         Column(
@@ -690,7 +744,6 @@ private fun XPProgressCard() {
                 CommerzoDimensions.CardPaddingLarge
             )
         ) {
-
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -699,15 +752,18 @@ private fun XPProgressCard() {
                         CommerzoDimensions.Space48
                     ),
                     shape = RoundedCornerShape(14.dp),
-                    color = MaterialTheme.colorScheme.secondaryContainer
+                    color =
+                        MaterialTheme.colorScheme.secondaryContainer
                 ) {
                     Box(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Star,
+                            imageVector =
+                                Icons.Default.Star,
                             contentDescription = "XP",
-                            tint = MaterialTheme.colorScheme.secondary,
+                            tint =
+                                MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.size(
                                 CommerzoDimensions.IconLarge
                             )
@@ -726,23 +782,29 @@ private fun XPProgressCard() {
                 ) {
                     Text(
                         text = "Level 1",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        style =
+                            MaterialTheme.typography.titleMedium,
+                        fontWeight =
+                            FontWeight.ExtraBold
                     )
 
                     Text(
                         text = "Keep learning to unlock your next level",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style =
+                            MaterialTheme.typography.bodySmall,
+                        color =
+                            MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
                 Text(
                     text = "0 XP",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.primary
+                    style =
+                        MaterialTheme.typography.titleMedium,
+                    fontWeight =
+                        FontWeight.ExtraBold,
+                    color =
+                        MaterialTheme.colorScheme.primary
                 )
             }
 
@@ -752,34 +814,7 @@ private fun XPProgressCard() {
                 )
             )
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(
-                        CommerzoDimensions.Space8
-                    )
-                    .clip(RoundedCornerShape(50.dp))
-                    .background(
-                        MaterialTheme.colorScheme.outlineVariant
-                    )
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0f)
-                        .height(
-                            CommerzoDimensions.Space8
-                        )
-                        .clip(RoundedCornerShape(50.dp))
-                        .background(
-                            Brush.horizontalGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.tertiary
-                                )
-                            )
-                        )
-                )
-            }
+            LinearXPBar()
 
             Spacer(
                 modifier = Modifier.height(
@@ -789,22 +824,64 @@ private fun XPProgressCard() {
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement =
+                    Arrangement.SpaceBetween
             ) {
                 Text(
                     text = "0 / 800 XP",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style =
+                        MaterialTheme.typography.labelSmall,
+                    fontWeight =
+                        FontWeight.Bold,
+                    color =
+                        MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Text(
-                    text = "Earn XP from practice & tests",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "Practice & tests earn XP",
+                    style =
+                        MaterialTheme.typography.labelSmall,
+                    color =
+                        MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun LinearXPBar() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(
+                CommerzoDimensions.Space8
+            )
+            .clip(
+                RoundedCornerShape(50.dp)
+            )
+            .background(
+                MaterialTheme.colorScheme.outlineVariant
+            )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0f)
+                .height(
+                    CommerzoDimensions.Space8
+                )
+                .clip(
+                    RoundedCornerShape(50.dp)
+                )
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.tertiary
+                        )
+                    )
+                )
+        )
     }
 }
 
@@ -814,12 +891,14 @@ private fun ProfileMenuGroup(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor =
+                MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = CommerzoDimensions.Space2
+            defaultElevation =
+                CommerzoDimensions.Space2
         )
     ) {
         Column(
@@ -838,14 +917,18 @@ private fun ProfileMenuRow(
     subtitle: String,
     iconBackground: Color,
     iconTint: Color,
-    titleColor: Color = MaterialTheme.colorScheme.onSurface,
-    arrowTint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    titleColor: Color =
+        MaterialTheme.colorScheme.onSurface,
+    arrowTint: Color =
+        MaterialTheme.colorScheme.onSurfaceVariant,
     onClick: () -> Unit
 ) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp)),
+            .clip(
+                RoundedCornerShape(18.dp)
+            ),
         color = Color.Transparent,
         onClick = onClick
     ) {
@@ -853,12 +936,14 @@ private fun ProfileMenuRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    horizontal = CommerzoDimensions.Space12,
-                    vertical = CommerzoDimensions.Space12
+                    horizontal =
+                        CommerzoDimensions.Space12,
+                    vertical =
+                        CommerzoDimensions.Space12
                 ),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment =
+                Alignment.CenterVertically
         ) {
-
             Surface(
                 modifier = Modifier.size(
                     CommerzoDimensions.Space48
@@ -867,7 +952,8 @@ private fun ProfileMenuRow(
                 color = iconBackground
             ) {
                 Box(
-                    contentAlignment = Alignment.Center
+                    contentAlignment =
+                        Alignment.Center
                 ) {
                     Icon(
                         imageVector = icon,
@@ -891,7 +977,8 @@ private fun ProfileMenuRow(
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleMedium,
+                    style =
+                        MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = titleColor
                 )
@@ -904,14 +991,18 @@ private fun ProfileMenuRow(
 
                 Text(
                     text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style =
+                        MaterialTheme.typography.bodySmall,
+                    color =
+                        MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
             Icon(
-                imageVector = Icons.Default.ArrowForward,
-                contentDescription = "Open $title",
+                imageVector =
+                    Icons.Default.ArrowForward,
+                contentDescription =
+                    "Open $title",
                 modifier = Modifier.size(
                     CommerzoDimensions.IconMedium
                 ),
@@ -945,15 +1036,19 @@ private fun SectionHeader(
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleLarge,
+            style =
+                MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.ExtraBold,
-            color = MaterialTheme.colorScheme.onBackground
+            color =
+                MaterialTheme.colorScheme.onBackground
         )
 
         Text(
             text = subtitle,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style =
+                MaterialTheme.typography.bodySmall,
+            color =
+                MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -962,8 +1057,9 @@ private fun SectionHeader(
 private fun ProfileBrandCard() {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant
+        shape = RoundedCornerShape(20.dp),
+        color =
+            MaterialTheme.colorScheme.surfaceVariant
     ) {
         Column(
             modifier = Modifier.padding(
@@ -972,9 +1068,9 @@ private fun ProfileBrandCard() {
         ) {
             Text(
                 text = "COMMERZO",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.onSurface
+                style =
+                    MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.ExtraBold
             )
 
             Spacer(
@@ -985,9 +1081,11 @@ private fun ProfileBrandCard() {
 
             Text(
                 text = "Learn. Practice. Score.",
-                style = MaterialTheme.typography.bodyMedium,
+                style =
+                    MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary
+                color =
+                    MaterialTheme.colorScheme.primary
             )
 
             Spacer(
@@ -998,8 +1096,10 @@ private fun ProfileBrandCard() {
 
             Text(
                 text = "Your focused Commerce learning space.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style =
+                    MaterialTheme.typography.bodySmall,
+                color =
+                    MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -1009,9 +1109,10 @@ private fun ProfileBrandCard() {
 private fun ProfileLoadingCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor =
+                MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
         Row(
@@ -1020,11 +1121,14 @@ private fun ProfileLoadingCard() {
                 .padding(
                     CommerzoDimensions.Space28
                 ),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement =
+                Arrangement.Center,
+            verticalAlignment =
+                Alignment.CenterVertically
         ) {
             CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.primary
+                color =
+                    MaterialTheme.colorScheme.primary
             )
         }
     }
@@ -1036,9 +1140,10 @@ private fun ProfileEmptyCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor =
+                MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
         Column(
@@ -1047,13 +1152,14 @@ private fun ProfileEmptyCard(
                 .padding(
                     CommerzoDimensions.CardPaddingLarge
                 ),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment =
+                Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Profile not found",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+                style =
+                    MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
             )
 
             Spacer(
@@ -1064,8 +1170,10 @@ private fun ProfileEmptyCard(
 
             Text(
                 text = "Your student profile has not been created yet.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style =
+                    MaterialTheme.typography.bodyMedium,
+                color =
+                    MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(
@@ -1090,9 +1198,10 @@ private fun ProfileErrorCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer
+            containerColor =
+                MaterialTheme.colorScheme.errorContainer
         )
     ) {
         Column(
@@ -1104,9 +1213,11 @@ private fun ProfileErrorCard(
         ) {
             Text(
                 text = "Unable to load profile",
-                style = MaterialTheme.typography.titleMedium,
+                style =
+                    MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onErrorContainer
+                color =
+                    MaterialTheme.colorScheme.onErrorContainer
             )
 
             Spacer(
@@ -1117,8 +1228,10 @@ private fun ProfileErrorCard(
 
             Text(
                 text = message,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onErrorContainer
+                style =
+                    MaterialTheme.typography.bodyMedium,
+                color =
+                    MaterialTheme.colorScheme.onErrorContainer
             )
 
             Spacer(
