@@ -84,17 +84,23 @@ fun SubjectSelectionScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(
+                            CommerzoDimensions.Space2
+                        )
+                    ) {
                         Text(
                             text = "Subjects",
                             style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
                         )
 
                         Text(
-                            text = "Choose a subject to continue learning",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            text = "Choose what you want to study",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
                         )
                     }
                 }
@@ -108,12 +114,46 @@ fun SubjectSelectionScreen(
                 .padding(paddingValues),
             contentPadding = PaddingValues(
                 horizontal = CommerzoDimensions.ScreenHorizontal,
-                vertical = CommerzoDimensions.ScreenVertical
+                vertical = CommerzoDimensions.Space12
             ),
             verticalArrangement = Arrangement.spacedBy(
-                CommerzoDimensions.CardSpacing
+                CommerzoDimensions.Space20
             )
         ) {
+
+            // ========================================================
+            // CURRICULUM
+            // ========================================================
+
+            item {
+                CurriculumCard(
+                    selectedBoard = selectedBoard,
+                    selectedClass = selectedClass,
+                    onBoardSelected = { board ->
+                        selectedBoard = board
+                        viewModel.setBoard(board)
+                    },
+                    onClassSelected = { classLevel ->
+                        selectedClass = classLevel
+                        viewModel.setClassLevel(classLevel)
+                    }
+                )
+            }
+
+            // ========================================================
+            // LEARNING PATH
+            // ========================================================
+
+            item {
+                LearningPathCard(
+                    board = selectedBoard,
+                    classLevel = selectedClass
+                )
+            }
+
+            // ========================================================
+            // SEARCH
+            // ========================================================
 
             item {
                 OutlinedTextField(
@@ -123,7 +163,7 @@ fun SubjectSelectionScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(18.dp),
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Search,
@@ -131,38 +171,26 @@ fun SubjectSelectionScreen(
                         )
                     },
                     placeholder = {
-                        Text("Search subjects")
+                        Text(
+                            text = "Search subjects..."
+                        )
                     }
                 )
             }
 
-            item {
-                CurriculumSelector(
-                    selectedClass = selectedClass,
-                    selectedBoard = selectedBoard,
-                    onClassSelected = { classLevel ->
-                        selectedClass = classLevel
-                        viewModel.setClassLevel(classLevel)
-                    },
-                    onBoardSelected = { board ->
-                        selectedBoard = board
-                        viewModel.setBoard(board)
-                    }
-                )
-            }
-
-            item {
-                LearnOverviewCard(
-                    board = selectedBoard,
-                    classLevel = selectedClass
-                )
-            }
+            // ========================================================
+            // SUBJECT LIST
+            // ========================================================
 
             item {
                 SectionHeader(
-                    title = "Your Subjects",
+                    title = "All Subjects",
                     subtitle = if (filteredSubjects.isEmpty()) {
-                        "No matching subjects"
+                        if (searchQuery.isBlank()) {
+                            "No subjects available"
+                        } else {
+                            "No matching subjects"
+                        }
                     } else {
                         "${filteredSubjects.size} subjects available"
                     }
@@ -171,7 +199,9 @@ fun SubjectSelectionScreen(
 
             if (filteredSubjects.isEmpty()) {
                 item {
-                    EmptySubjectsCard()
+                    EmptySubjectsCard(
+                        hasSearchQuery = searchQuery.isNotBlank()
+                    )
                 }
             } else {
                 items(
@@ -181,7 +211,7 @@ fun SubjectSelectionScreen(
                     }
                 ) { subject ->
 
-                    LearnSubjectCard(
+                    SubjectItemCard(
                         subject = subject,
                         onClick = {
                             onSubjectClick(subject)
@@ -189,42 +219,108 @@ fun SubjectSelectionScreen(
                     )
                 }
             }
+
+            item {
+                Spacer(
+                    modifier = Modifier.height(
+                        CommerzoDimensions.Space8
+                    )
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun CurriculumSelector(
-    selectedClass: ClassLevel,
+private fun CurriculumCard(
     selectedBoard: Board,
-    onClassSelected: (ClassLevel) -> Unit,
-    onBoardSelected: (Board) -> Unit
+    selectedClass: ClassLevel,
+    onBoardSelected: (Board) -> Unit,
+    onClassSelected: (ClassLevel) -> Unit
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(
-            CommerzoDimensions.Space12
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space12
+            )
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    modifier = Modifier.size(44.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    androidx.compose.foundation.layout.Box(
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MenuBook,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
 
-        CurriculumFilterGroup(
-            title = "Class",
-            options = listOf(
-                ClassLevel.CLASS_11 to "Class 11",
-                ClassLevel.CLASS_12 to "Class 12"
-            ),
-            selected = selectedClass,
-            onSelected = onClassSelected
-        )
+                Spacer(
+                    modifier = Modifier.size(
+                        CommerzoDimensions.Space12
+                    )
+                )
 
-        CurriculumFilterGroup(
-            title = "Board",
-            options = listOf(
-                Board.MP_BOARD to "MP Board",
-                Board.CBSE to "CBSE"
-            ),
-            selected = selectedBoard,
-            onSelected = onBoardSelected
-        )
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(
+                        CommerzoDimensions.Space2
+                    )
+                ) {
+                    Text(
+                        text = "Curriculum",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    Text(
+                        text = "Select your board and class",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            CurriculumFilterGroup(
+                title = "Class",
+                options = listOf(
+                    ClassLevel.CLASS_11 to "Class 11",
+                    ClassLevel.CLASS_12 to "Class 12"
+                ),
+                selected = selectedClass,
+                onSelected = onClassSelected
+            )
+
+            CurriculumFilterGroup(
+                title = "Board",
+                options = listOf(
+                    Board.MP_BOARD to "MP Board",
+                    Board.CBSE to "CBSE"
+                ),
+                selected = selectedBoard,
+                onSelected = onBoardSelected
+            )
+        }
     }
 }
 
@@ -235,18 +331,16 @@ private fun <T> CurriculumFilterGroup(
     selected: T,
     onSelected: (T) -> Unit
 ) {
-    Column {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(
+            CommerzoDimensions.Space6
+        )
+    ) {
         Text(
             text = title,
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        Spacer(
-            modifier = Modifier.height(
-                CommerzoDimensions.Space8
-            )
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Row(
@@ -262,7 +356,10 @@ private fun <T> CurriculumFilterGroup(
                         onSelected(value)
                     },
                     label = {
-                        Text(label)
+                        Text(
+                            text = label,
+                            maxLines = 1
+                        )
                     }
                 )
             }
@@ -271,7 +368,7 @@ private fun <T> CurriculumFilterGroup(
 }
 
 @Composable
-private fun LearnOverviewCard(
+private fun LearningPathCard(
     board: Board,
     classLevel: ClassLevel
 ) {
@@ -287,7 +384,7 @@ private fun LearnOverviewCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         )
@@ -301,20 +398,24 @@ private fun LearnOverviewCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(48.dp),
-                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier.size(50.dp),
+                shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.surface.copy(
                     alpha = 0.75f
                 )
             ) {
-                Icon(
-                    imageVector = Icons.Default.MenuBook,
-                    contentDescription = null,
-                    modifier = Modifier.padding(
-                        CommerzoDimensions.Space12
-                    ),
-                    tint = MaterialTheme.colorScheme.primary
-                )
+                androidx.compose.foundation.layout.Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MenuBook,
+                        contentDescription = null,
+                        modifier = Modifier.size(
+                            CommerzoDimensions.IconMedium
+                        ),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
 
             Spacer(
@@ -324,37 +425,31 @@ private fun LearnOverviewCard(
             )
 
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space4
+                )
             ) {
                 Text(
-                    text = "LEARNING PATH",
+                    text = "YOUR LEARNING PATH",
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                Spacer(
-                    modifier = Modifier.height(
-                        CommerzoDimensions.Space4
-                    )
-                )
-
                 Text(
                     text = "$className • $boardName",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(
-                    modifier = Modifier.height(
-                        CommerzoDimensions.Space4
-                    )
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
 
                 Text(
-                    text = "Subjects and chapters for your curriculum.",
+                    text = "Subjects → Chapters → Practice",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                        alpha = 0.78f
+                    )
                 )
             }
         }
@@ -362,14 +457,14 @@ private fun LearnOverviewCard(
 }
 
 @Composable
-private fun LearnSubjectCard(
+private fun SubjectItemCard(
     subject: SubjectData,
     onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
@@ -381,22 +476,23 @@ private fun LearnSubjectCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    CommerzoDimensions.CardPadding
+                    CommerzoDimensions.CardPaddingLarge
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(50.dp),
-                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier.size(54.dp),
+                shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
-                Text(
-                    text = subject.emoji,
-                    modifier = Modifier.padding(
-                        CommerzoDimensions.Space10
-                    ),
-                    style = MaterialTheme.typography.headlineSmall
-                )
+                androidx.compose.foundation.layout.Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = subject.emoji,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                }
             }
 
             Spacer(
@@ -406,24 +502,31 @@ private fun LearnSubjectCard(
             )
 
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space4
+                )
             ) {
                 Text(
                     text = subject.name,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(
-                    modifier = Modifier.height(
-                        CommerzoDimensions.Space4
-                    )
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2
                 )
 
                 Text(
                     text = "${subject.chaptersCount} chapters",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
+
+                Text(
+                    text = "Open subject",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1
                 )
             }
 
@@ -442,35 +545,35 @@ private fun SectionHeader(
     subtitle: String
 ) {
     Column(
-        modifier = Modifier.padding(
-            top = CommerzoDimensions.Space8
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(
+            CommerzoDimensions.Space4
         )
     ) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(
-            modifier = Modifier.height(
-                CommerzoDimensions.Space4
-            )
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1
         )
 
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2
         )
     }
 }
 
 @Composable
-private fun EmptySubjectsCard() {
+private fun EmptySubjectsCard(
+    hasSearchQuery: Boolean
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
@@ -481,7 +584,10 @@ private fun EmptySubjectsCard() {
                 .padding(
                     CommerzoDimensions.CardPaddingLarge
                 ),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space6
+            )
         ) {
             Icon(
                 imageVector = Icons.Default.Search,
@@ -492,26 +598,22 @@ private fun EmptySubjectsCard() {
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(
-                modifier = Modifier.height(
-                    CommerzoDimensions.Space12
-                )
-            )
-
             Text(
-                text = "No subjects found",
+                text = if (hasSearchQuery) {
+                    "No matching subjects"
+                } else {
+                    "No subjects available"
+                },
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(
-                modifier = Modifier.height(
-                    CommerzoDimensions.Space4
-                )
+                fontWeight = FontWeight.SemiBold
             )
 
             Text(
-                text = "Try another class, board or search term.",
+                text = if (hasSearchQuery) {
+                    "Try a different subject name."
+                } else {
+                    "Try another class or board."
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
