@@ -2,6 +2,7 @@ package com.commerzo.app.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -39,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.repository.TestHistoryItem
@@ -68,10 +71,18 @@ fun TestHistoryScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "Test History",
-                        fontWeight = FontWeight.Bold
-                    )
+                    Column {
+                        Text(
+                            text = "Test History",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Track your test performance",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -90,7 +101,7 @@ fun TestHistoryScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.DeleteSweep,
-                                contentDescription = "Clear history"
+                                contentDescription = "Clear test history"
                             )
                         }
                     }
@@ -111,7 +122,7 @@ fun TestHistoryScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                contentPadding = PaddingValues(
                     horizontal = CommerzoDimensions.ScreenHorizontal,
                     vertical = CommerzoDimensions.Space16
                 ),
@@ -131,6 +142,14 @@ fun TestHistoryScreen(
                 ) { item ->
                     TestHistoryCard(item = item)
                 }
+
+                item {
+                    Spacer(
+                        modifier = Modifier.height(
+                            CommerzoDimensions.Space8
+                        )
+                    )
+                }
             }
         }
     }
@@ -147,7 +166,7 @@ fun TestHistoryScreen(
             },
             text = {
                 Text(
-                    text = "All saved test history will be removed from this device."
+                    text = "All saved test results will be removed from this device. This action cannot be undone."
                 )
             },
             confirmButton = {
@@ -157,7 +176,7 @@ fun TestHistoryScreen(
                         showClearDialog = false
                     }
                 ) {
-                    Text("Clear")
+                    Text("Clear History")
                 }
             },
             dismissButton = {
@@ -179,9 +198,7 @@ private fun TestHistorySummary(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(
-            CommerzoDimensions.Space20
-        ),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         )
@@ -189,16 +206,17 @@ private fun TestHistorySummary(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(CommerzoDimensions.CardPaddingLarge),
+                .padding(
+                    horizontal = CommerzoDimensions.CardPaddingLarge,
+                    vertical = CommerzoDimensions.Space20
+                ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(
                 CommerzoDimensions.Space16
             )
         ) {
             Surface(
-                shape = RoundedCornerShape(
-                    CommerzoDimensions.Space12
-                ),
+                shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.primary
             ) {
                 Icon(
@@ -232,6 +250,32 @@ private fun TestHistorySummary(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
+
+                Spacer(
+                    modifier = Modifier.height(
+                        CommerzoDimensions.Space8
+                    )
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(
+                        CommerzoDimensions.Space4
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.TrendingUp,
+                        contentDescription = null,
+                        modifier = Modifier.height(16.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+
+                    Text(
+                        text = "Keep practicing and improving",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
             }
         }
     }
@@ -253,9 +297,8 @@ private fun TestHistoryCard(
         ).format(Date(item.completedAt))
     }
 
-    val progress = (
-        item.percentage.coerceIn(0, 100) / 100f
-    )
+    val progress = item.percentage
+        .coerceIn(0, 100) / 100f
 
     val scoreColor = when {
         item.percentage >= 80 ->
@@ -270,11 +313,12 @@ private fun TestHistoryCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(
-            CommerzoDimensions.Space16
-        ),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
         )
     ) {
         Column(
@@ -292,7 +336,8 @@ private fun TestHistoryCard(
                     Text(
                         text = subjectName,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Spacer(
@@ -304,14 +349,19 @@ private fun TestHistoryCard(
                     Text(
                         text = chapterName,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2
                     )
                 }
 
+                Spacer(
+                    modifier = Modifier.height(
+                        CommerzoDimensions.Space4
+                    )
+                )
+
                 Surface(
-                    shape = RoundedCornerShape(
-                        CommerzoDimensions.Space10
-                    ),
+                    shape = RoundedCornerShape(12.dp),
                     color = scoreColor.copy(alpha = 0.12f)
                 ) {
                     Text(
@@ -375,67 +425,25 @@ private fun TestHistoryCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Column {
-                    Text(
-                        text = "Score",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                HistoryStat(
+                    label = "Score",
+                    value = "${item.correct}/${item.totalQuestions}"
+                )
 
-                    Text(
-                        text = "${item.correct}/${item.totalQuestions}",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
+                HistoryStat(
+                    label = "Answered",
+                    value = item.answered.toString()
+                )
 
-                Column(
-                    horizontalAlignment = Alignment.End
-                ) {
-                    Text(
-                        text = "Answered",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                HistoryStat(
+                    label = "Wrong",
+                    value = item.wrong.toString()
+                )
 
-                    Text(
-                        text = "${item.answered}",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.End
-                ) {
-                    Text(
-                        text = "Wrong",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Text(
-                        text = "${item.wrong}",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.End
-                ) {
-                    Text(
-                        text = "Unattempted",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Text(
-                        text = "${item.unattempted}",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
+                HistoryStat(
+                    label = "Unattempted",
+                    value = item.unattempted.toString()
+                )
             }
 
             Spacer(
@@ -444,24 +452,53 @@ private fun TestHistoryCard(
                 )
             )
 
-            Text(
-                text = "Marked: ${item.marked}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(
-                modifier = Modifier.height(
-                    CommerzoDimensions.Space4
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Marked: ${item.marked}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            )
 
-            Text(
-                text = dateText,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+                Text(
+                    text = dateText,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun HistoryStat(
+    label: String,
+    value: String
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Spacer(
+            modifier = Modifier.height(
+                CommerzoDimensions.Space2
+            )
+        )
+
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -472,9 +509,7 @@ private fun HistoryInfoChip(
 ) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(
-            CommerzoDimensions.Space10
-        ),
+        shape = RoundedCornerShape(10.dp),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Text(
@@ -496,15 +531,13 @@ private fun EmptyTestHistory(
 ) {
     Column(
         modifier = modifier.padding(
-            CommerzoDimensions.ScreenHorizontal
+            horizontal = CommerzoDimensions.ScreenHorizontal
         ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Surface(
-            shape = RoundedCornerShape(
-                CommerzoDimensions.Space20
-            ),
+            shape = RoundedCornerShape(22.dp),
             color = MaterialTheme.colorScheme.primaryContainer
         ) {
             Icon(
@@ -526,7 +559,8 @@ private fun EmptyTestHistory(
         Text(
             text = "No test history yet",
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(
