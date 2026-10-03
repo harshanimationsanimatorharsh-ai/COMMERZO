@@ -8,11 +8,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -23,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.commerzo.app.ui.theme.CommerzoDimensions
 
@@ -53,10 +57,23 @@ fun TestResultScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "Test Result",
-                        style = MaterialTheme.typography.titleLarge
-                    )
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(
+                            CommerzoDimensions.Space2
+                        )
+                    ) {
+                        Text(
+                            text = "Test Result",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Text(
+                            text = "Your performance summary",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             )
         }
@@ -65,11 +82,13 @@ fun TestResultScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(
+                    rememberScrollState()
+                )
                 .padding(innerPadding)
                 .padding(
                     horizontal = CommerzoDimensions.ScreenHorizontal,
-                    vertical = CommerzoDimensions.ScreenVertical
+                    vertical = CommerzoDimensions.Space16
                 ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -82,7 +101,7 @@ fun TestResultScreen(
 
             Spacer(
                 modifier = Modifier.height(
-                    CommerzoDimensions.SectionSpacing
+                    CommerzoDimensions.Space20
                 )
             )
 
@@ -92,7 +111,7 @@ fun TestResultScreen(
 
             Spacer(
                 modifier = Modifier.height(
-                    CommerzoDimensions.Space12
+                    CommerzoDimensions.Space10
                 )
             )
 
@@ -107,17 +126,17 @@ fun TestResultScreen(
 
             Spacer(
                 modifier = Modifier.height(
-                    CommerzoDimensions.SectionSpacing
+                    CommerzoDimensions.Space20
                 )
             )
 
             SectionTitle(
-                title = "What's next?"
+                title = "Continue Learning"
             )
 
             Spacer(
                 modifier = Modifier.height(
-                    CommerzoDimensions.Space12
+                    CommerzoDimensions.Space10
                 )
             )
 
@@ -127,9 +146,13 @@ fun TestResultScreen(
                     .fillMaxWidth()
                     .height(
                         CommerzoDimensions.ButtonHeight
-                    )
+                    ),
+                shape = RoundedCornerShape(16.dp)
             ) {
-                Text("Restart Test")
+                Text(
+                    text = "Practice Again",
+                    fontWeight = FontWeight.Bold
+                )
             }
 
             Spacer(
@@ -144,14 +167,18 @@ fun TestResultScreen(
                     .fillMaxWidth()
                     .height(
                         CommerzoDimensions.ButtonHeight
-                    )
+                    ),
+                shape = RoundedCornerShape(16.dp)
             ) {
-                Text("Back to Tests")
+                Text(
+                    text = "Back to Tests",
+                    fontWeight = FontWeight.SemiBold
+                )
             }
 
             Spacer(
                 modifier = Modifier.height(
-                    CommerzoDimensions.Space16
+                    CommerzoDimensions.Space12
                 )
             )
         }
@@ -165,18 +192,21 @@ private fun ResultHeroCard(
     total: Int
 ) {
     val message = when {
-        percentage >= 90 -> "Excellent performance!"
-        percentage >= 75 -> "Great work!"
-        percentage >= 50 -> "Good effort. Keep improving!"
-        else -> "Keep practicing. You can improve!"
+        percentage >= 90 -> "Excellent work!"
+        percentage >= 75 -> "Great progress!"
+        percentage >= 50 -> "Good effort!"
+        else -> "Keep practicing!"
     }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
-        shape = MaterialTheme.shapes.large
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
+        )
     ) {
         Column(
             modifier = Modifier
@@ -188,46 +218,79 @@ private fun ResultHeroCard(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Test Completed",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-
-            Spacer(
-                modifier = Modifier.height(
-                    CommerzoDimensions.Space8
-                )
-            )
-
-            Text(
-                text = "$percentage%",
-                style = MaterialTheme.typography.displayMedium,
+                text = "TEST COMPLETED",
+                style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
 
             Spacer(
                 modifier = Modifier.height(
-                    CommerzoDimensions.Space4
+                    CommerzoDimensions.Space16
+                )
+            )
+
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier.size(116.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    progress = {
+                        (percentage / 100f).coerceIn(
+                            0f,
+                            1f
+                        )
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                    strokeWidth = 9.dp,
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.surface.copy(
+                        alpha = 0.55f
+                    )
+                )
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "$percentage%",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+
+                    Text(
+                        text = "Score",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+
+            Spacer(
+                modifier = Modifier.height(
+                    CommerzoDimensions.Space16
                 )
             )
 
             Text(
                 text = "$correct / $total correct",
                 style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
 
             Spacer(
                 modifier = Modifier.height(
-                    CommerzoDimensions.Space8
+                    CommerzoDimensions.Space6
                 )
             )
 
             Text(
                 text = message,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                textAlign = TextAlign.Center
             )
         }
     }
@@ -244,6 +307,7 @@ private fun PerformanceCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
@@ -254,26 +318,45 @@ private fun PerformanceCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(CommerzoDimensions.CardPadding)
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                )
         ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Accuracy",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
 
-            Text(
-                text = "Accuracy",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
+                Text(
+                    text = "$accuracy%",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
 
             Spacer(
                 modifier = Modifier.height(
-                    CommerzoDimensions.Space8
+                    CommerzoDimensions.Space10
                 )
             )
 
             LinearProgressIndicator(
                 progress = {
-                    (accuracy / 100f).coerceIn(0f, 1f)
+                    (accuracy / 100f).coerceIn(
+                        0f,
+                        1f
+                    )
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(7.dp)
             )
 
             Spacer(
@@ -283,7 +366,7 @@ private fun PerformanceCard(
             )
 
             Text(
-                text = "$accuracy% accuracy across $answered answered questions",
+                text = "$correct correct out of $answered answered",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -350,21 +433,9 @@ private fun PerformanceStat(
     title: String,
     value: Int
 ) {
-    SurfaceStat(
-        modifier = modifier,
-        title = title,
-        value = value
-    )
-}
-
-@Composable
-private fun SurfaceStat(
-    modifier: Modifier,
-    title: String,
-    value: Int
-) {
     Card(
         modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
@@ -372,13 +443,15 @@ private fun SurfaceStat(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(CommerzoDimensions.Space12)
+                .padding(
+                    CommerzoDimensions.Space12
+                )
         ) {
             Text(
                 text = value.toString(),
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(
@@ -389,7 +462,7 @@ private fun SurfaceStat(
 
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -404,7 +477,7 @@ private fun SectionTitle(
         text = title,
         modifier = Modifier.fillMaxWidth(),
         style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onBackground
     )
 }
