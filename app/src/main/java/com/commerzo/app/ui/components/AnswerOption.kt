@@ -13,8 +13,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.commerzo.app.ui.theme.CommerzoDimensions
+
+// ============================================================
+// COMMERZO — Premium Answer Option
+// Clear • Exam Friendly • State Aware
+// ============================================================
 
 @Composable
 fun AnswerOption(
@@ -27,17 +33,24 @@ fun AnswerOption(
     onClick: () -> Unit
 ) {
     val backgroundColor = when {
-        isCorrect -> MaterialTheme.colorScheme.primaryContainer
+        isCorrect -> MaterialTheme.colorScheme.secondaryContainer
         isWrong -> MaterialTheme.colorScheme.errorContainer
-        isSelected -> MaterialTheme.colorScheme.secondaryContainer
+        isSelected -> MaterialTheme.colorScheme.primaryContainer
         else -> MaterialTheme.colorScheme.surface
     }
 
     val contentColor = when {
-        isCorrect -> MaterialTheme.colorScheme.onPrimaryContainer
+        isCorrect -> MaterialTheme.colorScheme.onSecondaryContainer
         isWrong -> MaterialTheme.colorScheme.onErrorContainer
-        isSelected -> MaterialTheme.colorScheme.onSecondaryContainer
+        isSelected -> MaterialTheme.colorScheme.onPrimaryContainer
         else -> MaterialTheme.colorScheme.onSurface
+    }
+
+    val letterColor = when {
+        isCorrect -> MaterialTheme.colorScheme.secondary
+        isWrong -> MaterialTheme.colorScheme.error
+        isSelected -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     Card(
@@ -47,18 +60,23 @@ fun AnswerOption(
                 enabled = enabled,
                 onClick = onClick
             ),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
-            containerColor = backgroundColor
+            containerColor = backgroundColor,
+            disabledContainerColor = backgroundColor.copy(alpha = 0.65f)
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = CommerzoDimensions.Space2
+            defaultElevation = 1.dp,
+            pressedElevation = 0.dp
         )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(CommerzoDimensions.CardPadding),
+                .padding(
+                    horizontal = CommerzoDimensions.CardPadding,
+                    vertical = CommerzoDimensions.Space16
+                ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(
                 CommerzoDimensions.Space12
@@ -67,7 +85,8 @@ fun AnswerOption(
             Text(
                 text = "${('A'.code + index).toChar()}",
                 style = MaterialTheme.typography.titleMedium,
-                color = contentColor
+                fontWeight = FontWeight.Bold,
+                color = letterColor
             )
 
             Text(
