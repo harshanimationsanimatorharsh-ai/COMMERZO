@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Psychology
@@ -37,7 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.unit.dp
 import com.commerzo.app.ui.theme.CommerzoDimensions
 
 @Composable
@@ -95,7 +94,7 @@ fun GamesScreen() {
 
                         Text(
                             text = "Learn through challenges",
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -116,7 +115,6 @@ fun GamesScreen() {
                 CommerzoDimensions.CardSpacing
             )
         ) {
-
             item {
                 GamesHeroCard()
             }
@@ -124,7 +122,7 @@ fun GamesScreen() {
             item {
                 SectionHeader(
                     title = "Game Zone",
-                    subtitle = "Educational games are being prepared"
+                    subtitle = "Short learning challenges are coming to COMMERZO."
                 )
             }
 
@@ -188,7 +186,7 @@ private fun GamesHeroCard() {
                 }
 
                 Spacer(
-                    modifier = Modifier.size(
+                    modifier = Modifier.width(
                         CommerzoDimensions.Space12
                     )
                 )
@@ -212,7 +210,8 @@ private fun GamesHeroCard() {
                     Text(
                         text = "Play. Learn. Improve.",
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }
@@ -224,7 +223,7 @@ private fun GamesHeroCard() {
             )
 
             Text(
-                text = "COMMERZO games will turn practice into short, engaging learning challenges.",
+                text = "Turn practice into short, engaging learning challenges designed for Commerce students.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
@@ -259,13 +258,13 @@ private fun GamesHeroCard() {
                     )
 
                     Spacer(
-                        modifier = Modifier.size(
+                        modifier = Modifier.width(
                             CommerzoDimensions.Space8
                         )
                     )
 
                     Text(
-                        text = "Gamification will arrive with the real game engine.",
+                        text = "Games are being prepared for a future release.",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -281,16 +280,19 @@ private fun GameCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
         )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    CommerzoDimensions.CardPadding
+                    CommerzoDimensions.CardPaddingLarge
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -310,7 +312,7 @@ private fun GameCard(
             }
 
             Spacer(
-                modifier = Modifier.size(
+                modifier = Modifier.width(
                     CommerzoDimensions.Space12
                 )
             )
@@ -334,7 +336,8 @@ private fun GameCard(
                 Text(
                     text = game.title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(
@@ -357,7 +360,7 @@ private fun GameCard(
 
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.surface
+                    color = MaterialTheme.colorScheme.surfaceVariant
                 ) {
                     Text(
                         text = "Coming soon",
@@ -371,18 +374,6 @@ private fun GameCard(
                     )
                 }
             }
-
-            Spacer(
-                modifier = Modifier.width(
-                    CommerzoDimensions.Space8
-                )
-            )
-
-            Icon(
-                imageVector = Icons.Default.ArrowForward,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }
@@ -391,7 +382,7 @@ private fun GameCard(
 private fun GamesComingSoonCard() {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Column(
@@ -437,7 +428,7 @@ private fun GamesComingSoonCard() {
             )
 
             Text(
-                text = "Timed challenges, scores, results, XP and achievements will be connected in the dedicated Games phase.",
+                text = "Timed challenges, scores, XP and achievements will be connected when the dedicated Games engine is implemented.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
