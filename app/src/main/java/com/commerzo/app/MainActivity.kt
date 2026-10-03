@@ -3,6 +3,8 @@ package com.commerzo.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.commerzo.app.navigation.AuthNavigation
 import com.commerzo.app.ui.theme.CommerzoTheme
@@ -16,7 +18,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             val settingsViewModel: SettingsViewModel = viewModel()
 
-            val darkModeEnabled = settingsViewModel.darkModeEnabled.value
+            val darkModeEnabled by settingsViewModel.darkModeEnabled
+                .collectAsState()
 
             CommerzoTheme(
                 darkTheme = darkModeEnabled
