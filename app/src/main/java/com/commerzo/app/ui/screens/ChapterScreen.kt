@@ -36,9 +36,9 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalContext
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.model.content.ContentChapter
@@ -159,9 +159,6 @@ fun ChapterScreen(
             )
         ) {
 
-            /*
-             * SUBJECT HEADER
-             */
             item {
                 ChapterHeaderCard(
                     subjectName = subjectName,
@@ -171,9 +168,6 @@ fun ChapterScreen(
                 )
             }
 
-            /*
-             * CHAPTER LIST
-             */
             if (chapters.isEmpty()) {
 
                 item {
@@ -300,7 +294,7 @@ private fun ChapterHeaderCard(
                     imageVector = Icons.Default.MenuBook,
                     contentDescription = "Subject",
                     modifier = Modifier.padding(
-                        CommerzoDimensions.Space14
+                        CommerzoDimensions.Space12
                     ),
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -461,9 +455,6 @@ private fun ChapterItemCard(
                 }
             }
 
-            /*
-             * REAL STUDY PROGRESS
-             */
             LinearProgressIndicator(
                 progress = {
                     progressPercent
@@ -490,12 +481,6 @@ private fun ChapterItemCard(
                     MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            /*
-             * MAIN ACTION
-             *
-             * Study Tracker remains available even when
-             * question content is not available yet.
-             */
             OutlinedButton(
                 onClick = onStartStudy,
                 modifier = Modifier.fillMaxWidth(),
