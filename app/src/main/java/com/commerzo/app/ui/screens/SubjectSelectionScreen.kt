@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
@@ -121,10 +122,6 @@ fun SubjectSelectionScreen(
             )
         ) {
 
-            // ========================================================
-            // CURRICULUM
-            // ========================================================
-
             item {
                 CurriculumCard(
                     selectedBoard = selectedBoard,
@@ -140,20 +137,12 @@ fun SubjectSelectionScreen(
                 )
             }
 
-            // ========================================================
-            // LEARNING PATH
-            // ========================================================
-
             item {
                 LearningPathCard(
                     board = selectedBoard,
                     classLevel = selectedClass
                 )
             }
-
-            // ========================================================
-            // SEARCH
-            // ========================================================
 
             item {
                 OutlinedTextField(
@@ -177,10 +166,6 @@ fun SubjectSelectionScreen(
                     }
                 )
             }
-
-            // ========================================================
-            // SUBJECT LIST
-            // ========================================================
 
             item {
                 SectionHeader(
