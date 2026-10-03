@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -46,6 +47,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.commerzo.app.data.model.study.StudySession
@@ -81,29 +88,32 @@ fun StudyTrackerScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(
+                            CommerzoDimensions.Space2
+                        )
+                    ) {
                         Text(
                             text = if (hasStudyContext) {
                                 "Start Study"
                             } else {
                                 "Study Tracker"
                             },
-                            style = MaterialTheme.typography.titleLarge
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
                         )
 
                         if (!hasStudyContext) {
                             Text(
-                                text = "Track your learning progress",
-                                style = MaterialTheme.typography.labelSmall,
+                                text = "Build a consistent study habit",
+                                style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
                 },
                 navigationIcon = {
-                    IconButton(
-                        onClick = onBack
-                    ) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back"
@@ -187,10 +197,10 @@ private fun StudyTrackerSessionContent(
         modifier = modifier,
         contentPadding = PaddingValues(
             horizontal = CommerzoDimensions.ScreenHorizontal,
-            vertical = CommerzoDimensions.ScreenVertical
+            vertical = CommerzoDimensions.Space16
         ),
         verticalArrangement = Arrangement.spacedBy(
-            CommerzoDimensions.CardSpacing
+            CommerzoDimensions.Space16
         )
     ) {
         item {
@@ -228,12 +238,19 @@ private fun StudyTrackerDashboardContent(
         modifier = modifier,
         contentPadding = PaddingValues(
             horizontal = CommerzoDimensions.ScreenHorizontal,
-            vertical = CommerzoDimensions.ScreenVertical
+            vertical = CommerzoDimensions.Space16
         ),
         verticalArrangement = Arrangement.spacedBy(
-            CommerzoDimensions.CardSpacing
+            CommerzoDimensions.Space16
         )
     ) {
+        item {
+            StudyDashboardHero(
+                todaySeconds = uiState.todayStudySeconds,
+                currentStreak = uiState.currentStreak
+            )
+        }
+
         item {
             ActiveSessionCard(
                 session = uiState.activeSession,
@@ -253,20 +270,10 @@ private fun StudyTrackerDashboardContent(
         }
 
         item {
-            StudyPeriodCard(
-                title = "This Week",
-                icon = Icons.Default.CalendarMonth,
-                seconds = uiState.weekStudySeconds,
-                sessions = uiState.weekSessionCount
-            )
-        }
-
-        item {
-            StudyPeriodCard(
-                title = "This Month",
-                icon = Icons.Default.AccessTime,
-                seconds = uiState.monthStudySeconds,
-                sessions = null
+            WeeklyOverviewCard(
+                weekSeconds = uiState.weekStudySeconds,
+                weekSessions = uiState.weekSessionCount,
+                monthSeconds = uiState.monthStudySeconds
             )
         }
 
@@ -279,7 +286,8 @@ private fun StudyTrackerDashboardContent(
 
         item {
             SectionHeader(
-                title = "Recent Sessions"
+                title = "Recent Sessions",
+                subtitle = "Your latest focused study sessions"
             )
         }
 
@@ -288,8 +296,8 @@ private fun StudyTrackerDashboardContent(
                 EmptyTrackerState(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(140.dp),
-                    title = "No study sessions yet",
+                        .height(150.dp),
+                    title = "No sessions yet",
                     message = "Complete your first study session and it will appear here."
                 )
             }
@@ -307,6 +315,130 @@ private fun StudyTrackerDashboardContent(
                 ErrorCard(message)
             }
         }
+
+        item {
+            Spacer(
+                modifier = Modifier.height(
+                    CommerzoDimensions.Space4
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun StudyDashboardHero(
+    todaySeconds: Long,
+    currentStreak: Int
+) {
+    val goalSeconds = 45L * 60L
+    val progress =
+        (todaySeconds.toFloat() / goalSeconds.toFloat())
+            .coerceIn(0f, 1f)
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space12
+            )
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = "Keep going",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(
+                            CommerzoDimensions.Space4
+                        )
+                    )
+
+                    Text(
+                        text = "Stay consistent and make progress every day.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+
+                Surface(
+                    modifier = Modifier.size(50.dp),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surface.copy(
+                        alpha = 0.7f
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = null,
+                        modifier = Modifier.padding(13.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = formatDuration(todaySeconds),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+
+                Spacer(
+                    modifier = Modifier.weight(1f)
+                )
+
+                Text(
+                    text = "$currentStreak day streak",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(7.dp),
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.surface.copy(
+                    alpha = 0.65f
+                )
+            )
+
+            Text(
+                text = "Daily target: 45 minutes",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        }
     }
 }
 
@@ -319,49 +451,48 @@ private fun StudyContextCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         )
     ) {
         Column(
-            modifier = Modifier.padding(
-                CommerzoDimensions.CardPaddingLarge
-            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
             verticalArrangement = Arrangement.spacedBy(
                 CommerzoDimensions.Space8
             )
         ) {
             Row(
-                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space12
+                )
             ) {
                 Surface(
-                    modifier = Modifier.size(44.dp),
-                    shape = CircleShape,
+                    modifier = Modifier.size(46.dp),
+                    shape = RoundedCornerShape(14.dp),
                     color = MaterialTheme.colorScheme.primary
                 ) {
-                    Box(
-                        contentAlignment = androidx.compose.ui.Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = null,
+                        modifier = Modifier.padding(12.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
                 }
 
-                Spacer(
-                    modifier = Modifier.size(
-                        CommerzoDimensions.Space12
-                    )
-                )
-
-                Column {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
                     Text(
                         text = "Ready to study?",
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
 
                     Text(
@@ -374,14 +505,14 @@ private fun StudyContextCard(
 
             Spacer(
                 modifier = Modifier.height(
-                    CommerzoDimensions.Space8
+                    CommerzoDimensions.Space4
                 )
             )
 
             Text(
                 text = subjectId,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
+                fontWeight = FontWeight.Bold
             )
 
             Text(
@@ -401,7 +532,8 @@ private fun StudyContextCard(
                         horizontal = CommerzoDimensions.Space12,
                         vertical = CommerzoDimensions.Space8
                     ),
-                    style = MaterialTheme.typography.labelLarge
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
@@ -416,38 +548,44 @@ private fun ActiveSessionCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (session == null) {
-                MaterialTheme.colorScheme.surface
-            } else {
-                MaterialTheme.colorScheme.tertiaryContainer
-            }
+            containerColor =
+                if (session == null) {
+                    MaterialTheme.colorScheme.surface
+                } else {
+                    MaterialTheme.colorScheme.tertiaryContainer
+                }
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
         )
     ) {
         Column(
-            modifier = Modifier.padding(
-                CommerzoDimensions.CardPaddingLarge
-            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
             verticalArrangement = Arrangement.spacedBy(
                 CommerzoDimensions.Space12
             )
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
                         text = if (session == null) {
-                            "Ready to study?"
+                            "Start studying"
                         } else {
                             "Study session active"
                         },
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                        fontWeight = FontWeight.ExtraBold
                     )
 
                     Spacer(
@@ -459,7 +597,7 @@ private fun ActiveSessionCard(
                     Text(
                         text = if (session == null) {
                             if (onStart != null) {
-                                "Start now and track your focused study time."
+                                "Track your focused study time from here."
                             } else {
                                 "Open a chapter to start a study session."
                             }
@@ -474,29 +612,29 @@ private fun ActiveSessionCard(
                 Surface(
                     modifier = Modifier.size(48.dp),
                     shape = CircleShape,
-                    color = if (session == null) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.tertiary
-                    }
+                    color =
+                        if (session == null) {
+                            MaterialTheme.colorScheme.primaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.tertiary
+                        }
                 ) {
-                    Box(
-                        contentAlignment = androidx.compose.ui.Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = if (session == null) {
+                    Icon(
+                        imageVector =
+                            if (session == null) {
                                 Icons.Default.PlayArrow
                             } else {
                                 Icons.Default.AccessTime
                             },
-                            contentDescription = null,
-                            tint = if (session == null) {
+                        contentDescription = null,
+                        modifier = Modifier.padding(12.dp),
+                        tint =
+                            if (session == null) {
                                 MaterialTheme.colorScheme.primary
                             } else {
                                 MaterialTheme.colorScheme.onTertiary
                             }
-                        )
-                    }
+                    )
                 }
             }
 
@@ -508,7 +646,7 @@ private fun ActiveSessionCard(
                 Button(
                     onClick = onStop,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp)
+                    shape = RoundedCornerShape(15.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Stop,
@@ -521,13 +659,16 @@ private fun ActiveSessionCard(
                         )
                     )
 
-                    Text("Stop Study Session")
+                    Text(
+                        text = "Stop Study Session",
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             } else if (onStart != null) {
                 Button(
                     onClick = onStart,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp)
+                    shape = RoundedCornerShape(15.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
@@ -540,7 +681,10 @@ private fun ActiveSessionCard(
                         )
                     )
 
-                    Text("Start Study Session")
+                    Text(
+                        text = "Start Study Session",
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
@@ -570,12 +714,12 @@ private fun ActiveTimer(
 
     Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = formatDuration(elapsedSeconds),
             style = MaterialTheme.typography.displaySmall,
-            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+            fontWeight = FontWeight.ExtraBold,
             color = MaterialTheme.colorScheme.primary
         )
 
@@ -593,20 +737,28 @@ private fun StudyOverviewCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp)
+        shape = RoundedCornerShape(21.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
+        )
     ) {
         Column(
-            modifier = Modifier.padding(
-                CommerzoDimensions.CardPaddingLarge
-            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
             verticalArrangement = Arrangement.spacedBy(
-                CommerzoDimensions.Space16
+                CommerzoDimensions.Space12
             )
         ) {
             Text(
                 text = "Your Progress",
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                fontWeight = FontWeight.ExtraBold
             )
 
             Text(
@@ -614,12 +766,13 @@ private fun StudyOverviewCard(
                     uiState.totalStudySeconds
                 ),
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.primary
             )
 
             Text(
                 text = "Total completed study time",
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
@@ -646,7 +799,7 @@ private fun StudyOverviewCard(
                 StatItem(
                     modifier = Modifier.weight(1f),
                     value = uiState.currentStreak.toString(),
-                    label = "Day streak"
+                    label = "Streak"
                 )
             }
         }
@@ -672,16 +825,18 @@ private fun TodayGoalCard(
         shape = RoundedCornerShape(20.dp)
     ) {
         Column(
-            modifier = Modifier.padding(
-                CommerzoDimensions.CardPaddingLarge
-            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
             verticalArrangement = Arrangement.spacedBy(
-                CommerzoDimensions.Space12
+                CommerzoDimensions.Space10
             )
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     imageVector = Icons.Default.Flag,
@@ -699,13 +854,13 @@ private fun TodayGoalCard(
                     text = "Daily Goal",
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
+                    fontWeight = FontWeight.Bold
                 )
 
                 Text(
                     text = "${(progress * 100).toInt()}%",
                     style = MaterialTheme.typography.labelLarge,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
             }
@@ -723,7 +878,7 @@ private fun TodayGoalCard(
                 } else {
                     "Daily goal completed 🎉"
                 },
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -731,70 +886,102 @@ private fun TodayGoalCard(
 }
 
 @Composable
-private fun StudyPeriodCard(
-    title: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    seconds: Long,
-    sessions: Int?
+private fun WeeklyOverviewCard(
+    weekSeconds: Long,
+    weekSessions: Int,
+    monthSeconds: Long
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp)
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    CommerzoDimensions.CardPadding
+                    CommerzoDimensions.CardPaddingLarge
                 ),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space12
+            )
         ) {
-            Surface(
-                modifier = Modifier.size(46.dp),
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.secondaryContainer
-            ) {
-                Box(
-                    contentAlignment = androidx.compose.ui.Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.secondary
-                    )
-                }
-            }
-
-            Spacer(
-                modifier = Modifier.size(
-                    CommerzoDimensions.Space12
-                )
+            Text(
+                text = "Study Overview",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
             )
 
-            Column(
-                modifier = Modifier.weight(1f)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space8
+                )
             ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
+                OverviewStat(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.CalendarMonth,
+                    value = formatDuration(weekSeconds),
+                    label = "This week"
                 )
 
-                Text(
-                    text = formatDuration(seconds),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                OverviewStat(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.AccessTime,
+                    value = formatDuration(monthSeconds),
+                    label = "This month"
                 )
-
-                sessions?.let {
-                    Text(
-                        text = "$it completed sessions",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
             }
+
+            Text(
+                text = "$weekSessions completed sessions this week",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
+    }
+}
+
+@Composable
+private fun OverviewStat(
+    modifier: Modifier,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    value: String,
+    label: String
+) {
+    Column(
+        modifier = modifier
+            .background(
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(15.dp)
+            )
+            .padding(
+                CommerzoDimensions.Space12
+            ),
+        verticalArrangement = Arrangement.spacedBy(
+            CommerzoDimensions.Space6
+        )
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(19.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.ExtraBold
+        )
+
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -816,22 +1003,19 @@ private fun StreakCard(
                 .padding(
                     CommerzoDimensions.CardPaddingLarge
                 ),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(52.dp),
+                modifier = Modifier.size(50.dp),
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
-                Box(
-                    contentAlignment = androidx.compose.ui.Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Whatshot,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Default.Whatshot,
+                    contentDescription = null,
+                    modifier = Modifier.padding(13.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
 
             Spacer(
@@ -846,12 +1030,12 @@ private fun StreakCard(
                 Text(
                     text = "$currentStreak day streak",
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    fontWeight = FontWeight.ExtraBold
                 )
 
                 Text(
-                    text = "Longest: $longestStreak days",
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = "Longest streak: $longestStreak days",
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -871,7 +1055,13 @@ private fun RecentSessionCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(17.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
+        )
     ) {
         Row(
             modifier = Modifier
@@ -879,22 +1069,19 @@ private fun RecentSessionCard(
                 .padding(
                     CommerzoDimensions.CardPadding
                 ),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
                 modifier = Modifier.size(42.dp),
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
-                Box(
-                    contentAlignment = androidx.compose.ui.Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    modifier = Modifier.padding(11.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
 
             Spacer(
@@ -909,7 +1096,7 @@ private fun RecentSessionCard(
                 Text(
                     text = session.subjectId,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold
                 )
 
                 Text(
@@ -926,7 +1113,7 @@ private fun RecentSessionCard(
                     session.durationSeconds
                 ),
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                fontWeight = FontWeight.Bold
             )
         }
     }
@@ -946,17 +1133,20 @@ private fun StatItem(
             )
             .padding(
                 CommerzoDimensions.Space12
-            )
+            ),
+        verticalArrangement = Arrangement.spacedBy(
+            CommerzoDimensions.Space2
+        )
     ) {
         Text(
             text = value,
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+            fontWeight = FontWeight.ExtraBold
         )
 
         Text(
             text = label,
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
@@ -964,16 +1154,31 @@ private fun StatItem(
 
 @Composable
 private fun SectionHeader(
-    title: String
+    title: String,
+    subtitle: String
 ) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleLarge,
-        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-        modifier = Modifier.padding(
-            top = CommerzoDimensions.Space8
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                top = CommerzoDimensions.Space4
+            ),
+        verticalArrangement = Arrangement.spacedBy(
+            CommerzoDimensions.Space2
         )
-    )
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.ExtraBold
+        )
+
+        Text(
+            text = subtitle,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
 }
 
 @Composable
@@ -982,7 +1187,7 @@ private fun LoadingTrackerState(
 ) {
     Box(
         modifier = modifier,
-        contentAlignment = androidx.compose.ui.Alignment.Center
+        contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator()
     }
@@ -999,23 +1204,19 @@ private fun EmptyTrackerState(
             CommerzoDimensions.ScreenHorizontal
         ),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Surface(
             modifier = Modifier.size(72.dp),
             shape = CircleShape,
             color = MaterialTheme.colorScheme.primaryContainer
         ) {
-            Box(
-                contentAlignment = androidx.compose.ui.Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AccessTime,
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
+            Icon(
+                imageVector = Icons.Default.AccessTime,
+                contentDescription = null,
+                modifier = Modifier.padding(20.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
 
         Spacer(
@@ -1027,7 +1228,8 @@ private fun EmptyTrackerState(
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
         )
 
         Spacer(
@@ -1039,7 +1241,8 @@ private fun EmptyTrackerState(
         Text(
             text = message,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
         )
     }
 }
