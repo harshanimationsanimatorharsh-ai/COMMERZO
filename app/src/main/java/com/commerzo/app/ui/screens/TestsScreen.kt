@@ -74,10 +74,9 @@ fun TestsScreen(
                 CommerzoDimensions.Space20
             )
         ) {
-
             TestIntroCard()
 
-            SectionHeader(
+            TestsSectionHeader(
                 title = "Available Test",
                 subtitle = "Practice with a timed Commerce test"
             )
@@ -123,6 +122,32 @@ fun TestsScreen(
                 )
             )
         }
+    }
+}
+
+@Composable
+private fun TestsSectionHeader(
+    title: String,
+    subtitle: String
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(
+            CommerzoDimensions.Space4
+        )
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        Text(
+            text = subtitle,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -198,7 +223,6 @@ private fun TestCard(
                 CommerzoDimensions.Space12
             )
         ) {
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
