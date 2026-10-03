@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SupportAgent
@@ -68,20 +67,19 @@ fun SettingsScreen(
                     ) {
                         Text(
                             text = "Settings",
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.ExtraBold
                         )
 
                         Text(
-                            text = "Customize your COMMERZO experience",
+                            text = "Make COMMERZO feel right for you",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
                 navigationIcon = {
-                    IconButton(
-                        onClick = onBack
-                    ) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back"
@@ -112,8 +110,7 @@ fun SettingsScreen(
             SettingsHeroCard()
 
             SettingsSectionTitle(
-                title = "Appearance",
-                subtitle = "Make COMMERZO comfortable for you"
+                title = "Appearance"
             )
 
             SettingsToggleCard(
@@ -129,8 +126,7 @@ fun SettingsScreen(
             )
 
             SettingsSectionTitle(
-                title = "Notifications",
-                subtitle = "Stay updated with your learning"
+                title = "Notifications"
             )
 
             SettingsToggleCard(
@@ -146,25 +142,7 @@ fun SettingsScreen(
             )
 
             SettingsSectionTitle(
-                title = "Account",
-                subtitle = "Manage your COMMERZO account"
-            )
-
-            SettingsInfoCard(
-                icon = Icons.Default.Person,
-                title = "Account",
-                subtitle = "Manage your student profile from Profile"
-            )
-
-            SettingsInfoCard(
-                icon = Icons.Default.Settings,
-                title = "Learning Preferences",
-                subtitle = "Board, class and study preferences"
-            )
-
-            SettingsSectionTitle(
-                title = "Preferences",
-                subtitle = "Choose how COMMERZO feels and sounds"
+                title = "Preferences"
             )
 
             SettingsInfoCard(
@@ -180,8 +158,7 @@ fun SettingsScreen(
             )
 
             SettingsSectionTitle(
-                title = "Support",
-                subtitle = "Get help whenever you need it"
+                title = "Support"
             )
 
             SettingsInfoCard(
@@ -193,8 +170,7 @@ fun SettingsScreen(
             SupportEmailCard()
 
             SettingsSectionTitle(
-                title = "About",
-                subtitle = "Information about COMMERZO"
+                title = "About COMMERZO"
             )
 
             SettingsInfoCard(
@@ -257,7 +233,7 @@ private fun SettingsHeroCard() {
                 ) {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = "Settings",
+                        contentDescription = null,
                         modifier = Modifier.size(
                             CommerzoDimensions.IconLarge
                         ),
@@ -286,7 +262,7 @@ private fun SettingsHeroCard() {
                 )
 
                 Text(
-                    text = "Personalize your learning experience.",
+                    text = "Customize your learning experience.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
@@ -297,27 +273,15 @@ private fun SettingsHeroCard() {
 
 @Composable
 private fun SettingsSectionTitle(
-    title: String,
-    subtitle: String
+    title: String
 ) {
-    Column(
+    Text(
+        text = title,
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(
-            CommerzoDimensions.Space4
-        )
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.ExtraBold
-        )
-
-        Text(
-            text = subtitle,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.ExtraBold,
+        color = MaterialTheme.colorScheme.onBackground
+    )
 }
 
 @Composable
@@ -330,7 +294,7 @@ private fun SettingsToggleCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
@@ -482,7 +446,7 @@ private fun SettingsIcon(
 private fun SupportEmailCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
@@ -509,7 +473,7 @@ private fun SupportEmailCard() {
                 ) {
                     Icon(
                         imageVector = Icons.Default.Email,
-                        contentDescription = "Support email",
+                        contentDescription = null,
                         modifier = Modifier.size(
                             CommerzoDimensions.IconMedium
                         ),
