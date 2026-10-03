@@ -10,15 +10,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.commerzo.app.ui.theme.CommerzoDimensions
 
+// ============================================================
+// COMMERZO — Premium Screen Header
+// Clean • Minimal • Student Friendly
+// ============================================================
+
 @Composable
 fun CommerzoTopBar(
     title: String,
-    subtitle: String
+    subtitle: String = "",
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = CommerzoDimensions.Space4),
+            .padding(
+                top = CommerzoDimensions.Space4,
+                bottom = CommerzoDimensions.Space8
+            ),
         verticalArrangement = Arrangement.spacedBy(
             CommerzoDimensions.Space4
         )
@@ -26,13 +35,17 @@ fun CommerzoTopBar(
         Text(
             text = title,
             style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 2
         )
 
-        Text(
-            text = subtitle,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        if (subtitle.isNotBlank()) {
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2
+            )
+        }
     }
 }
