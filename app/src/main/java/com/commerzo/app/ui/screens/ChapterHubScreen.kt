@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -104,9 +103,6 @@ fun ChapterHubScreen(
             )
         ) {
 
-            /*
-             * CHAPTER HEADER
-             */
             item {
                 ChapterHeroCard(
                     subjectName = subjectName,
@@ -116,9 +112,6 @@ fun ChapterHubScreen(
                 )
             }
 
-            /*
-             * PRIMARY ACTIONS
-             */
             item {
                 SectionHeader(
                     title = "Learn & Practice",
@@ -156,9 +149,6 @@ fun ChapterHubScreen(
                 )
             }
 
-            /*
-             * STUDY MATERIAL
-             */
             item {
                 SectionHeader(
                     title = "Study Material",
@@ -242,7 +232,7 @@ private fun ChapterHeroCard(
                     imageVector = Icons.Default.MenuBook,
                     contentDescription = "Chapter",
                     modifier = Modifier.padding(
-                        CommerzoDimensions.Space14
+                        CommerzoDimensions.Space12
                     ),
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -381,8 +371,7 @@ private fun HubActionCard(
                             "$subtitle • Coming soon"
                         },
                     style = MaterialTheme.typography.bodySmall,
-                    color =
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
