@@ -4,15 +4,35 @@ sealed class Screen(
     val route: String
 ) {
 
+    // ─────────────────────────────────────────────────────────────
+    // ROOT DESTINATIONS
+    // ─────────────────────────────────────────────────────────────
+
     data object Home : Screen("home")
 
     data object Practice : Screen("practice")
 
     data object Tests : Screen("tests")
 
+    /*
+     * Compatibility route.
+     *
+     * Games must NOT remain a root bottom-navigation destination
+     * in the final IA. It will eventually live inside:
+     *
+     * Practice → More → Games
+     *
+     * Keep this route temporarily so existing navigation references
+     * do not break before AppNavigation is migrated.
+     */
     data object Games : Screen("games")
 
     data object Profile : Screen("profile")
+
+
+    // ─────────────────────────────────────────────────────────────
+    // STUDY TRACKER
+    // ─────────────────────────────────────────────────────────────
 
     data object StudyTracker : Screen("study_tracker")
 
@@ -24,8 +44,6 @@ sealed class Screen(
      * - chapterId
      * - board
      * - classLevel
-     *
-     * These values come from the existing Subject -> Chapter flow.
      */
     data object StudyTrackerSession : Screen(
         "study_tracker_session/{subjectId}/{chapterId}/{board}/{classLevel}"
@@ -44,8 +62,22 @@ sealed class Screen(
         }
     }
 
+
+    // ─────────────────────────────────────────────────────────────
+    // LEARNING FLOW
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Subjects are an internal learning destination.
+     *
+     * They should NOT be a bottom-navigation destination in the
+     * final four-tab architecture.
+     */
     data object Subjects : Screen("subjects")
 
+    /**
+     * Chapter list for a selected subject.
+     */
     data object Chapters : Screen(
         "chapters/{subjectId}/{board}/{classLevel}"
     ) {
@@ -60,6 +92,47 @@ sealed class Screen(
                 "${encodeRouteArgument(classLevel)}"
         }
     }
+
+    /**
+     * Central chapter destination.
+     *
+     * Target learning flow:
+     *
+     * Subject
+     *     ↓
+     * Chapter
+     *     ↓
+     * Chapter Hub
+     *     ├── Notes
+     *     ├── Practice
+     *     ├── Test
+     *     ├── PDFs
+     *     └── PYQs
+     *
+     * This route is introduced now so navigation can migrate
+     * toward the target information architecture.
+     */
+    data object ChapterHub : Screen(
+        "chapter_hub/{subjectId}/{chapterId}/{board}/{classLevel}"
+    ) {
+        fun createRoute(
+            subjectId: String,
+            chapterId: String,
+            board: String,
+            classLevel: String
+        ): String {
+            return "chapter_hub/" +
+                "${encodeRouteArgument(subjectId)}/" +
+                "${encodeRouteArgument(chapterId)}/" +
+                "${encodeRouteArgument(board)}/" +
+                "${encodeRouteArgument(classLevel)}"
+        }
+    }
+
+
+    // ─────────────────────────────────────────────────────────────
+    // QUESTION / PRACTICE FLOW
+    // ─────────────────────────────────────────────────────────────
 
     data object Questions : Screen(
         "questions/{subjectId}/{chapterId}/{board}/{classLevel}"
@@ -77,6 +150,11 @@ sealed class Screen(
                 "${encodeRouteArgument(classLevel)}"
         }
     }
+
+
+    // ─────────────────────────────────────────────────────────────
+    // TEST FLOW
+    // ─────────────────────────────────────────────────────────────
 
     data object TestSession : Screen(
         "test_session/{subjectId}/{chapterId}/{board}/{classLevel}"
@@ -97,14 +175,20 @@ sealed class Screen(
 
     data object TestResult : Screen("test_result")
 
-    data object Bookmarks : Screen("bookmarks")
-
     data object TestHistory : Screen("test_history")
+
+
+    // ─────────────────────────────────────────────────────────────
+    // PERSONAL / PROGRESS
+    // ─────────────────────────────────────────────────────────────
+
+    data object Bookmarks : Screen("bookmarks")
 
     data object Achievements : Screen("achievements")
 
     data object Settings : Screen("settings")
 }
+
 
 /**
  * Encodes a navigation argument so IDs containing characters such as
