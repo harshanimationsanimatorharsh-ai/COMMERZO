@@ -4,17 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Assignment
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PlayCircle
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +20,7 @@ import com.commerzo.app.data.model.Board
 import com.commerzo.app.data.model.ClassLevel
 import com.commerzo.app.data.model.content.CurriculumContentIds
 import com.commerzo.app.data.repository.SubjectRepository
+import com.commerzo.app.ui.components.CommerzoBottomBar
 import com.commerzo.app.ui.screens.AchievementsScreen
 import com.commerzo.app.ui.screens.BookmarksScreen
 import com.commerzo.app.ui.screens.ChapterHubScreen
@@ -57,44 +48,17 @@ data class NavigationTestResult(
     val marked: Int = 0
 )
 
-private data class BottomNavItem(
-    val route: String,
-    val label: String,
-    val icon: androidx.compose.ui.graphics.vector.ImageVector
-)
-
 /**
  * COMMERZO root navigation.
  *
- * Final target bottom navigation:
+ * Primary bottom navigation:
  *
  * HOME | PRACTICE | TESTS | PROFILE
  *
- * Subjects/Learn and Games remain internal destinations.
+ * Secondary destinations such as Subjects, Chapters,
+ * Study Tracker, Bookmarks, History, Achievements,
+ * Settings and Games remain internal destinations.
  */
-private val bottomNavItems = listOf(
-    BottomNavItem(
-        route = Screen.Home.route,
-        label = "Home",
-        icon = Icons.Default.Home
-    ),
-    BottomNavItem(
-        route = Screen.Practice.route,
-        label = "Practice",
-        icon = Icons.Default.PlayCircle
-    ),
-    BottomNavItem(
-        route = Screen.Tests.route,
-        label = "Tests",
-        icon = Icons.Default.Assignment
-    ),
-    BottomNavItem(
-        route = Screen.Profile.route,
-        label = "Profile",
-        icon = Icons.Default.Person
-    )
-)
-
 @Composable
 fun AppNavigation(
     navController: NavHostController = rememberNavController(),
@@ -116,54 +80,21 @@ fun AppNavigation(
         }
 
     val showBottomBar =
-        bottomNavItems.any { item ->
-            item.route == currentRoute
+        when (currentRoute) {
+            Screen.Home.route,
+            Screen.Practice.route,
+            Screen.Tests.route,
+            Screen.Profile.route -> true
+
+            else -> false
         }
 
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ) {
-                    bottomNavItems.forEach { item ->
-
-                        val selected =
-                            currentRoute == item.route
-
-                        NavigationBarItem(
-                            selected = selected,
-                            onClick = {
-
-                                if (!selected) {
-                                    navController.navigate(
-                                        item.route
-                                    ) {
-                                        popUpTo(
-                                            Screen.Home.route
-                                        ) {
-                                            saveState = true
-                                        }
-
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-                                }
-                            },
-                            icon = {
-                                Icon(
-                                    imageVector = item.icon,
-                                    contentDescription = item.label
-                                )
-                            },
-                            label = {
-                                Text(
-                                    text = item.label
-                                )
-                            }
-                        )
-                    }
-                }
+                CommerzoBottomBar(
+                    navController = navController
+                )
             }
         }
     ) { innerPadding ->
@@ -185,9 +116,9 @@ fun AppNavigation(
                 startDestination = Screen.Home.route
             ) {
 
-                // ─────────────────────────────────────────────────
+                // ====================================================
                 // HOME
-                // ─────────────────────────────────────────────────
+                // ====================================================
 
                 composable(Screen.Home.route) {
                     HomeScreen(
@@ -248,9 +179,9 @@ fun AppNavigation(
                     )
                 }
 
-                // ─────────────────────────────────────────────────
+                // ====================================================
                 // PRACTICE
-                // ─────────────────────────────────────────────────
+                // ====================================================
 
                 composable(Screen.Practice.route) {
                     PracticeScreen(
@@ -260,9 +191,9 @@ fun AppNavigation(
                     )
                 }
 
-                // ─────────────────────────────────────────────────
+                // ====================================================
                 // TEST CENTER
-                // ─────────────────────────────────────────────────
+                // ====================================================
 
                 composable(Screen.Tests.route) {
                     TestSelectionScreen(
@@ -289,11 +220,13 @@ fun AppNavigation(
                     )
                 }
 
-                // ─────────────────────────────────────────────────
+                // ====================================================
                 // TEST SESSION
-                // ─────────────────────────────────────────────────
+                // ====================================================
 
-                composable(Screen.TestSession.route) { backStackEntry ->
+                composable(
+                    Screen.TestSession.route
+                ) { backStackEntry ->
 
                     val rawSubjectId =
                         backStackEntry.arguments
@@ -361,17 +294,17 @@ fun AppNavigation(
                     )
                 }
 
-                // ─────────────────────────────────────────────────
+                // ====================================================
                 // GAMES
-                // ─────────────────────────────────────────────────
+                // ====================================================
 
                 composable(Screen.Games.route) {
                     GamesScreen()
                 }
 
-                // ─────────────────────────────────────────────────
+                // ====================================================
                 // PROFILE
-                // ─────────────────────────────────────────────────
+                // ====================================================
 
                 composable(Screen.Profile.route) {
                     ProfileScreen(
@@ -406,9 +339,9 @@ fun AppNavigation(
                     )
                 }
 
-                // ─────────────────────────────────────────────────
+                // ====================================================
                 // STUDY TRACKER
-                // ─────────────────────────────────────────────────
+                // ====================================================
 
                 composable(Screen.StudyTracker.route) {
                     StudyTrackerScreen(
@@ -461,9 +394,9 @@ fun AppNavigation(
                     )
                 }
 
-                // ─────────────────────────────────────────────────
+                // ====================================================
                 // SUBJECTS
-                // ─────────────────────────────────────────────────
+                // ====================================================
 
                 composable(Screen.Subjects.route) {
                     SubjectSelectionScreen(
@@ -481,11 +414,13 @@ fun AppNavigation(
                     )
                 }
 
-                // ─────────────────────────────────────────────────
+                // ====================================================
                 // CHAPTERS
-                // ─────────────────────────────────────────────────
+                // ====================================================
 
-                composable(Screen.Chapters.route) { backStackEntry ->
+                composable(
+                    Screen.Chapters.route
+                ) { backStackEntry ->
 
                     val subjectId =
                         decodeRouteArgument(
@@ -563,9 +498,9 @@ fun AppNavigation(
                     )
                 }
 
-                // ─────────────────────────────────────────────────
+                // ====================================================
                 // CHAPTER HUB
-                // ─────────────────────────────────────────────────
+                // ====================================================
 
                 composable(
                     Screen.ChapterHub.route
@@ -661,11 +596,13 @@ fun AppNavigation(
                     )
                 }
 
-                // ─────────────────────────────────────────────────
+                // ====================================================
                 // QUESTIONS
-                // ─────────────────────────────────────────────────
+                // ====================================================
 
-                composable(Screen.Questions.route) { backStackEntry ->
+                composable(
+                    Screen.Questions.route
+                ) { backStackEntry ->
 
                     val rawSubjectId =
                         decodeRouteArgument(
@@ -715,11 +652,13 @@ fun AppNavigation(
                     )
                 }
 
-                // ─────────────────────────────────────────────────
+                // ====================================================
                 // TEST RESULT
-                // ─────────────────────────────────────────────────
+                // ====================================================
 
-                composable(Screen.TestResult.route) {
+                composable(
+                    Screen.TestResult.route
+                ) {
                     TestResultScreen(
                         total = latestTestResult.total,
                         answered = latestTestResult.answered,
@@ -758,11 +697,13 @@ fun AppNavigation(
                     )
                 }
 
-                // ─────────────────────────────────────────────────
+                // ====================================================
                 // BOOKMARKS
-                // ─────────────────────────────────────────────────
+                // ====================================================
 
-                composable(Screen.Bookmarks.route) {
+                composable(
+                    Screen.Bookmarks.route
+                ) {
                     BookmarksScreen(
                         onBack = {
                             navController.popBackStack()
@@ -770,11 +711,13 @@ fun AppNavigation(
                     )
                 }
 
-                // ─────────────────────────────────────────────────
+                // ====================================================
                 // TEST HISTORY
-                // ─────────────────────────────────────────────────
+                // ====================================================
 
-                composable(Screen.TestHistory.route) {
+                composable(
+                    Screen.TestHistory.route
+                ) {
                     TestHistoryScreen(
                         onBack = {
                             navController.popBackStack()
@@ -782,11 +725,13 @@ fun AppNavigation(
                     )
                 }
 
-                // ─────────────────────────────────────────────────
+                // ====================================================
                 // ACHIEVEMENTS
-                // ─────────────────────────────────────────────────
+                // ====================================================
 
-                composable(Screen.Achievements.route) {
+                composable(
+                    Screen.Achievements.route
+                ) {
                     AchievementsScreen(
                         onBack = {
                             navController.popBackStack()
@@ -794,11 +739,13 @@ fun AppNavigation(
                     )
                 }
 
-                // ─────────────────────────────────────────────────
+                // ====================================================
                 // SETTINGS
-                // ─────────────────────────────────────────────────
+                // ====================================================
 
-                composable(Screen.Settings.route) {
+                composable(
+                    Screen.Settings.route
+                ) {
                     SettingsScreen(
                         onBack = {
                             navController.popBackStack()
