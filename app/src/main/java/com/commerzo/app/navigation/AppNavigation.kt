@@ -32,6 +32,7 @@ import com.commerzo.app.data.model.content.CurriculumContentIds
 import com.commerzo.app.data.repository.SubjectRepository
 import com.commerzo.app.ui.screens.AchievementsScreen
 import com.commerzo.app.ui.screens.BookmarksScreen
+import com.commerzo.app.ui.screens.ChapterHubScreen
 import com.commerzo.app.ui.screens.ChapterScreen
 import com.commerzo.app.ui.screens.GamesScreen
 import com.commerzo.app.ui.screens.HomeScreen
@@ -69,8 +70,7 @@ private data class BottomNavItem(
  *
  * HOME | PRACTICE | TESTS | PROFILE
  *
- * Subjects/Learn and Games remain available as internal destinations
- * for compatibility, but they are intentionally NOT root bottom tabs.
+ * Subjects/Learn and Games remain internal destinations.
  */
 private val bottomNavItems = listOf(
     BottomNavItem(
@@ -363,9 +363,6 @@ fun AppNavigation(
 
                 // ─────────────────────────────────────────────────
                 // GAMES
-                //
-                // Internal destination only.
-                // NOT a bottom-navigation destination.
                 // ─────────────────────────────────────────────────
 
                 composable(Screen.Games.route) {
@@ -465,10 +462,7 @@ fun AppNavigation(
                 }
 
                 // ─────────────────────────────────────────────────
-                // SUBJECTS / LEARNING
-                //
-                // Internal destination.
-                // NOT a bottom-navigation destination.
+                // SUBJECTS
                 // ─────────────────────────────────────────────────
 
                 composable(Screen.Subjects.route) {
@@ -536,19 +530,18 @@ fun AppNavigation(
                         },
                         onChapterClick = {
                             chapterId,
-                            _ ->
+                            chapterTitle ->
 
                             navController.navigate(
-                                Screen.Questions.createRoute(
-                                    subjectId =
-                                        toQuestionSubjectId(
-                                            subjectId
-                                        ),
+                                Screen.ChapterHub.createRoute(
+                                    subjectId = subjectId,
                                     chapterId = chapterId,
                                     board = board.name,
                                     classLevel = classLevel.name
                                 )
-                            )
+                            ) {
+                                launchSingleTop = true
+                            }
                         },
                         onStartStudy = {
                             startSubjectId,
@@ -566,6 +559,97 @@ fun AppNavigation(
                                 )
                             )
                         }
+                    )
+                }
+
+                // ─────────────────────────────────────────────────
+                // CHAPTER HUB
+                // ─────────────────────────────────────────────────
+
+                composable(
+                    Screen.ChapterHub.route
+                ) { backStackEntry ->
+
+                    val subjectId =
+                        decodeRouteArgument(
+                            backStackEntry.arguments
+                                ?.getString("subjectId")
+                        ).takeIf { it.isNotBlank() }
+                            ?: return@composable
+
+                    val chapterId =
+                        decodeRouteArgument(
+                            backStackEntry.arguments
+                                ?.getString("chapterId")
+                        ).takeIf { it.isNotBlank() }
+                            ?: return@composable
+
+                    val board =
+                        enumValueOrDefault(
+                            decodeRouteArgument(
+                                backStackEntry.arguments
+                                    ?.getString("board")
+                            ),
+                            Board.MP_BOARD
+                        )
+
+                    val classLevel =
+                        enumValueOrDefault(
+                            decodeRouteArgument(
+                                backStackEntry.arguments
+                                    ?.getString("classLevel")
+                            ),
+                            ClassLevel.CLASS_12
+                        )
+
+                    val subjectName =
+                        getSubjectDisplayName(
+                            subjectRepository = subjectRepository,
+                            subjectId = subjectId,
+                            board = board,
+                            classLevel = classLevel
+                        )
+
+                    ChapterHubScreen(
+                        subjectId = subjectId,
+                        chapterId = chapterId,
+                        subjectName = subjectName,
+                        chapterTitle = chapterId,
+                        board = board.name,
+                        classLevel = classLevel.name,
+                        onBack = {
+                            navController.popBackStack()
+                        },
+                        onPractice = {
+                            navController.navigate(
+                                Screen.Questions.createRoute(
+                                    subjectId =
+                                        toQuestionSubjectId(
+                                            subjectId
+                                        ),
+                                    chapterId = chapterId,
+                                    board = board.name,
+                                    classLevel = classLevel.name
+                                )
+                            )
+                        },
+                        onTest = {
+                            navController.navigate(
+                                Screen.TestSession.createRoute(
+                                    subjectId =
+                                        toQuestionSubjectId(
+                                            subjectId
+                                        ),
+                                    chapterId = chapterId,
+                                    board = board.name,
+                                    classLevel = classLevel.name
+                                )
+                            )
+                        },
+                        onNotes = {},
+                        onPdfs = {},
+                        onPyq = {},
+                        onBookmarks = {}
                     )
                 }
 
