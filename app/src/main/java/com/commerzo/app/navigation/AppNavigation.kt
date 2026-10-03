@@ -536,6 +536,7 @@ fun AppNavigation(
                                 Screen.ChapterHub.createRoute(
                                     subjectId = subjectId,
                                     chapterId = chapterId,
+                                    chapterTitle = chapterTitle,
                                     board = board.name,
                                     classLevel = classLevel.name
                                 )
@@ -584,6 +585,13 @@ fun AppNavigation(
                         ).takeIf { it.isNotBlank() }
                             ?: return@composable
 
+                    val chapterTitle =
+                        decodeRouteArgument(
+                            backStackEntry.arguments
+                                ?.getString("chapterTitle")
+                        ).takeIf { it.isNotBlank() }
+                            ?: chapterId
+
                     val board =
                         enumValueOrDefault(
                             decodeRouteArgument(
@@ -614,7 +622,7 @@ fun AppNavigation(
                         subjectId = subjectId,
                         chapterId = chapterId,
                         subjectName = subjectName,
-                        chapterTitle = chapterId,
+                        chapterTitle = chapterTitle,
                         board = board.name,
                         classLevel = classLevel.name,
                         onBack = {
