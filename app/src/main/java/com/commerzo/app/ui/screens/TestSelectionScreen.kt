@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -29,7 +28,6 @@ import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -57,6 +55,7 @@ import com.commerzo.app.data.model.content.CurriculumContentIds
 import com.commerzo.app.data.repository.QuestionBankManager
 import com.commerzo.app.data.repository.content.ContentManager
 import com.commerzo.app.data.repository.content.CurriculumContentMapper
+import com.commerzo.app.ui.theme.CommerzoDimensions
 
 @Composable
 fun TestSelectionScreen(
@@ -84,10 +83,6 @@ fun TestSelectionScreen(
         mutableStateOf(ClassLevel.CLASS_12)
     }
 
-    var selectedTestType by remember {
-        mutableStateOf(TestType.CHAPTER)
-    }
-
     var selectedSubjectId by remember {
         mutableStateOf<String?>(null)
     }
@@ -97,15 +92,11 @@ fun TestSelectionScreen(
     }
 
     val boardId = remember(selectedBoard) {
-        CurriculumContentMapper.getBoardId(
-            selectedBoard
-        )
+        CurriculumContentMapper.getBoardId(selectedBoard)
     }
 
     val classId = remember(selectedClass) {
-        CurriculumContentMapper.getClassId(
-            selectedClass
-        )
+        CurriculumContentMapper.getClassId(selectedClass)
     }
 
     val subjects by produceState<List<ContentSubject>>(
@@ -134,33 +125,28 @@ fun TestSelectionScreen(
         } ?: emptyList()
     }
 
-    val questionSubjectId = remember(
-        selectedSubjectId
-    ) {
-        toQuestionSubjectId(
-            selectedSubjectId
-        )
-    }
-
-    val selectedChapter = chapters.firstOrNull {
-        it.id == selectedChapterId
+    val questionSubjectId = remember(selectedSubjectId) {
+        toQuestionSubjectId(selectedSubjectId)
     }
 
     val selectedSubject = subjects.firstOrNull {
         it.id == selectedSubjectId
     }
 
-    val selectedQuestionCount =
-        selectedChapter?.let { chapter ->
-            questionBankManager
-                .getValidatedQuestions(
-                    subjectId = questionSubjectId ?: "",
-                    chapterId = chapter.id,
-                    board = selectedBoard,
-                    classLevel = selectedClass
-                )
-                .size
-        } ?: 0
+    val selectedChapter = chapters.firstOrNull {
+        it.id == selectedChapterId
+    }
+
+    val selectedQuestionCount = selectedChapter?.let { chapter ->
+        questionBankManager
+            .getValidatedQuestions(
+                subjectId = questionSubjectId ?: "",
+                chapterId = chapter.id,
+                board = selectedBoard,
+                classLevel = selectedClass
+            )
+            .size
+    } ?: 0
 
     Scaffold(
         topBar = {
@@ -168,25 +154,24 @@ fun TestSelectionScreen(
                 title = {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(
-                            2.dp
+                            CommerzoDimensions.Space2
                         )
                     ) {
                         Text(
-                            text = "Tests",
-                            fontWeight = FontWeight.ExtraBold
+                            text = "Start a Test",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
                         )
 
                         Text(
-                            text = "Challenge yourself and measure progress",
-                            style = MaterialTheme.typography.labelSmall,
+                            text = "Choose your chapter and test yourself",
+                            style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
                 navigationIcon = {
-                    IconButton(
-                        onClick = onBack
-                    ) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back"
@@ -202,46 +187,39 @@ fun TestSelectionScreen(
                 .fillMaxSize()
                 .padding(paddingValues),
             contentPadding = PaddingValues(
-                horizontal = 20.dp,
-                vertical = 12.dp
+                horizontal = CommerzoDimensions.ScreenHorizontal,
+                vertical = CommerzoDimensions.Space16
             ),
             verticalArrangement = Arrangement.spacedBy(
-                16.dp
+                CommerzoDimensions.Space16
             )
         ) {
 
-            /*
-             * TEST TYPES
-             */
             item {
-                SectionHeader(
-                    title = "Choose Test",
-                    subtitle = "Select the type of test you want"
+                ChapterTestHeroCard()
+            }
+
+            item {
+                SelectionSectionTitle(
+                    number = "01",
+                    title = "Choose Board",
+                    subtitle = "Select your examination board"
                 )
             }
 
             item {
-                TestTypeCard(
-                    title = "Quick Test",
-                    subtitle = "Fast practice with a short test",
-                    icon = Icons.Default.PlayArrow,
-                    selected = selectedTestType == TestType.QUICK,
-                    enabled = false,
-                    onClick = {
-                        selectedTestType = TestType.QUICK
-                    }
-                )
-            }
-
-            item {
-                TestTypeCard(
-                    title = "Chapter Test",
-                    subtitle = "Test one chapter in detail",
-                    icon = Icons.Default.MenuBook,
-                    selected = selectedTestType == TestType.CHAPTER,
-                    enabled = true,
-                    onClick = {
-                        selectedTestType = TestType.CHAPTER
+                SelectionChoiceRow(
+                    first = "MP Board",
+                    second = "CBSE",
+                    firstSelected = selectedBoard == Board.MP_BOARD,
+                    secondSelected = selectedBoard == Board.CBSE,
+                    onFirstClick = {
+                        selectedBoard = Board.MP_BOARD
+                        selectedSubjectId = null
+                        selectedChapterId = null
+                    },
+                    onSecondClick = {
+                        selectedBoard = Board.CBSE
                         selectedSubjectId = null
                         selectedChapterId = null
                     }
@@ -249,115 +227,50 @@ fun TestSelectionScreen(
             }
 
             item {
-                TestTypeCard(
-                    title = "Weekly Test",
-                    subtitle = "Weekly revision and assessment",
-                    icon = Icons.Default.Schedule,
-                    selected = selectedTestType == TestType.WEEKLY,
-                    enabled = false,
-                    onClick = {
-                        selectedTestType = TestType.WEEKLY
+                SelectionSectionTitle(
+                    number = "02",
+                    title = "Choose Class",
+                    subtitle = "Select your current class"
+                )
+            }
+
+            item {
+                SelectionChoiceRow(
+                    first = "Class 11",
+                    second = "Class 12",
+                    firstSelected =
+                        selectedClass == ClassLevel.CLASS_11,
+                    secondSelected =
+                        selectedClass == ClassLevel.CLASS_12,
+                    onFirstClick = {
+                        selectedClass = ClassLevel.CLASS_11
+                        selectedSubjectId = null
+                        selectedChapterId = null
+                    },
+                    onSecondClick = {
+                        selectedClass = ClassLevel.CLASS_12
+                        selectedSubjectId = null
+                        selectedChapterId = null
                     }
                 )
             }
 
             item {
-                TestTypeCard(
-                    title = "Full Syllabus",
-                    subtitle = "Complete syllabus assessment",
-                    icon = Icons.Default.WorkspacePremium,
-                    selected = selectedTestType == TestType.FULL_SYLLABUS,
-                    enabled = false,
-                    onClick = {
-                        selectedTestType = TestType.FULL_SYLLABUS
-                    }
+                SelectionSectionTitle(
+                    number = "03",
+                    title = "Choose Subject",
+                    subtitle = "Select a subject for your test"
                 )
             }
 
-            item {
-                TestTypeCard(
-                    title = "Previous Year Papers",
-                    subtitle = "Practice board examination papers",
-                    icon = Icons.Default.Assessment,
-                    selected = selectedTestType == TestType.PYQ,
-                    enabled = false,
-                    onClick = {
-                        selectedTestType = TestType.PYQ
-                    }
-                )
-            }
-
-            /*
-             * CURRENTLY SUPPORTED TEST FLOW
-             */
-            if (selectedTestType == TestType.CHAPTER) {
-
+            if (subjects.isEmpty()) {
                 item {
-                    SelectionSectionTitle(
-                        number = "01",
-                        title = "Choose Board",
-                        subtitle = "Select your examination board"
+                    EmptySelectionCard(
+                        title = "No subjects available",
+                        message = "No subjects are available for this board and class yet."
                     )
                 }
-
-                item {
-                    SelectionChoiceRow(
-                        first = "MP Board",
-                        second = "CBSE",
-                        firstSelected =
-                            selectedBoard == Board.MP_BOARD,
-                        secondSelected =
-                            selectedBoard == Board.CBSE,
-                        onFirstClick = {
-                            selectedBoard = Board.MP_BOARD
-                            selectedSubjectId = null
-                            selectedChapterId = null
-                        },
-                        onSecondClick = {
-                            selectedBoard = Board.CBSE
-                            selectedSubjectId = null
-                            selectedChapterId = null
-                        }
-                    )
-                }
-
-                item {
-                    SelectionSectionTitle(
-                        number = "02",
-                        title = "Choose Class",
-                        subtitle = "Select your current class"
-                    )
-                }
-
-                item {
-                    SelectionChoiceRow(
-                        first = "Class 11",
-                        second = "Class 12",
-                        firstSelected =
-                            selectedClass == ClassLevel.CLASS_11,
-                        secondSelected =
-                            selectedClass == ClassLevel.CLASS_12,
-                        onFirstClick = {
-                            selectedClass = ClassLevel.CLASS_11
-                            selectedSubjectId = null
-                            selectedChapterId = null
-                        },
-                        onSecondClick = {
-                            selectedClass = ClassLevel.CLASS_12
-                            selectedSubjectId = null
-                            selectedChapterId = null
-                        }
-                    )
-                }
-
-                item {
-                    SelectionSectionTitle(
-                        number = "03",
-                        title = "Choose Subject",
-                        subtitle = "Select a subject for your test"
-                    )
-                }
-
+            } else {
                 items(
                     items = subjects,
                     key = { it.id }
@@ -387,17 +300,26 @@ fun TestSelectionScreen(
                         }
                     )
                 }
+            }
 
-                if (selectedSubjectId != null) {
+            if (selectedSubjectId != null) {
 
+                item {
+                    SelectionSectionTitle(
+                        number = "04",
+                        title = "Choose Chapter",
+                        subtitle = "Select the chapter you want to test"
+                    )
+                }
+
+                if (chapters.isEmpty()) {
                     item {
-                        SelectionSectionTitle(
-                            number = "04",
-                            title = "Choose Chapter",
-                            subtitle = "Select the chapter you want to test"
+                        EmptySelectionCard(
+                            title = "No chapters available",
+                            message = "This subject does not have chapters available for the selected curriculum yet."
                         )
                     }
-
+                } else {
                     items(
                         items = chapters,
                         key = { it.id }
@@ -434,203 +356,143 @@ fun TestSelectionScreen(
                             }
                         )
                     }
-
-                    item {
-                        TestSummaryCard(
-                            board =
-                                selectedBoard.displayName(),
-                            className =
-                                selectedClass.displayName(),
-                            subject =
-                                selectedSubject?.name
-                                    ?: "Not selected",
-                            chapter =
-                                selectedChapter?.title
-                                    ?: "Not selected",
-                            questionCount =
-                                selectedQuestionCount
-                        )
-                    }
-
-                    item {
-                        Button(
-                            onClick = {
-
-                                val subjectId =
-                                    selectedSubjectId
-                                        ?: return@Button
-
-                                val chapterId =
-                                    selectedChapterId
-                                        ?: return@Button
-
-                                if (selectedQuestionCount <= 0) {
-                                    return@Button
-                                }
-
-                                onStartTest(
-                                    subjectId,
-                                    chapterId,
-                                    selectedBoard,
-                                    selectedClass
-                                )
-                            },
-                            enabled =
-                                selectedSubjectId != null &&
-                                    selectedChapterId != null &&
-                                    selectedQuestionCount > 0,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(54.dp),
-                            shape = RoundedCornerShape(17.dp)
-                        ) {
-                            Icon(
-                                imageVector =
-                                    Icons.Default.PlayArrow,
-                                contentDescription = null
-                            )
-
-                            Spacer(
-                                modifier = Modifier.width(8.dp)
-                            )
-
-                            Text(
-                                text = "Start Chapter Test",
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
                 }
-            }
-
-            /*
-             * Future test types are intentionally not wired
-             * to the chapter-test engine.
-             */
-            if (selectedTestType != TestType.CHAPTER) {
 
                 item {
-                    ComingSoonTestCard(
-                        testType = selectedTestType
+                    TestSummaryCard(
+                        board = selectedBoard.displayName(),
+                        className = selectedClass.displayName(),
+                        subject =
+                            selectedSubject?.name ?: "Not selected",
+                        chapter =
+                            selectedChapter?.title ?: "Not selected",
+                        questionCount = selectedQuestionCount
                     )
+                }
+
+                item {
+                    Button(
+                        onClick = {
+                            val subjectId =
+                                selectedSubjectId ?: return@Button
+
+                            val chapterId =
+                                selectedChapterId ?: return@Button
+
+                            if (selectedQuestionCount <= 0) {
+                                return@Button
+                            }
+
+                            onStartTest(
+                                subjectId,
+                                chapterId,
+                                selectedBoard,
+                                selectedClass
+                            )
+                        },
+                        enabled =
+                            selectedSubjectId != null &&
+                                selectedChapterId != null &&
+                                selectedQuestionCount > 0,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(
+                                CommerzoDimensions.ButtonHeight
+                            ),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = null
+                        )
+
+                        Spacer(
+                            modifier = Modifier.width(
+                                CommerzoDimensions.Space8
+                            )
+                        )
+
+                        Text(
+                            text = "Start Chapter Test",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
 
             item {
+                MoreTestModesCard()
+            }
+
+            item {
                 Spacer(
-                    modifier = Modifier.height(4.dp)
+                    modifier = Modifier.height(
+                        CommerzoDimensions.Space4
+                    )
                 )
             }
         }
     }
 }
 
-private enum class TestType {
-    QUICK,
-    CHAPTER,
-    WEEKLY,
-    FULL_SYLLABUS,
-    PYQ
-}
-
 @Composable
-private fun TestTypeCard(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
-    selected: Boolean,
-    enabled: Boolean,
-    onClick: () -> Unit
-) {
+private fun ChapterTestHeroCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        onClick = onClick,
-        enabled = enabled,
-        shape = RoundedCornerShape(22.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = when {
-                selected ->
-                    MaterialTheme.colorScheme.primaryContainer
-
-                enabled ->
-                    MaterialTheme.colorScheme.surface
-
-                else ->
-                    MaterialTheme.colorScheme.surfaceVariant
-            },
-            disabledContainerColor =
-                MaterialTheme.colorScheme.surfaceVariant
+            containerColor =
+                MaterialTheme.colorScheme.primaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
         )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(18.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space16
+            )
         ) {
-
             Surface(
-                modifier = Modifier.size(50.dp),
-                shape = RoundedCornerShape(16.dp),
-                color =
-                    if (enabled) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surface
-                    }
+                modifier = Modifier.size(54.dp),
+                shape = RoundedCornerShape(17.dp),
+                color = MaterialTheme.colorScheme.surface.copy(
+                    alpha = 0.72f
+                )
             ) {
                 Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    modifier = Modifier.padding(13.dp),
-                    tint =
-                        if (enabled) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        }
+                    imageVector = Icons.Default.Assessment,
+                    contentDescription = null,
+                    modifier = Modifier.padding(14.dp),
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
-
-            Spacer(
-                modifier = Modifier.width(13.dp)
-            )
 
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(
-                    3.dp
+                    CommerzoDimensions.Space4
                 )
             ) {
                 Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
+                    text = "Chapter Test",
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.ExtraBold,
                     color =
-                        if (enabled) {
-                            MaterialTheme.colorScheme.onSurface
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        }
+                        MaterialTheme.colorScheme.onPrimaryContainer
                 )
 
                 Text(
-                    text =
-                        if (enabled) {
-                            subtitle
-                        } else {
-                            "$subtitle • Coming soon"
-                        },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            if (selected && enabled) {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "Selected",
-                    tint = MaterialTheme.colorScheme.primary
+                    text = "Practice one chapter with real MCQs and get your score instantly.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color =
+                        MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
         }
@@ -638,47 +500,10 @@ private fun TestTypeCard(
 }
 
 @Composable
-private fun ComingSoonTestCard(
-    testType: TestType
-) {
-    val title: String
-    val description: String
-
-    when (testType) {
-        TestType.QUICK -> {
-            title = "Quick Test"
-            description =
-                "A short timed test mode will be connected to the test engine here."
-        }
-
-        TestType.WEEKLY -> {
-            title = "Weekly Test"
-            description =
-                "Weekly scheduled assessments will be connected here."
-        }
-
-        TestType.FULL_SYLLABUS -> {
-            title = "Full Syllabus"
-            description =
-                "Complete-syllabus test generation will be connected here."
-        }
-
-        TestType.PYQ -> {
-            title = "Previous Year Papers"
-            description =
-                "Board-wise previous year papers will appear here after PYQ data is connected."
-        }
-
-        TestType.CHAPTER -> {
-            title = "Chapter Test"
-            description =
-                "Choose a subject and chapter to start."
-        }
-    }
-
+private fun MoreTestModesCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor =
                 MaterialTheme.colorScheme.surfaceVariant
@@ -687,28 +512,37 @@ private fun ComingSoonTestCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(
+                    CommerzoDimensions.CardPadding
+                ),
             verticalArrangement = Arrangement.spacedBy(
-                8.dp
+                CommerzoDimensions.Space8
             )
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.ExtraBold
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space10
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.WorkspacePremium,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+
+                Text(
+                    text = "More test modes",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
             Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium,
+                text = "Quick Test, Weekly Test, Full Syllabus and Previous Year Papers will be added here as their data and test engines become available.",
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Text(
-                text = "Coming soon",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
             )
         }
     }
@@ -726,7 +560,7 @@ private fun SelectionSectionTitle(
     ) {
         Surface(
             modifier = Modifier.size(34.dp),
-            shape = CircleShape,
+            shape = RoundedCornerShape(12.dp),
             color = MaterialTheme.colorScheme.primaryContainer
         ) {
             Box(
@@ -742,10 +576,14 @@ private fun SelectionSectionTitle(
         }
 
         Spacer(
-            modifier = Modifier.width(11.dp)
+            modifier = Modifier.width(
+                CommerzoDimensions.Space10
+            )
         )
 
-        Column {
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
@@ -753,7 +591,9 @@ private fun SelectionSectionTitle(
             )
 
             Spacer(
-                modifier = Modifier.height(2.dp)
+                modifier = Modifier.height(
+                    CommerzoDimensions.Space2
+                )
             )
 
             Text(
@@ -776,7 +616,9 @@ private fun SelectionChoiceRow(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(
+            CommerzoDimensions.Space8
+        )
     ) {
         ChoiceCard(
             modifier = Modifier.weight(1f),
@@ -804,7 +646,7 @@ private fun ChoiceCard(
     Card(
         modifier = modifier,
         onClick = onClick,
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(17.dp),
         colors = CardDefaults.cardColors(
             containerColor =
                 if (selected) {
@@ -812,6 +654,9 @@ private fun ChoiceCard(
                 } else {
                     MaterialTheme.colorScheme.surface
                 }
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
         )
     ) {
         Row(
@@ -819,14 +664,17 @@ private fun ChoiceCard(
                 .fillMaxWidth()
                 .padding(
                     horizontal = 14.dp,
-                    vertical = 16.dp
+                    vertical = 15.dp
                 ),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space8
+            )
         ) {
             Icon(
                 imageVector = Icons.Default.School,
                 contentDescription = null,
-                modifier = Modifier.size(21.dp),
+                modifier = Modifier.size(20.dp),
                 tint =
                     if (selected) {
                         MaterialTheme.colorScheme.primary
@@ -835,25 +683,18 @@ private fun ChoiceCard(
                     }
             )
 
-            Spacer(
-                modifier = Modifier.width(9.dp)
-            )
-
             Text(
                 text = title,
+                modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold
             )
 
             if (selected) {
-                Spacer(
-                    modifier = Modifier.weight(1f)
-                )
-
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = "Selected",
-                    modifier = Modifier.size(19.dp),
+                    modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
@@ -874,7 +715,7 @@ private fun SelectionCard(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
         enabled = enabled,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(19.dp),
         colors = CardDefaults.cardColors(
             containerColor = when {
                 !enabled ->
@@ -886,12 +727,19 @@ private fun SelectionCard(
                 else ->
                     MaterialTheme.colorScheme.surface
             }
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation =
+                if (enabled) 1.dp else 0.dp
         )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(
+                    horizontal = 16.dp,
+                    vertical = 14.dp
+                ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -925,7 +773,9 @@ private fun SelectionCard(
             }
 
             Spacer(
-                modifier = Modifier.width(13.dp)
+                modifier = Modifier.width(
+                    CommerzoDimensions.Space12
+                )
             )
 
             Column(
@@ -934,11 +784,19 @@ private fun SelectionCard(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold
+                    fontWeight = FontWeight.Bold,
+                    color =
+                        if (enabled) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
                 )
 
                 Spacer(
-                    modifier = Modifier.height(3.dp)
+                    modifier = Modifier.height(
+                        CommerzoDimensions.Space2
+                    )
                 )
 
                 Text(
@@ -950,12 +808,15 @@ private fun SelectionCard(
 
             if (selected) {
                 Spacer(
-                    modifier = Modifier.width(8.dp)
+                    modifier = Modifier.width(
+                        CommerzoDimensions.Space8
+                    )
                 )
 
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = "Selected",
+                    modifier = Modifier.size(21.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
@@ -973,38 +834,40 @@ private fun TestSummaryCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
+        shape = RoundedCornerShape(21.dp),
         colors = CardDefaults.cardColors(
             containerColor =
                 MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
         Column(
-            modifier = Modifier.padding(18.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space4
+            )
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space10
+                )
             ) {
                 Surface(
                     modifier = Modifier.size(40.dp),
-                    shape = CircleShape,
+                    shape = RoundedCornerShape(12.dp),
                     color = MaterialTheme.colorScheme.primaryContainer
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = null,
-                            modifier = Modifier.size(21.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        modifier = Modifier.padding(10.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
-
-                Spacer(
-                    modifier = Modifier.width(11.dp)
-                )
 
                 Column {
                     Text(
@@ -1014,7 +877,7 @@ private fun TestSummaryCard(
                     )
 
                     Text(
-                        text = "Review your selection before starting",
+                        text = "Review before starting",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1022,7 +885,9 @@ private fun TestSummaryCard(
             }
 
             Spacer(
-                modifier = Modifier.height(15.dp)
+                modifier = Modifier.height(
+                    CommerzoDimensions.Space10
+                )
             )
 
             SummaryRow(
@@ -1046,7 +911,9 @@ private fun TestSummaryCard(
             )
 
             Spacer(
-                modifier = Modifier.height(8.dp)
+                modifier = Modifier.height(
+                    CommerzoDimensions.Space6
+                )
             )
 
             Row(
@@ -1082,7 +949,9 @@ private fun SummaryRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 3.dp)
+            .padding(
+                vertical = CommerzoDimensions.Space2
+            )
     ) {
         Text(
             text = label,
@@ -1103,27 +972,40 @@ private fun SummaryRow(
 }
 
 @Composable
-private fun SectionHeader(
+private fun EmptySelectionCard(
     title: String,
-    subtitle: String
+    message: String
 ) {
-    Column(
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(
-            4.dp
+        shape = RoundedCornerShape(19.dp),
+        colors = CardDefaults.cardColors(
+            containerColor =
+                MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.ExtraBold
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space6
+            )
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
 
-        Text(
-            text = subtitle,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
