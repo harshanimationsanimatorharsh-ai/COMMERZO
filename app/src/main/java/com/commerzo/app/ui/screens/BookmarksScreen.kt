@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Search
@@ -76,18 +77,20 @@ fun BookmarksScreen(
                         Text(
                             text = "Bookmarks",
                             style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.ExtraBold
+                            fontWeight = FontWeight.Bold
                         )
 
                         Text(
-                            text = "Saved questions for revision",
+                            text = "Your saved revision questions",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(
+                        onClick = onBack
+                    ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back"
@@ -152,15 +155,53 @@ fun BookmarksScreen(
                     }
 
                     item {
-                        Text(
-                            text = "Saved Questions",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.padding(
-                                top = CommerzoDimensions.Space4
-                            )
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    top = CommerzoDimensions.Space4
+                                ),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = "Saved Questions",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+
+                                Spacer(
+                                    modifier = Modifier.height(
+                                        CommerzoDimensions.Space2
+                                    )
+                                )
+
+                                Text(
+                                    text = "Review these whenever you revise.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            Surface(
+                                shape = RoundedCornerShape(10.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant
+                            ) {
+                                Text(
+                                    text = "${questionDetails.size}",
+                                    modifier = Modifier.padding(
+                                        horizontal = CommerzoDimensions.Space10,
+                                        vertical = CommerzoDimensions.Space6
+                                    ),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     }
 
                     items(
@@ -241,7 +282,7 @@ private fun BookmarkSummaryCard(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp
+            defaultElevation = 1.dp
         )
     ) {
         Row(
@@ -255,7 +296,9 @@ private fun BookmarkSummaryCard(
             Surface(
                 modifier = Modifier.size(52.dp),
                 shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surface
+                color = MaterialTheme.colorScheme.surface.copy(
+                    alpha = 0.82f
+                )
             ) {
                 Icon(
                     imageVector = Icons.Default.Bookmark,
@@ -286,12 +329,12 @@ private fun BookmarkSummaryCard(
                         "$count saved questions"
                     },
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold,
+                    fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
 
                 Text(
-                    text = "Keep important questions ready for quick revision.",
+                    text = "Important questions saved for focused revision.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
@@ -307,7 +350,7 @@ private fun BookmarkQuestionCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
@@ -323,7 +366,6 @@ private fun BookmarkQuestionCard(
                 CommerzoDimensions.Space12
             )
         ) {
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -360,8 +402,8 @@ private fun BookmarkQuestionCard(
                             question.subjectId
                         ),
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
                     )
 
                     Text(
@@ -385,19 +427,43 @@ private fun BookmarkQuestionCard(
                 }
             }
 
-            Surface(
-                shape = RoundedCornerShape(9.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            ) {
-                Text(
-                    text = "${question.board.displayName()} • ${question.classLevel.displayName()}",
-                    modifier = Modifier.padding(
-                        horizontal = CommerzoDimensions.Space10,
-                        vertical = CommerzoDimensions.Space6
-                    ),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(
+                    CommerzoDimensions.Space8
                 )
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(9.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    Text(
+                        text = question.board.displayName(),
+                        modifier = Modifier.padding(
+                            horizontal = CommerzoDimensions.Space10,
+                            vertical = CommerzoDimensions.Space6
+                        ),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(9.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    Text(
+                        text = question.classLevel.displayName(),
+                        modifier = Modifier.padding(
+                            horizontal = CommerzoDimensions.Space10,
+                            vertical = CommerzoDimensions.Space6
+                        ),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             Text(
@@ -455,11 +521,13 @@ private fun BookmarkQuestionCard(
                             )
 
                             if (isCorrect) {
-                                Text(
-                                    text = "✓",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    contentDescription = "Correct answer",
+                                    modifier = Modifier.size(
+                                        CommerzoDimensions.IconSmall
+                                    ),
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
@@ -503,10 +571,9 @@ private fun EmptyBookmarksContent(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
-            .padding(
-                horizontal = CommerzoDimensions.ScreenHorizontal
-            ),
+        modifier = modifier.padding(
+            horizontal = CommerzoDimensions.ScreenHorizontal
+        ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -534,7 +601,7 @@ private fun EmptyBookmarksContent(
         Text(
             text = "No bookmarks yet",
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.ExtraBold
+            fontWeight = FontWeight.Bold
         )
 
         Spacer(
@@ -556,10 +623,9 @@ private fun MissingBookmarksContent(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
-            .padding(
-                horizontal = CommerzoDimensions.ScreenHorizontal
-            ),
+        modifier = modifier.padding(
+            horizontal = CommerzoDimensions.ScreenHorizontal
+        ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -587,7 +653,7 @@ private fun MissingBookmarksContent(
         Text(
             text = "Saved questions unavailable",
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.ExtraBold
+            fontWeight = FontWeight.Bold
         )
 
         Spacer(
