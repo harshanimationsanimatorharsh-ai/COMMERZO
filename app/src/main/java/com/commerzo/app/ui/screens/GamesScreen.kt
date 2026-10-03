@@ -37,7 +37,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.commerzo.app.ui.theme.CommerzoDimensions
 
 @Composable
 fun GamesScreen() {
@@ -45,44 +46,38 @@ fun GamesScreen() {
     val games = listOf(
         GameItem(
             title = "Math Challenge",
-            subtitle = "Solve fast and improve your accuracy.",
+            subtitle = "Fast mathematical problem solving.",
             icon = Icons.Default.Quiz,
-            xp = "+20 XP",
             category = "QUICK PLAY"
         ),
         GameItem(
             title = "Equation Game",
-            subtitle = "Test your mathematical thinking.",
+            subtitle = "Practice mathematical thinking.",
             icon = Icons.Default.Psychology,
-            xp = "+25 XP",
             category = "LOGIC"
         ),
         GameItem(
             title = "Mind Sharp",
-            subtitle = "Train memory, logic and quick thinking.",
+            subtitle = "Memory, logic and quick thinking.",
             icon = Icons.Default.Psychology,
-            xp = "+30 XP",
             category = "BRAIN"
         ),
         GameItem(
             title = "Puzzle Challenge",
-            subtitle = "Solve puzzles and unlock achievements.",
+            subtitle = "Solve educational puzzles.",
             icon = Icons.Default.EmojiEvents,
-            xp = "+30 XP",
             category = "PUZZLE"
         ),
         GameItem(
             title = "Speed Challenge",
-            subtitle = "Answer correctly before time runs out.",
+            subtitle = "Answer questions against the clock.",
             icon = Icons.Default.Timer,
-            xp = "+35 XP",
             category = "SPEED"
         ),
         GameItem(
             title = "Daily Challenge",
-            subtitle = "Complete today's challenge and earn XP.",
+            subtitle = "A new challenge designed for daily practice.",
             icon = Icons.Default.FlashOn,
-            xp = "+50 XP",
             category = "DAILY"
         )
     )
@@ -94,11 +89,12 @@ fun GamesScreen() {
                     Column {
                         Text(
                             text = "Games",
-                            fontWeight = FontWeight.ExtraBold
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
                         )
 
                         Text(
-                            text = "Think. Play. Improve.",
+                            text = "Learn through challenges",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -113,12 +109,12 @@ fun GamesScreen() {
                 .fillMaxSize()
                 .padding(paddingValues),
             contentPadding = PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
-                top = 10.dp,
-                bottom = 28.dp
+                horizontal = CommerzoDimensions.ScreenHorizontal,
+                vertical = CommerzoDimensions.ScreenVertical
             ),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.CardSpacing
+            )
         ) {
 
             item {
@@ -126,13 +122,9 @@ fun GamesScreen() {
             }
 
             item {
-                GameStatsCard()
-            }
-
-            item {
                 SectionHeader(
                     title = "Game Zone",
-                    subtitle = "Play, learn and earn XP"
+                    subtitle = "Educational games are being prepared"
                 )
             }
 
@@ -140,18 +132,13 @@ fun GamesScreen() {
                 items = games,
                 key = { it.title }
             ) { game ->
-
                 GameCard(
-                    game = game,
-                    onClick = {
-                        // Individual game navigation will be connected
-                        // when the real game modules are implemented.
-                    }
+                    game = game
                 )
             }
 
             item {
-                XPInfoCard()
+                GamesComingSoonCard()
             }
         }
     }
@@ -161,7 +148,6 @@ private data class GameItem(
     val title: String,
     val subtitle: String,
     val icon: ImageVector,
-    val xp: String,
     val category: String
 )
 
@@ -169,7 +155,7 @@ private data class GameItem(
 private fun GamesHeroCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(26.dp),
+        shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         )
@@ -177,199 +163,157 @@ private fun GamesHeroCard() {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp)
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                )
         ) {
-
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Surface(
-                    modifier = Modifier.size(58.dp),
-                    shape = RoundedCornerShape(18.dp),
+                    modifier = Modifier.size(52.dp),
+                    shape = RoundedCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.surface.copy(
-                        alpha = 0.82f
+                        alpha = 0.78f
                     )
                 ) {
                     Icon(
                         imageVector = Icons.Default.FlashOn,
-                        contentDescription = "Daily Challenge",
-                        modifier = Modifier.padding(14.dp),
+                        contentDescription = null,
+                        modifier = Modifier.padding(
+                            CommerzoDimensions.Space12
+                        ),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
 
-                Spacer(modifier = Modifier.width(14.dp))
+                Spacer(
+                    modifier = Modifier.size(
+                        CommerzoDimensions.Space12
+                    )
+                )
 
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "DAILY CHALLENGE",
+                        text = "GAME ZONE",
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(
+                        modifier = Modifier.height(
+                            CommerzoDimensions.Space4
+                        )
+                    )
 
                     Text(
-                        text = "Train your brain today",
+                        text = "Play. Learn. Improve.",
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.ExtraBold
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(15.dp))
-
-            Text(
-                text = "Complete today's challenge, improve your skills and earn XP.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+            Spacer(
+                modifier = Modifier.height(
+                    CommerzoDimensions.Space12
+                )
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "COMMERZO games will turn practice into short, engaging learning challenges.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+
+            Spacer(
+                modifier = Modifier.height(
+                    CommerzoDimensions.Space12
+                )
+            )
 
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(15.dp),
-                color = MaterialTheme.colorScheme.surface
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.surface.copy(
+                    alpha = 0.72f
+                )
             ) {
                 Row(
                     modifier = Modifier.padding(
-                        horizontal = 14.dp,
-                        vertical = 12.dp
+                        horizontal = CommerzoDimensions.Space12,
+                        vertical = CommerzoDimensions.Space10
                     ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         imageVector = Icons.Default.Whatshot,
-                        contentDescription = "Streak",
-                        modifier = Modifier.size(19.dp),
+                        contentDescription = null,
+                        modifier = Modifier.size(
+                            CommerzoDimensions.IconSmall
+                        ),
                         tint = MaterialTheme.colorScheme.primary
                     )
 
-                    Spacer(modifier = Modifier.width(7.dp))
-
-                    Text(
-                        text = "0 day streak",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold
+                    Spacer(
+                        modifier = Modifier.size(
+                            CommerzoDimensions.Space8
+                        )
                     )
 
-                    Spacer(modifier = Modifier.weight(1f))
-
                     Text(
-                        text = "+50 XP",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.primary
+                        text = "Gamification will arrive with the real game engine.",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun GameStatsCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            GameStat(
-                modifier = Modifier.weight(1f),
-                value = "0",
-                label = "Games"
-            )
-
-            GameStat(
-                modifier = Modifier.weight(1f),
-                value = "0",
-                label = "XP Earned"
-            )
-
-            GameStat(
-                modifier = Modifier.weight(1f),
-                value = "0",
-                label = "Best Score"
-            )
-        }
-    }
-}
-
-@Composable
-private fun GameStat(
-    modifier: Modifier,
-    value: String,
-    label: String
-) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(15.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant
-    ) {
-        Column(
-            modifier = Modifier.padding(
-                vertical = 12.dp,
-                horizontal = 6.dp
-            ),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.ExtraBold
-            )
-
-            Spacer(modifier = Modifier.height(2.dp))
-
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }
 
 @Composable
 private fun GameCard(
-    game: GameItem,
-    onClick: () -> Unit
+    game: GameItem
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        onClick = onClick,
-        shape = RoundedCornerShape(22.dp)
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(17.dp),
+                .padding(
+                    CommerzoDimensions.CardPadding
+                ),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Surface(
-                modifier = Modifier.size(54.dp),
-                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.size(50.dp),
+                shape = RoundedCornerShape(14.dp),
                 color = MaterialTheme.colorScheme.secondaryContainer
             ) {
                 Icon(
                     imageVector = game.icon,
-                    contentDescription = game.title,
-                    modifier = Modifier.padding(13.dp),
+                    contentDescription = null,
+                    modifier = Modifier.padding(
+                        CommerzoDimensions.Space12
+                    ),
                     tint = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
 
-            Spacer(modifier = Modifier.width(13.dp))
+            Spacer(
+                modifier = Modifier.size(
+                    CommerzoDimensions.Space12
+                )
+            )
 
             Column(
                 modifier = Modifier.weight(1f)
@@ -381,15 +325,23 @@ private fun GameCard(
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                Spacer(modifier = Modifier.height(3.dp))
+                Spacer(
+                    modifier = Modifier.height(
+                        CommerzoDimensions.Space4
+                    )
+                )
 
                 Text(
                     text = game.title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold
+                    fontWeight = FontWeight.Bold
                 )
 
-                Spacer(modifier = Modifier.height(3.dp))
+                Spacer(
+                    modifier = Modifier.height(
+                        CommerzoDimensions.Space4
+                    )
+                )
 
                 Text(
                     text = game.subtitle,
@@ -397,82 +349,98 @@ private fun GameCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Spacer(modifier = Modifier.height(7.dp))
+                Spacer(
+                    modifier = Modifier.height(
+                        CommerzoDimensions.Space8
+                    )
+                )
 
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer
+                    color = MaterialTheme.colorScheme.surface
                 ) {
                     Text(
-                        text = game.xp,
+                        text = "Coming soon",
                         modifier = Modifier.padding(
-                            horizontal = 8.dp,
-                            vertical = 4.dp
+                            horizontal = CommerzoDimensions.Space8,
+                            vertical = CommerzoDimensions.Space4
                         ),
                         style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(
+                modifier = Modifier.width(
+                    CommerzoDimensions.Space8
+                )
+            )
 
             Icon(
                 imageVector = Icons.Default.ArrowForward,
-                contentDescription = "Open ${game.title}",
-                tint = MaterialTheme.colorScheme.primary
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
 }
 
 @Composable
-private fun XPInfoCard() {
+private fun GamesComingSoonCard() {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
+        shape = RoundedCornerShape(18.dp),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
-        Row(
-            modifier = Modifier.padding(18.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Surface(
-                modifier = Modifier.size(44.dp),
+                modifier = Modifier.size(52.dp),
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
                 Box(
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "XP",
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.primary
+                    Icon(
+                        imageVector = Icons.Default.Psychology,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(13.dp))
-
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = "Play. Learn. Grow.",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold
+            Spacer(
+                modifier = Modifier.height(
+                    CommerzoDimensions.Space12
                 )
+            )
 
-                Spacer(modifier = Modifier.height(3.dp))
+            Text(
+                text = "Real Game Engine Coming Soon",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
 
-                Text(
-                    text = "Earn XP through games and use it for levels, achievements and leaderboard progress.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            Spacer(
+                modifier = Modifier.height(
+                    CommerzoDimensions.Space4
                 )
-            }
+            )
+
+            Text(
+                text = "Timed challenges, scores, results, XP and achievements will be connected in the dedicated Games phase.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -482,14 +450,22 @@ private fun SectionHeader(
     title: String,
     subtitle: String
 ) {
-    Column {
+    Column(
+        modifier = Modifier.padding(
+            top = CommerzoDimensions.Space8
+        )
+    ) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.ExtraBold
+            fontWeight = FontWeight.Bold
         )
 
-        Spacer(modifier = Modifier.height(3.dp))
+        Spacer(
+            modifier = Modifier.height(
+                CommerzoDimensions.Space4
+            )
+        )
 
         Text(
             text = subtitle,
