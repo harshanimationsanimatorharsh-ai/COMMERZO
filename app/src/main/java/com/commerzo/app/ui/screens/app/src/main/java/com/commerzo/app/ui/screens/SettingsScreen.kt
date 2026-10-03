@@ -15,17 +15,21 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Policy
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SupportAgent
-import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -44,11 +48,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.commerzo.app.ui.theme.CommerzoDimensions
 import com.commerzo.app.ui.viewmodel.settings.SettingsViewModel
-
-// ============================================================
-// COMMERZO — Settings Screen
-// Phase 7 — Professional UI/UX Overhaul
-// ============================================================
 
 @Composable
 fun SettingsScreen(
@@ -69,36 +68,24 @@ fun SettingsScreen(
                     ) {
                         Text(
                             text = "Settings",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.ExtraBold
                         )
 
                         Text(
-                            text = "Customize your COMMERZO experience.",
+                            text = "Customize your COMMERZO experience",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
                 navigationIcon = {
-                    Surface(
-                        onClick = onBack,
-                        modifier = Modifier
-                            .padding(start = CommerzoDimensions.Space8)
-                            .size(40.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant
+                    IconButton(
+                        onClick = onBack
                     ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "‹",
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -122,30 +109,24 @@ fun SettingsScreen(
             )
         ) {
 
-            SettingsIntroCard()
-
-            // ------------------------------------------------
-            // Appearance
-            // ------------------------------------------------
+            SettingsHeroCard()
 
             SettingsSectionTitle(
                 title = "Appearance",
-                subtitle = "Make COMMERZO comfortable to use"
+                subtitle = "Make COMMERZO comfortable for you"
             )
 
             SettingsToggleCard(
                 icon = Icons.Default.DarkMode,
                 title = "Dark Mode",
-                subtitle = "Use a darker appearance",
+                subtitle = if (darkModeEnabled) {
+                    "Dark appearance is enabled"
+                } else {
+                    "Use a darker appearance"
+                },
                 checked = darkModeEnabled,
-                onCheckedChange = {
-                    viewModel.setDarkModeEnabled(it)
-                }
+                onCheckedChange = viewModel::setDarkModeEnabled
             )
-
-            // ------------------------------------------------
-            // Notifications
-            // ------------------------------------------------
 
             SettingsSectionTitle(
                 title = "Notifications",
@@ -154,71 +135,84 @@ fun SettingsScreen(
 
             SettingsToggleCard(
                 icon = Icons.Default.Notifications,
-                title = "Learning Notifications",
-                subtitle = "Receive reminders and important updates",
+                title = "Study Notifications",
+                subtitle = if (notificationsEnabled) {
+                    "Learning notifications are enabled"
+                } else {
+                    "Learning notifications are disabled"
+                },
                 checked = notificationsEnabled,
-                onCheckedChange = {
-                    viewModel.setNotificationsEnabled(it)
-                }
+                onCheckedChange = viewModel::setNotificationsEnabled
             )
-
-            // ------------------------------------------------
-            // Account
-            // ------------------------------------------------
 
             SettingsSectionTitle(
                 title = "Account",
-                subtitle = "Manage your student preferences"
+                subtitle = "Manage your COMMERZO account"
             )
 
-            SettingsActionCard(
+            SettingsInfoCard(
                 icon = Icons.Default.Person,
-                title = "Student Profile",
-                subtitle = "View and update your profile"
+                title = "Account",
+                subtitle = "Manage your student profile from Profile"
             )
 
-            SettingsActionCard(
-                icon = Icons.Default.SwapHoriz,
+            SettingsInfoCard(
+                icon = Icons.Default.Settings,
                 title = "Learning Preferences",
                 subtitle = "Board, class and study preferences"
             )
 
-            // ------------------------------------------------
-            // Help & Support
-            // ------------------------------------------------
-
             SettingsSectionTitle(
-                title = "Help & Support",
-                subtitle = "We're here when you need help"
+                title = "Preferences",
+                subtitle = "Choose how COMMERZO feels and sounds"
             )
 
-            SettingsActionCard(
+            SettingsInfoCard(
+                icon = Icons.Default.Language,
+                title = "Language",
+                subtitle = "Language preferences will be available soon"
+            )
+
+            SettingsInfoCard(
+                icon = Icons.Default.VolumeUp,
+                title = "Sound & Haptics",
+                subtitle = "Sound and haptic controls will be available soon"
+            )
+
+            SettingsSectionTitle(
+                title = "Support",
+                subtitle = "Get help whenever you need it"
+            )
+
+            SettingsInfoCard(
                 icon = Icons.Default.SupportAgent,
-                title = "Support Team",
-                subtitle = "Get help from the COMMERZO team"
+                title = "Help Center",
+                subtitle = "Help resources will be available soon"
             )
 
             SupportEmailCard()
 
-            // ------------------------------------------------
-            // Information
-            // ------------------------------------------------
-
             SettingsSectionTitle(
-                title = "Information",
-                subtitle = "About COMMERZO"
+                title = "About",
+                subtitle = "Information about COMMERZO"
             )
 
-            SettingsActionCard(
+            SettingsInfoCard(
                 icon = Icons.Default.Info,
                 title = "About COMMERZO",
                 subtitle = "Learn more about the app"
             )
 
-            SettingsActionCard(
+            SettingsInfoCard(
                 icon = Icons.Default.Policy,
-                title = "Privacy & Security",
-                subtitle = "Understand how your account is protected"
+                title = "Privacy Policy",
+                subtitle = "Privacy information will be available soon"
+            )
+
+            SettingsInfoCard(
+                icon = Icons.Default.Policy,
+                title = "Terms & Conditions",
+                subtitle = "Terms will be available soon"
             )
 
             VersionCard()
@@ -232,43 +226,42 @@ fun SettingsScreen(
     }
 }
 
-// ============================================================
-// Intro Card
-// ============================================================
-
 @Composable
-private fun SettingsIntroCard() {
+private fun SettingsHeroCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = CommerzoDimensions.Space2
+            defaultElevation = 2.dp
         )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(CommerzoDimensions.CardPaddingLarge),
+                .padding(
+                    CommerzoDimensions.CardPaddingLarge
+                ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(52.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.primary.copy(
-                    alpha = 0.12f
-                )
+                modifier = Modifier.size(56.dp),
+                shape = RoundedCornerShape(17.dp),
+                color = MaterialTheme.colorScheme.surface
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "⚙",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.primary
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Settings",
+                        modifier = Modifier.size(
+                            CommerzoDimensions.IconLarge
+                        ),
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -287,13 +280,13 @@ private fun SettingsIntroCard() {
             ) {
                 Text(
                     text = "Your preferences",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.ExtraBold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
 
                 Text(
-                    text = "Personalize your learning experience and account settings.",
+                    text = "Personalize your learning experience.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
@@ -302,16 +295,13 @@ private fun SettingsIntroCard() {
     }
 }
 
-// ============================================================
-// Section Title
-// ============================================================
-
 @Composable
 private fun SettingsSectionTitle(
     title: String,
     subtitle: String
 ) {
     Column(
+        modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(
             CommerzoDimensions.Space4
         )
@@ -319,8 +309,7 @@ private fun SettingsSectionTitle(
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
+            fontWeight = FontWeight.ExtraBold
         )
 
         Text(
@@ -330,10 +319,6 @@ private fun SettingsSectionTitle(
         )
     }
 }
-
-// ============================================================
-// Toggle Card
-// ============================================================
 
 @Composable
 private fun SettingsToggleCard(
@@ -350,13 +335,15 @@ private fun SettingsToggleCard(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = CommerzoDimensions.Space2
+            defaultElevation = 1.dp
         )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(CommerzoDimensions.CardPadding),
+                .padding(
+                    CommerzoDimensions.CardPadding
+                ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             SettingsIcon(
@@ -403,12 +390,8 @@ private fun SettingsToggleCard(
     }
 }
 
-// ============================================================
-// Action Card
-// ============================================================
-
 @Composable
-private fun SettingsActionCard(
+private fun SettingsInfoCard(
     icon: ImageVector,
     title: String,
     subtitle: String
@@ -420,19 +403,18 @@ private fun SettingsActionCard(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = CommerzoDimensions.Space2
-        ),
-        onClick = {}
+            defaultElevation = 1.dp
+        )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(CommerzoDimensions.CardPadding),
+                .padding(
+                    CommerzoDimensions.CardPadding
+                ),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            SettingsIcon(
-                icon = icon
-            )
+            SettingsIcon(icon = icon)
 
             Spacer(
                 modifier = Modifier.width(
@@ -458,19 +440,9 @@ private fun SettingsActionCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-
-            Text(
-                text = "›",
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }
-
-// ============================================================
-// Settings Icon
-// ============================================================
 
 @Composable
 private fun SettingsIcon(
@@ -506,10 +478,6 @@ private fun SettingsIcon(
     }
 }
 
-// ============================================================
-// Support Email
-// ============================================================
-
 @Composable
 private fun SupportEmailCard() {
     Card(
@@ -519,13 +487,15 @@ private fun SupportEmailCard() {
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = CommerzoDimensions.Space2
+            defaultElevation = 1.dp
         )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(CommerzoDimensions.CardPadding),
+                .padding(
+                    CommerzoDimensions.CardPadding
+                ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
@@ -561,7 +531,7 @@ private fun SupportEmailCard() {
                 )
             ) {
                 Text(
-                    text = "Support Email",
+                    text = "Contact Support",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -576,10 +546,6 @@ private fun SupportEmailCard() {
         }
     }
 }
-
-// ============================================================
-// Version Card
-// ============================================================
 
 @Composable
 private fun VersionCard() {
@@ -600,8 +566,7 @@ private fun VersionCard() {
             Text(
                 text = "COMMERZO",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.onSurface
+                fontWeight = FontWeight.ExtraBold
             )
 
             Text(
@@ -611,7 +576,7 @@ private fun VersionCard() {
             )
 
             Text(
-                text = "Version 5.3.1",
+                text = "Version 5.3.0",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
