@@ -4,48 +4,341 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /*
-     * COMMERZO USER PROFILES
+     * ============================================================
+     * COMMERZO FIRESTORE SECURITY RULES
+     * ============================================================
      *
-     * Each authenticated student has one profile:
+     * AUTHORIZATION MODEL
      *
-     * users/{firebaseUid}
+     * Student:
+     *   - Can access only their own user profile.
+     *   - Can read published educational content.
+     *   - Cannot create/update/delete educational content.
      *
-     * Students can read and update ONLY their own profile.
+     * Admin:
+     *   - Must be authenticated.
+     *   - Must have Firebase Custom Claim:
      *
-     * Admin access will be added later using secure
-     * Firebase custom claims / trusted backend authorization.
+     *       admin == true
+     *
+     *   - Can manage COMMERZO backend data.
+     *
+     * IMPORTANT:
+     * Client-side fields such as users/{uid}.role are NOT trusted
+     * for admin authorization.
+     *
+     * Admin authorization is based on Firebase Auth Custom Claims.
+     * ============================================================
      */
 
-    match /users/{userId} {
 
-      // A signed-in user can read only their own profile.
-      allow read: if isOwner(userId);
+    // ============================================================
+    // AUTHENTICATION / AUTHORIZATION HELPERS
+    // ============================================================
 
-      // A signed-in user can create only their own profile.
-      // The client cannot create an admin profile.
-      allow create: if isOwner(userId)
-        && request.resource.data.userId == userId
-        && request.resource.data.role == "student";
+    function isSignedIn() {
+      return request.auth != null;
+    }
 
-      // A signed-in user can update only their own profile.
-      // The role field cannot be changed from the client.
-      allow update: if isOwner(userId)
-        && request.resource.data.userId == resource.data.userId
-        && request.resource.data.role == resource.data.role;
-
-      // Profile deletion is intentionally disabled for now.
-      // Account deletion will later use a controlled flow that
-      // also handles associated cloud data.
-      allow delete: if false;
+    function isOwner(userId) {
+      return isSignedIn()
+        && request.auth.uid == userId;
     }
 
     /*
-     * Helper: verifies that the currently authenticated
-     * Firebase user owns the requested document.
+     * Trusted admin authorization.
+     *
+     * The "admin" claim must be assigned from a trusted backend /
+     * Firebase Admin SDK.
+     *
+     * NEVER trust:
+     *   users/{uid}.role == "admin"
+     *
+     * for security authorization.
      */
-    function isOwner(userId) {
-      return request.auth != null
-        && request.auth.uid == userId;
+    function isAdmin() {
+      return isSignedIn()
+        && request.auth.token.admin == true;
+    }
+
+
+    // ============================================================
+    // USER PROFILES
+    // ============================================================
+
+    match /users/{userId} {
+
+      // Student can read only their own profile.
+      // Admin can read any profile.
+      allow read: if isOwner(userId) || isAdmin();
+
+      /*
+       * Student profile creation.
+       *
+       * The client can create only its own profile.
+       * Client-created profiles must always be students.
+       */
+      allow create: if (
+        isOwner(userId)
+        && request.resource.data.userId == userId
+        && request.resource.data.role == "student"
+      ) || isAdmin();
+
+      /*
+       * Student can update only their own profile.
+       *
+       * userId and role are immutable from the student client.
+       *
+       * Admin can update user profiles.
+       */
+      allow update: if (
+        isOwner(userId)
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.role == resource.data.role
+      ) || isAdmin();
+
+      /*
+       * Student deletion remains disabled.
+       *
+       * Admin can delete a user profile.
+       */
+      allow delete: if isAdmin();
+    }
+
+
+    // ============================================================
+    // BOARDS
+    // ============================================================
+
+    match /boards/{boardId} {
+
+      // Students can read boards.
+      allow read: if isSignedIn() || isAdmin();
+
+      // Only admins can manage boards.
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // ============================================================
+    // CLASSES
+    // ============================================================
+
+    match /classes/{classId} {
+
+      allow read: if isSignedIn() || isAdmin();
+
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // ============================================================
+    // SUBJECTS
+    // ============================================================
+
+    match /subjects/{subjectId} {
+
+      allow read: if isSignedIn() || isAdmin();
+
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // ============================================================
+    // CHAPTERS
+    // ============================================================
+
+    match /chapters/{chapterId} {
+
+      allow read: if isSignedIn() || isAdmin();
+
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // ============================================================
+    // QUESTIONS
+    // ============================================================
+
+    match /questions/{questionId} {
+
+      /*
+       * Students can read questions.
+       *
+       * Content publishing controls should eventually use a field
+       * such as:
+       *
+       *   published: true
+       *
+       * For now authenticated users can read the collection.
+       */
+      allow read: if isSignedIn() || isAdmin();
+
+      // Only admins can create/update/delete questions.
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // ============================================================
+    // TESTS
+    // ============================================================
+
+    match /tests/{testId} {
+
+      allow read: if isSignedIn() || isAdmin();
+
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // ============================================================
+    // TEST QUESTIONS
+    // ============================================================
+
+    match /test_questions/{testQuestionId} {
+
+      allow read: if isSignedIn() || isAdmin();
+
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // ============================================================
+    // PREVIOUS YEAR PAPERS
+    // ============================================================
+
+    match /pyqs/{pyqId} {
+
+      allow read: if isSignedIn() || isAdmin();
+
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // ============================================================
+    // RESOURCES
+    // ============================================================
+
+    match /resources/{resourceId} {
+
+      allow read: if isSignedIn() || isAdmin();
+
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // ============================================================
+    // ANNOUNCEMENTS
+    // ============================================================
+
+    match /announcements/{announcementId} {
+
+      allow read: if isSignedIn() || isAdmin();
+
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // ============================================================
+    // PLANS
+    // ============================================================
+
+    match /plans/{planId} {
+
+      // Students can see available plans.
+      allow read: if isSignedIn() || isAdmin();
+
+      // Only admins can manage plans.
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // ============================================================
+    // SUBSCRIPTIONS
+    // ============================================================
+
+    match /subscriptions/{subscriptionId} {
+
+      /*
+       * A student may read only their own subscription document
+       * when the document contains:
+       *
+       *   userId == request.auth.uid
+       *
+       * Admin can access all subscriptions.
+       */
+      allow read: if (
+        isAdmin()
+        || (
+          isSignedIn()
+          && resource.data.userId == request.auth.uid
+        )
+      );
+
+      // Subscription records must not be client-created or modified.
+      // Later this should be controlled by trusted backend / billing.
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // ============================================================
+    // FEATURE FLAGS
+    // ============================================================
+
+    match /feature_flags/{featureId} {
+
+      // Students can read feature flags.
+      allow read: if isSignedIn() || isAdmin();
+
+      // Only admins can change feature flags.
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // ============================================================
+    // APP CONFIG
+    // ============================================================
+
+    match /app_config/{configId} {
+
+      allow read: if isSignedIn() || isAdmin();
+
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // ============================================================
+    // ANALYTICS
+    // ============================================================
+
+    match /analytics/{analyticsId} {
+
+      /*
+       * Analytics data is not directly writable by students.
+       *
+       * Later this should preferably be written through a trusted
+       * backend / Cloud Functions pipeline.
+       */
+      allow read: if isAdmin();
+
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // ============================================================
+    // DEFAULT DENY
+    // ============================================================
+    //
+    // Any collection not explicitly defined above is denied.
+    //
+    // This is intentional.
+    //
+    // New backend collections must receive explicit security rules
+    // before they become accessible.
+    // ============================================================
+
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
