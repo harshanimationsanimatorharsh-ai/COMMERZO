@@ -50,7 +50,8 @@ fun HomeScreen(
     onBookmarksClick: () -> Unit = {},
     onTestHistoryClick: () -> Unit = {},
     onAchievementsClick: () -> Unit = {},
-    onSettingsClick: () -> Unit = {}
+    onSettingsClick: () -> Unit = {},
+    onStudyResourcesClick: () -> Unit = {}
 ) {
     val subjects = listOf(
         HomeSubject("accountancy", "Accountancy", "📊"),
@@ -170,6 +171,16 @@ fun HomeScreen(
                             subtitle = "Explore chapters",
                             icon = Icons.Default.MenuBook,
                             onClick = onSubjectsClick
+                        )
+                    }
+
+                    // NEW: STUDY RESOURCES
+                    item {
+                        QuickActionTile(
+                            title = "Study Material",
+                            subtitle = "Notes, PYQs & syllabus",
+                            icon = Icons.Default.MenuBook,
+                            onClick = onStudyResourcesClick
                         )
                     }
                 }
