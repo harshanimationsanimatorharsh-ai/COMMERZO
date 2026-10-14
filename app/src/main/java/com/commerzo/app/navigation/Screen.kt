@@ -6,87 +6,50 @@ import java.nio.charset.StandardCharsets
 /**
  * COMMERZO navigation route contract.
  *
- * This file contains route definitions only.
- *
- * Primary destinations:
- * HOME | PRACTICE | TESTS | PROFILE
- *
- * Internal destinations:
- * Subjects, Chapters, Chapter Hub, Questions,
- * Test Session, Test Result, Study Tracker
- * and Profile secondary destinations.
- *
- * IMPORTANT:
  * Existing route strings are intentionally preserved
- * to keep compatibility with AppNavigation and
- * existing navigation state.
+ * for compatibility with AppNavigation and existing
+ * navigation state.
  */
 sealed class Screen(
     val route: String
 ) {
 
-    // ============================================================
     // PRIMARY APP DESTINATIONS
-    // ============================================================
 
-    data object Home : Screen(
-        route = "home"
-    )
+    data object Home : Screen("home")
 
-    data object Practice : Screen(
-        route = "practice"
-    )
+    data object Practice : Screen("practice")
 
-    data object Tests : Screen(
-        route = "tests"
-    )
+    data object Tests : Screen("tests")
 
-    data object Profile : Screen(
-        route = "profile"
-    )
+    data object Profile : Screen("profile")
 
-    // ============================================================
     // INTERNAL / SECONDARY DESTINATIONS
-    // ============================================================
 
-    data object Games : Screen(
-        route = "games"
-    )
+    data object Games : Screen("games")
 
-    data object StudyTracker : Screen(
-        route = "study_tracker"
-    )
+    data object StudyTracker : Screen("study_tracker")
 
-    data object Subjects : Screen(
-        route = "subjects"
-    )
+    data object Subjects : Screen("subjects")
 
-    data object TestResult : Screen(
-        route = "test_result"
-    )
+    data object TestResult : Screen("test_result")
 
-    data object TestHistory : Screen(
-        route = "test_history"
-    )
+    data object TestHistory : Screen("test_history")
 
-    data object Bookmarks : Screen(
-        route = "bookmarks"
-    )
+    data object Bookmarks : Screen("bookmarks")
 
-    data object Achievements : Screen(
-        route = "achievements"
-    )
+    data object Achievements : Screen("achievements")
 
-    data object Settings : Screen(
-        route = "settings"
-    )
+    data object Settings : Screen("settings")
 
-    // ============================================================
+    // NEW: STUDY RESOURCES
+
+    data object StudyResources : Screen("study_resources")
+
     // STUDY TRACKER SESSION
-    // ============================================================
 
     data object StudyTrackerSession : Screen(
-        route = "study_tracker_session/{subjectId}/{chapterId}/{board}/{classLevel}"
+        "study_tracker_session/{subjectId}/{chapterId}/{board}/{classLevel}"
     ) {
 
         fun createRoute(
@@ -96,7 +59,7 @@ sealed class Screen(
             classLevel: String
         ): String {
             return buildRoute(
-                baseRoute = "study_tracker_session",
+                "study_tracker_session",
                 subjectId,
                 chapterId,
                 board,
@@ -105,12 +68,10 @@ sealed class Screen(
         }
     }
 
-    // ============================================================
     // SUBJECT → CHAPTERS
-    // ============================================================
 
     data object Chapters : Screen(
-        route = "chapters/{subjectId}/{board}/{classLevel}"
+        "chapters/{subjectId}/{board}/{classLevel}"
     ) {
 
         fun createRoute(
@@ -119,7 +80,7 @@ sealed class Screen(
             classLevel: String
         ): String {
             return buildRoute(
-                baseRoute = "chapters",
+                "chapters",
                 subjectId,
                 board,
                 classLevel
@@ -127,12 +88,10 @@ sealed class Screen(
         }
     }
 
-    // ============================================================
     // CHAPTER HUB
-    // ============================================================
 
     data object ChapterHub : Screen(
-        route = "chapter_hub/{subjectId}/{chapterId}/{chapterTitle}/{board}/{classLevel}"
+        "chapter_hub/{subjectId}/{chapterId}/{chapterTitle}/{board}/{classLevel}"
     ) {
 
         fun createRoute(
@@ -143,7 +102,7 @@ sealed class Screen(
             classLevel: String
         ): String {
             return buildRoute(
-                baseRoute = "chapter_hub",
+                "chapter_hub",
                 subjectId,
                 chapterId,
                 chapterTitle,
@@ -153,12 +112,10 @@ sealed class Screen(
         }
     }
 
-    // ============================================================
     // PRACTICE QUESTIONS
-    // ============================================================
 
     data object Questions : Screen(
-        route = "questions/{subjectId}/{chapterId}/{board}/{classLevel}"
+        "questions/{subjectId}/{chapterId}/{board}/{classLevel}"
     ) {
 
         fun createRoute(
@@ -168,7 +125,7 @@ sealed class Screen(
             classLevel: String
         ): String {
             return buildRoute(
-                baseRoute = "questions",
+                "questions",
                 subjectId,
                 chapterId,
                 board,
@@ -177,12 +134,10 @@ sealed class Screen(
         }
     }
 
-    // ============================================================
     // TEST SESSION
-    // ============================================================
 
     data object TestSession : Screen(
-        route = "test_session/{subjectId}/{chapterId}/{board}/{classLevel}"
+        "test_session/{subjectId}/{chapterId}/{board}/{classLevel}"
     ) {
 
         fun createRoute(
@@ -192,7 +147,7 @@ sealed class Screen(
             classLevel: String
         ): String {
             return buildRoute(
-                baseRoute = "test_session",
+                "test_session",
                 subjectId,
                 chapterId,
                 board,
@@ -202,17 +157,8 @@ sealed class Screen(
     }
 }
 
-// ================================================================
 // ROUTE HELPERS
-// ================================================================
 
-/**
- * Builds a navigation route from a base route and
- * encoded path arguments.
- *
- * Keeping this logic centralized prevents inconsistent
- * route construction across the application.
- */
 private fun buildRoute(
     baseRoute: String,
     vararg arguments: String
@@ -231,17 +177,6 @@ private fun buildRoute(
     }
 }
 
-/**
- * Encodes a single navigation path argument.
- *
- * Values such as:
- * - spaces
- * - special characters
- * - chapter titles
- * - subject IDs
- *
- * are safely encoded before being inserted into a route.
- */
 private fun encodeRouteArgument(
     value: String
 ): String {
