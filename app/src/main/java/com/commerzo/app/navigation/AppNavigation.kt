@@ -1,3 +1,4 @@
+
 package com.commerzo.app.navigation
 
 import androidx.compose.foundation.layout.Box
@@ -31,6 +32,7 @@ import com.commerzo.app.ui.screens.PracticeScreen
 import com.commerzo.app.ui.screens.ProfileScreen
 import com.commerzo.app.ui.screens.QuestionScreen
 import com.commerzo.app.ui.screens.SettingsScreen
+import com.commerzo.app.ui.screens.StudyResourcesScreen
 import com.commerzo.app.ui.screens.StudyTrackerScreen
 import com.commerzo.app.ui.screens.SubjectSelectionScreen
 import com.commerzo.app.ui.screens.TestHistoryScreen
@@ -48,17 +50,6 @@ data class NavigationTestResult(
     val marked: Int = 0
 )
 
-/**
- * COMMERZO root navigation.
- *
- * Primary bottom navigation:
- *
- * HOME | PRACTICE | TESTS | PROFILE
- *
- * Secondary destinations such as Subjects, Chapters,
- * Study Tracker, Bookmarks, History, Achievements,
- * Settings and Games remain internal destinations.
- */
 @Composable
 fun AppNavigation(
     navController: NavHostController = rememberNavController(),
@@ -116,10 +107,6 @@ fun AppNavigation(
                 startDestination = Screen.Home.route
             ) {
 
-                // ====================================================
-                // HOME
-                // ====================================================
-
                 composable(Screen.Home.route) {
                     HomeScreen(
                         onSubjectClick = { subjectId ->
@@ -132,56 +119,45 @@ fun AppNavigation(
                             )
                         },
                         onSubjectsClick = {
-                            navController.navigate(
-                                Screen.Subjects.route
-                            )
+                            navController.navigate(Screen.Subjects.route)
                         },
                         onPracticeClick = {
-                            navController.navigate(
-                                Screen.Practice.route
-                            )
+                            navController.navigate(Screen.Practice.route)
                         },
                         onTestsClick = {
-                            navController.navigate(
-                                Screen.Tests.route
-                            )
+                            navController.navigate(Screen.Tests.route)
                         },
                         onGamesClick = {
-                            navController.navigate(
-                                Screen.Games.route
-                            )
+                            navController.navigate(Screen.Games.route)
                         },
                         onProfileClick = {
-                            navController.navigate(
-                                Screen.Profile.route
-                            )
+                            navController.navigate(Screen.Profile.route)
                         },
                         onBookmarksClick = {
-                            navController.navigate(
-                                Screen.Bookmarks.route
-                            )
+                            navController.navigate(Screen.Bookmarks.route)
                         },
                         onTestHistoryClick = {
-                            navController.navigate(
-                                Screen.TestHistory.route
-                            )
+                            navController.navigate(Screen.TestHistory.route)
                         },
                         onAchievementsClick = {
-                            navController.navigate(
-                                Screen.Achievements.route
-                            )
+                            navController.navigate(Screen.Achievements.route)
                         },
                         onSettingsClick = {
-                            navController.navigate(
-                                Screen.Settings.route
-                            )
+                            navController.navigate(Screen.Settings.route)
+                        },
+                        onStudyResourcesClick = {
+                            navController.navigate(Screen.StudyResources.route)
                         }
                     )
                 }
 
-                // ====================================================
-                // PRACTICE
-                // ====================================================
+                composable(Screen.StudyResources.route) {
+                    StudyResourcesScreen(
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
 
                 composable(Screen.Practice.route) {
                     PracticeScreen(
@@ -190,10 +166,6 @@ fun AppNavigation(
                         }
                     )
                 }
-
-                // ====================================================
-                // TEST CENTER
-                // ====================================================
 
                 composable(Screen.Tests.route) {
                     TestSelectionScreen(
@@ -205,9 +177,7 @@ fun AppNavigation(
 
                             navController.navigate(
                                 Screen.TestSession.createRoute(
-                                    subjectId = toQuestionSubjectId(
-                                        subjectId
-                                    ),
+                                    subjectId = toQuestionSubjectId(subjectId),
                                     chapterId = chapterId,
                                     board = board.name,
                                     classLevel = classLevel.name
@@ -220,13 +190,7 @@ fun AppNavigation(
                     )
                 }
 
-                // ====================================================
-                // TEST SESSION
-                // ====================================================
-
-                composable(
-                    Screen.TestSession.route
-                ) { backStackEntry ->
+                composable(Screen.TestSession.route) { backStackEntry ->
 
                     val rawSubjectId =
                         backStackEntry.arguments
@@ -234,9 +198,7 @@ fun AppNavigation(
                             ?: return@composable
 
                     val subjectId =
-                        toQuestionSubjectId(
-                            rawSubjectId
-                        )
+                        toQuestionSubjectId(rawSubjectId)
 
                     val chapterId =
                         backStackEntry.arguments
@@ -246,8 +208,7 @@ fun AppNavigation(
                     val board =
                         enumValueOrDefault(
                             decodeRouteArgument(
-                                backStackEntry.arguments
-                                    ?.getString("board")
+                                backStackEntry.arguments?.getString("board")
                             ),
                             Board.MP_BOARD
                         )
@@ -255,8 +216,7 @@ fun AppNavigation(
                     val classLevel =
                         enumValueOrDefault(
                             decodeRouteArgument(
-                                backStackEntry.arguments
-                                    ?.getString("classLevel")
+                                backStackEntry.arguments?.getString("classLevel")
                             ),
                             ClassLevel.CLASS_12
                         )
@@ -274,19 +234,16 @@ fun AppNavigation(
                             unattempted,
                             marked ->
 
-                            latestTestResult =
-                                NavigationTestResult(
-                                    total = total,
-                                    answered = answered,
-                                    correct = correct,
-                                    wrong = wrong,
-                                    unattempted = unattempted,
-                                    marked = marked
-                                )
-
-                            navController.navigate(
-                                Screen.TestResult.route
+                            latestTestResult = NavigationTestResult(
+                                total = total,
+                                answered = answered,
+                                correct = correct,
+                                wrong = wrong,
+                                unattempted = unattempted,
+                                marked = marked
                             )
+
+                            navController.navigate(Screen.TestResult.route)
                         },
                         onBack = {
                             navController.popBackStack()
@@ -294,54 +251,32 @@ fun AppNavigation(
                     )
                 }
 
-                // ====================================================
-                // GAMES
-                // ====================================================
-
                 composable(Screen.Games.route) {
                     GamesScreen()
                 }
 
-                // ====================================================
-                // PROFILE
-                // ====================================================
-
                 composable(Screen.Profile.route) {
                     ProfileScreen(
                         onBookmarks = {
-                            navController.navigate(
-                                Screen.Bookmarks.route
-                            )
+                            navController.navigate(Screen.Bookmarks.route)
                         },
                         onTestHistory = {
-                            navController.navigate(
-                                Screen.TestHistory.route
-                            )
+                            navController.navigate(Screen.TestHistory.route)
                         },
                         onAchievements = {
-                            navController.navigate(
-                                Screen.Achievements.route
-                            )
+                            navController.navigate(Screen.Achievements.route)
                         },
                         onSettings = {
-                            navController.navigate(
-                                Screen.Settings.route
-                            )
+                            navController.navigate(Screen.Settings.route)
                         },
                         onStudyTracker = {
-                            navController.navigate(
-                                Screen.StudyTracker.route
-                            )
+                            navController.navigate(Screen.StudyTracker.route)
                         },
                         onLogout = {
                             authViewModel.signOut()
                         }
                     )
                 }
-
-                // ====================================================
-                // STUDY TRACKER
-                // ====================================================
 
                 composable(Screen.StudyTracker.route) {
                     StudyTrackerScreen(
@@ -351,35 +286,29 @@ fun AppNavigation(
                     )
                 }
 
-                composable(
-                    Screen.StudyTrackerSession.route
-                ) { backStackEntry ->
+                composable(Screen.StudyTrackerSession.route) { backStackEntry ->
 
                     val subjectId =
                         decodeRouteArgument(
-                            backStackEntry.arguments
-                                ?.getString("subjectId")
+                            backStackEntry.arguments?.getString("subjectId")
                         ).takeIf { it.isNotBlank() }
                             ?: return@composable
 
                     val chapterId =
                         decodeRouteArgument(
-                            backStackEntry.arguments
-                                ?.getString("chapterId")
+                            backStackEntry.arguments?.getString("chapterId")
                         ).takeIf { it.isNotBlank() }
                             ?: return@composable
 
                     val board =
                         decodeRouteArgument(
-                            backStackEntry.arguments
-                                ?.getString("board")
+                            backStackEntry.arguments?.getString("board")
                         ).takeIf { it.isNotBlank() }
                             ?: return@composable
 
                     val classLevel =
                         decodeRouteArgument(
-                            backStackEntry.arguments
-                                ?.getString("classLevel")
+                            backStackEntry.arguments?.getString("classLevel")
                         ).takeIf { it.isNotBlank() }
                             ?: return@composable
 
@@ -394,15 +323,10 @@ fun AppNavigation(
                     )
                 }
 
-                // ====================================================
-                // SUBJECTS
-                // ====================================================
-
                 composable(Screen.Subjects.route) {
                     SubjectSelectionScreen(
                         viewModel = viewModel(),
                         onSubjectClick = { subject ->
-
                             navController.navigate(
                                 Screen.Chapters.createRoute(
                                     subjectId = subject.id,
@@ -414,26 +338,18 @@ fun AppNavigation(
                     )
                 }
 
-                // ====================================================
-                // CHAPTERS
-                // ====================================================
-
-                composable(
-                    Screen.Chapters.route
-                ) { backStackEntry ->
+                composable(Screen.Chapters.route) { backStackEntry ->
 
                     val subjectId =
                         decodeRouteArgument(
-                            backStackEntry.arguments
-                                ?.getString("subjectId")
+                            backStackEntry.arguments?.getString("subjectId")
                         ).takeIf { it.isNotBlank() }
                             ?: return@composable
 
                     val board =
                         enumValueOrDefault(
                             decodeRouteArgument(
-                                backStackEntry.arguments
-                                    ?.getString("board")
+                                backStackEntry.arguments?.getString("board")
                             ),
                             Board.MP_BOARD
                         )
@@ -441,8 +357,7 @@ fun AppNavigation(
                     val classLevel =
                         enumValueOrDefault(
                             decodeRouteArgument(
-                                backStackEntry.arguments
-                                    ?.getString("classLevel")
+                                backStackEntry.arguments?.getString("classLevel")
                             ),
                             ClassLevel.CLASS_12
                         )
@@ -463,10 +378,7 @@ fun AppNavigation(
                         onBack = {
                             navController.popBackStack()
                         },
-                        onChapterClick = {
-                            chapterId,
-                            chapterTitle ->
-
+                        onChapterClick = { chapterId, chapterTitle ->
                             navController.navigate(
                                 Screen.ChapterHub.createRoute(
                                     subjectId = subjectId,
@@ -498,40 +410,30 @@ fun AppNavigation(
                     )
                 }
 
-                // ====================================================
-                // CHAPTER HUB
-                // ====================================================
-
-                composable(
-                    Screen.ChapterHub.route
-                ) { backStackEntry ->
+                composable(Screen.ChapterHub.route) { backStackEntry ->
 
                     val subjectId =
                         decodeRouteArgument(
-                            backStackEntry.arguments
-                                ?.getString("subjectId")
+                            backStackEntry.arguments?.getString("subjectId")
                         ).takeIf { it.isNotBlank() }
                             ?: return@composable
 
                     val chapterId =
                         decodeRouteArgument(
-                            backStackEntry.arguments
-                                ?.getString("chapterId")
+                            backStackEntry.arguments?.getString("chapterId")
                         ).takeIf { it.isNotBlank() }
                             ?: return@composable
 
                     val chapterTitle =
                         decodeRouteArgument(
-                            backStackEntry.arguments
-                                ?.getString("chapterTitle")
+                            backStackEntry.arguments?.getString("chapterTitle")
                         ).takeIf { it.isNotBlank() }
                             ?: chapterId
 
                     val board =
                         enumValueOrDefault(
                             decodeRouteArgument(
-                                backStackEntry.arguments
-                                    ?.getString("board")
+                                backStackEntry.arguments?.getString("board")
                             ),
                             Board.MP_BOARD
                         )
@@ -539,8 +441,7 @@ fun AppNavigation(
                     val classLevel =
                         enumValueOrDefault(
                             decodeRouteArgument(
-                                backStackEntry.arguments
-                                    ?.getString("classLevel")
+                                backStackEntry.arguments?.getString("classLevel")
                             ),
                             ClassLevel.CLASS_12
                         )
@@ -566,10 +467,7 @@ fun AppNavigation(
                         onPractice = {
                             navController.navigate(
                                 Screen.Questions.createRoute(
-                                    subjectId =
-                                        toQuestionSubjectId(
-                                            subjectId
-                                        ),
+                                    subjectId = toQuestionSubjectId(subjectId),
                                     chapterId = chapterId,
                                     board = board.name,
                                     classLevel = classLevel.name
@@ -579,55 +477,48 @@ fun AppNavigation(
                         onTest = {
                             navController.navigate(
                                 Screen.TestSession.createRoute(
-                                    subjectId =
-                                        toQuestionSubjectId(
-                                            subjectId
-                                        ),
+                                    subjectId = toQuestionSubjectId(subjectId),
                                     chapterId = chapterId,
                                     board = board.name,
                                     classLevel = classLevel.name
                                 )
                             )
                         },
-                        onNotes = {},
-                        onPdfs = {},
-                        onPyq = {},
-                        onBookmarks = {}
+                        onNotes = {
+                            navController.navigate(Screen.StudyResources.route)
+                        },
+                        onPdfs = {
+                            navController.navigate(Screen.StudyResources.route)
+                        },
+                        onPyq = {
+                            navController.navigate(Screen.StudyResources.route)
+                        },
+                        onBookmarks = {
+                            navController.navigate(Screen.Bookmarks.route)
+                        }
                     )
                 }
 
-                // ====================================================
-                // QUESTIONS
-                // ====================================================
-
-                composable(
-                    Screen.Questions.route
-                ) { backStackEntry ->
+                composable(Screen.Questions.route) { backStackEntry ->
 
                     val rawSubjectId =
                         decodeRouteArgument(
-                            backStackEntry.arguments
-                                ?.getString("subjectId")
+                            backStackEntry.arguments?.getString("subjectId")
                         ).takeIf { it.isNotBlank() }
                             ?: return@composable
 
-                    val subjectId =
-                        toQuestionSubjectId(
-                            rawSubjectId
-                        )
+                    val subjectId = toQuestionSubjectId(rawSubjectId)
 
                     val chapterId =
                         decodeRouteArgument(
-                            backStackEntry.arguments
-                                ?.getString("chapterId")
+                            backStackEntry.arguments?.getString("chapterId")
                         ).takeIf { it.isNotBlank() }
                             ?: return@composable
 
                     val board =
                         enumValueOrDefault(
                             decodeRouteArgument(
-                                backStackEntry.arguments
-                                    ?.getString("board")
+                                backStackEntry.arguments?.getString("board")
                             ),
                             Board.MP_BOARD
                         )
@@ -635,8 +526,7 @@ fun AppNavigation(
                     val classLevel =
                         enumValueOrDefault(
                             decodeRouteArgument(
-                                backStackEntry.arguments
-                                    ?.getString("classLevel")
+                                backStackEntry.arguments?.getString("classLevel")
                             ),
                             ClassLevel.CLASS_12
                         )
@@ -652,13 +542,7 @@ fun AppNavigation(
                     )
                 }
 
-                // ====================================================
-                // TEST RESULT
-                // ====================================================
-
-                composable(
-                    Screen.TestResult.route
-                ) {
+                composable(Screen.TestResult.route) {
                     TestResultScreen(
                         total = latestTestResult.total,
                         answered = latestTestResult.answered,
@@ -667,29 +551,17 @@ fun AppNavigation(
                         unattempted = latestTestResult.unattempted,
                         marked = latestTestResult.marked,
                         onRestart = {
-                            latestTestResult =
-                                NavigationTestResult()
-
-                            navController.navigate(
-                                Screen.Tests.route
-                            ) {
-                                popUpTo(
-                                    Screen.Tests.route
-                                ) {
+                            latestTestResult = NavigationTestResult()
+                            navController.navigate(Screen.Tests.route) {
+                                popUpTo(Screen.Tests.route) {
                                     inclusive = true
                                 }
                             }
                         },
                         onBackToTests = {
-                            latestTestResult =
-                                NavigationTestResult()
-
-                            navController.navigate(
-                                Screen.Tests.route
-                            ) {
-                                popUpTo(
-                                    Screen.Tests.route
-                                ) {
+                            latestTestResult = NavigationTestResult()
+                            navController.navigate(Screen.Tests.route) {
+                                popUpTo(Screen.Tests.route) {
                                     inclusive = true
                                 }
                             }
@@ -697,13 +569,7 @@ fun AppNavigation(
                     )
                 }
 
-                // ====================================================
-                // BOOKMARKS
-                // ====================================================
-
-                composable(
-                    Screen.Bookmarks.route
-                ) {
+                composable(Screen.Bookmarks.route) {
                     BookmarksScreen(
                         onBack = {
                             navController.popBackStack()
@@ -711,13 +577,7 @@ fun AppNavigation(
                     )
                 }
 
-                // ====================================================
-                // TEST HISTORY
-                // ====================================================
-
-                composable(
-                    Screen.TestHistory.route
-                ) {
+                composable(Screen.TestHistory.route) {
                     TestHistoryScreen(
                         onBack = {
                             navController.popBackStack()
@@ -725,13 +585,7 @@ fun AppNavigation(
                     )
                 }
 
-                // ====================================================
-                // ACHIEVEMENTS
-                // ====================================================
-
-                composable(
-                    Screen.Achievements.route
-                ) {
+                composable(Screen.Achievements.route) {
                     AchievementsScreen(
                         onBack = {
                             navController.popBackStack()
@@ -739,13 +593,7 @@ fun AppNavigation(
                     )
                 }
 
-                // ====================================================
-                // SETTINGS
-                // ====================================================
-
-                composable(
-                    Screen.Settings.route
-                ) {
+                composable(Screen.Settings.route) {
                     SettingsScreen(
                         onBack = {
                             navController.popBackStack()
@@ -761,13 +609,10 @@ private fun toQuestionSubjectId(
     subjectId: String
 ): String {
     return when (subjectId) {
-
         CurriculumContentIds.MP_BOARD_CLASS_12_ECONOMICS_MICRO,
         CurriculumContentIds.MP_BOARD_CLASS_12_ECONOMICS_MACRO,
         CurriculumContentIds.CBSE_CLASS_12_ECONOMICS_INDIAN,
-        CurriculumContentIds.CBSE_CLASS_12_ECONOMICS_MACRO -> {
-            "economics"
-        }
+        CurriculumContentIds.CBSE_CLASS_12_ECONOMICS_MACRO -> "economics"
 
         else -> subjectId
     }
@@ -779,9 +624,7 @@ private fun getSubjectDisplayName(
     board: Board,
     classLevel: ClassLevel
 ): String {
-
     return when (subjectId) {
-
         CurriculumContentIds.MP_BOARD_CLASS_12_ECONOMICS_MICRO ->
             "Economics • Micro Economics"
 
@@ -796,13 +639,8 @@ private fun getSubjectDisplayName(
 
         else ->
             subjectRepository
-                .getSubjects(
-                    board,
-                    classLevel
-                )
-                .firstOrNull {
-                    it.id == subjectId
-                }
+                .getSubjects(board, classLevel)
+                .firstOrNull { it.id == subjectId }
                 ?.name
                 ?: subjectId
     }
