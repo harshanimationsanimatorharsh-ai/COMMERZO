@@ -23,6 +23,7 @@ import com.commerzo.app.data.model.content.CurriculumContentIds
 import com.commerzo.app.data.repository.SubjectRepository
 import com.commerzo.app.ui.components.CommerzoBottomBar
 import com.commerzo.app.ui.screens.AchievementsScreen
+import com.commerzo.app.ui.screens.AboutScreen
 import com.commerzo.app.ui.screens.BookmarksScreen
 import com.commerzo.app.ui.screens.ChapterHubScreen
 import com.commerzo.app.ui.screens.ChapterScreen
@@ -599,6 +600,13 @@ fun AppNavigation(
                             navController.popBackStack()
                         }
                     )
+                }
+                composable(Screen.About.route) {
+    AboutScreen(
+        onBack = {
+            navController.popBackStack()
+        }
+    )
                 }
             }
         }
