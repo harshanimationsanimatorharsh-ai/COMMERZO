@@ -41,6 +41,7 @@ import com.commerzo.app.ui.screens.TestResultScreen
 import com.commerzo.app.ui.screens.TestScreen
 import com.commerzo.app.ui.screens.TestSelectionScreen
 import com.commerzo.app.ui.viewmodel.auth.AuthViewModel
+import com.commerzo.app.ui.screens.PrivacyPolicyScreen
 
 data class NavigationTestResult(
     val total: Int = 0,
@@ -606,6 +607,13 @@ fun AppNavigation(
                 }
                 composable(Screen.About.route) {
     AboutScreen(
+        onBack = {
+            navController.popBackStack()
+        }
+    )
+                }
+                composable(Screen.PrivacyPolicy.route) {
+    PrivacyPolicyScreen(
         onBack = {
             navController.popBackStack()
         }
