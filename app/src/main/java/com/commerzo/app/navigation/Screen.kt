@@ -44,6 +44,8 @@ sealed class Screen(
     data object Settings : Screen("settings")
 
     data object About : Screen("about")
+    
+    data object PrivacyPolicy : Screen("privacy_policy")
 
     // STUDY RESOURCES
 
