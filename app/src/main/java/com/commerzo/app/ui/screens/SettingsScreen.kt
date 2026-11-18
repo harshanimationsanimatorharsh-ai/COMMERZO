@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.commerzo.app.ui.theme.CommerzoDimensions
 import com.commerzo.app.ui.viewmodel.settings.SettingsViewModel
+import com.commerzo.app.core.AppVersion
 
 fun SettingsScreen(
     onBack: () -> Unit,
@@ -546,10 +547,10 @@ private fun VersionCard() {
             )
 
             Text(
-                text = "Version 5.3.0",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+    text = AppVersion.label,
+    style = MaterialTheme.typography.labelSmall,
+    color = MaterialTheme.colorScheme.onSurfaceVariant
+)
         }
     }
 }
