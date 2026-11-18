@@ -54,6 +54,7 @@ fun SettingsScreen(
     onBack: () -> Unit,
     onAboutClick: () -> Unit,
     onPrivacyPolicyClick: () -> Unit,
+    onTermsConditionsClick: () -> Unit,
     viewModel: SettingsViewModel = viewModel()
 ) {
 
@@ -192,10 +193,11 @@ fun SettingsScreen(
 ) 
 
             SettingsInfoCard(
-                icon = Icons.Default.Policy,
-                title = "Terms & Conditions",
-                subtitle = "Terms will be available soon"
-            )
+    icon = Icons.Default.Policy,
+    title = "Terms & Conditions",
+    subtitle = "Read the rules for using COMMERZO",
+    onClick = onTermsConditionsClick
+)
 
             VersionCard()
 
