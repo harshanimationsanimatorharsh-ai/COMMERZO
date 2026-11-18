@@ -1,10 +1,11 @@
+
 package com.commerzo.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.commerzo.app.navigation.AuthNavigation
 import com.commerzo.app.ui.theme.CommerzoTheme
@@ -24,7 +25,9 @@ class MainActivity : ComponentActivity() {
             CommerzoTheme(
                 darkTheme = darkModeEnabled
             ) {
-                AuthNavigation()
+                AuthNavigation(
+                    settingsViewModel = settingsViewModel
+                )
             }
         }
     }
