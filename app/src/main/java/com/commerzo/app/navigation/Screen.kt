@@ -1,3 +1,4 @@
+
 package com.commerzo.app.navigation
 
 import java.net.URLEncoder
@@ -42,7 +43,9 @@ sealed class Screen(
 
     data object Settings : Screen("settings")
 
-    // NEW: STUDY RESOURCES
+    data object About : Screen("about")
+
+    // STUDY RESOURCES
 
     data object StudyResources : Screen("study_resources")
 
