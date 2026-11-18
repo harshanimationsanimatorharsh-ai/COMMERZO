@@ -602,9 +602,13 @@ fun AppNavigation(
         },
         onAboutClick = {
             navController.navigate(Screen.About.route)
+        },
+        onPrivacyPolicyClick = {
+    navController.navigate(Screen.PrivacyPolicy.route)
         }
     )
                 }
+        
                 composable(Screen.About.route) {
     AboutScreen(
         onBack = {
