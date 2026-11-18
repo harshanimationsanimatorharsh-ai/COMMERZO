@@ -86,7 +86,9 @@ val CommerzoDarkOutlineVariant = Color(0xFF454752)
 val CommerzoSuccess = Color(0xFF16A34A)
 val CommerzoWarning = Color(0xFFF59E0B)
 val CommerzoInfo = Color(0xFF3B82F6)
-val CommerzoError = Color(0xFFE5484D)
+val CommerzoError = Color(0xFFB3261E)
+val CommerzoDarkError = Color(0xFFFFB4AB)
+val CommerzoDarkOnError = Color(0xFF690005)
 
 // Light error container
 val CommerzoErrorContainer = Color(0xFFFFE4E2)
