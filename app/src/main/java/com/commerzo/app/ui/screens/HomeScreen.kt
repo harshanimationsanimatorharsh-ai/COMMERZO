@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -125,6 +124,7 @@ fun HomeScreen(
                 CommerzoDimensions.Space20
             )
         ) {
+
             item {
                 ContinueLearningCard(
                     onClick = onPracticeClick
@@ -133,8 +133,8 @@ fun HomeScreen(
 
             item {
                 SectionHeader(
-                    title = "Quick Start",
-                    subtitle = "Choose how you want to study"
+                    title = "Quick Access",
+                    subtitle = "Your essential study tools"
                 )
             }
 
@@ -147,15 +147,6 @@ fun HomeScreen(
                         end = CommerzoDimensions.Space4
                     )
                 ) {
-                    item {
-                        QuickActionTile(
-                            title = "Practice",
-                            subtitle = "Chapter MCQs",
-                            icon = Icons.Default.MenuBook,
-                            onClick = onPracticeClick
-                        )
-                    }
-
                     item {
                         QuickActionTile(
                             title = "Tests",
@@ -174,7 +165,6 @@ fun HomeScreen(
                         )
                     }
 
-                    // NEW: STUDY RESOURCES
                     item {
                         QuickActionTile(
                             title = "Study Material",
@@ -189,7 +179,7 @@ fun HomeScreen(
             item {
                 SectionHeader(
                     title = "Your Subjects",
-                    subtitle = "Pick a subject to continue"
+                    subtitle = "Choose a subject to explore"
                 )
             }
 
@@ -214,16 +204,6 @@ fun HomeScreen(
                         )
                     }
                 }
-            }
-
-            item {
-                StudyGoalCard()
-            }
-
-            item {
-                PracticeRecommendationCard(
-                    onClick = onPracticeClick
-                )
             }
 
             item {
@@ -305,7 +285,7 @@ private fun ContinueLearningCard(
                 )
 
                 Text(
-                    text = "Jump back into your practice.",
+                    text = "Continue your chapter practice.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onPrimary.copy(
                         alpha = 0.82f
@@ -427,142 +407,6 @@ private fun CompactSubjectCard(
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.primary,
                 maxLines = 1
-            )
-        }
-    }
-}
-
-@Composable
-private fun StudyGoalCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    CommerzoDimensions.CardPaddingLarge
-                ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                modifier = Modifier.size(50.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.primaryContainer
-            ) {
-                Box(
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Timer,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
-            Spacer(
-                modifier = Modifier.width(
-                    CommerzoDimensions.Space12
-                )
-            )
-
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(
-                    CommerzoDimensions.Space4
-                )
-            ) {
-                Text(
-                    text = "Daily Study Goal",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Text(
-                    text = "30 minutes of focused study",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Text(
-                text = "30 min",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-    }
-}
-
-@Composable
-private fun PracticeRecommendationCard(
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = onClick,
-        shape = RoundedCornerShape(22.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    CommerzoDimensions.CardPaddingLarge
-                ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                modifier = Modifier.size(50.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.secondaryContainer
-            ) {
-                Box(
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.MenuBook,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.secondary
-                    )
-                }
-            }
-
-            Spacer(
-                modifier = Modifier.width(
-                    CommerzoDimensions.Space12
-                )
-            )
-
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(
-                    CommerzoDimensions.Space4
-                )
-            ) {
-                Text(
-                    text = "Start Practice",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Text(
-                    text = "Practice chapter MCQs and strengthen concepts.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2
-                )
-            }
-
-            Icon(
-                imageVector = Icons.Default.ArrowForward,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
             )
         }
     }
