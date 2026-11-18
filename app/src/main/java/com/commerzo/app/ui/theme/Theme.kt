@@ -80,8 +80,8 @@ private val DarkColors = darkColorScheme(
     outline = CommerzoDarkOutline,
     outlineVariant = CommerzoDarkOutlineVariant,
 
-    error = CommerzoError,
-    onError = CommerzoWhite,
+    error = CommerzoDarkError,
+onError = CommerzoDarkOnError,
     errorContainer = CommerzoDarkErrorContainer,
     onErrorContainer = CommerzoDarkOnErrorContainer
 )
