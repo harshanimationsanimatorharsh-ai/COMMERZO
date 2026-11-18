@@ -1,3 +1,4 @@
+
 package com.commerzo.app.ui.viewmodel.profile
 
 import android.app.Application
@@ -53,91 +54,84 @@ class ProfileViewModel(
 
     fun loadProfile() {
         viewModelScope.launch {
+            _profileState.value = ProfileState.Loading
 
-            _profileState.value =
-                ProfileState.Loading
+            try {
+                val authUser =
+                    authRepository.getCurrentUser()
 
-            val authUser =
-                authRepository.getCurrentUser()
-
-            if (authUser == null) {
-
-                _profileState.value =
-                    ProfileState.Error(
-                        "No signed-in user found."
-                    )
-
-                return@launch
-            }
-
-            val userId =
-                authUser.userId
-
-            val result =
-                profileRepository.getProfile(userId)
-
-            result.onSuccess { profile ->
-
-                if (profile != null) {
-
+                if (authUser == null) {
                     _profileState.value =
-                        ProfileState.Success(
-                            profile
+                        ProfileState.Error(
+                            "No signed-in user found."
                         )
-
-                } else {
-
-                    val newProfile =
-                        createProfileFromAuthUser(
-                            authUser
-                        )
-
-                    val createResult =
-                        profileRepository
-                            .createOrUpdateProfile(
-                                newProfile
-                            )
-
-                    if (createResult.isSuccess) {
-
-                        _profileState.value =
-                            ProfileState.Success(
-                                newProfile
-                            )
-
-                    } else {
-
-                        _profileState.value =
-                            ProfileState.Success(
-                                newProfile
-                            )
-                    }
+                    return@launch
                 }
 
-            }.onFailure {
-
-                val fallbackProfile =
-                    createProfileFromAuthUser(
-                        authUser
+                val result =
+                    profileRepository.getProfile(
+                        authUser.userId
                     )
 
+                result.fold(
+                    onSuccess = { profile ->
+                        if (profile != null) {
+                            _profileState.value =
+                                ProfileState.Success(profile)
+                        } else {
+                            createMissingProfile(authUser)
+                        }
+                    },
+                    onFailure = { error ->
+                        _profileState.value =
+                            ProfileState.Error(
+                                error.message
+                                    ?: "Unable to load your profile. Please try again."
+                            )
+                    }
+                )
+            } catch (error: Exception) {
                 _profileState.value =
-                    ProfileState.Success(
-                        fallbackProfile
+                    ProfileState.Error(
+                        error.message
+                            ?: "Something went wrong while loading your profile."
                     )
             }
         }
     }
 
+    private suspend fun createMissingProfile(
+        authUser: AuthUser
+    ) {
+        val newProfile =
+            createProfileFromAuthUser(authUser)
+
+        val result =
+            profileRepository.createOrUpdateProfile(
+                newProfile
+            )
+
+        result.fold(
+            onSuccess = {
+                _profileState.value =
+                    ProfileState.Success(newProfile)
+            },
+            onFailure = { error ->
+                _profileState.value =
+                    ProfileState.Error(
+                        error.message
+                            ?: "Your profile could not be saved. Please retry."
+                    )
+            }
+        )
+    }
+
     fun updateDisplayName(
         displayName: String
     ) {
-        val name =
-            displayName.trim()
+        val name = displayName.trim()
 
-        if (name.isBlank()) {
-            return
-        }
+        if (name.isBlank()) return
 
         updateProfileField(
             mapOf(
@@ -173,20 +167,15 @@ class ProfileViewModel(
         updates: Map<String, Any?>
     ) {
         viewModelScope.launch {
-
             val currentProfile =
-                (
-                    _profileState.value
-                        as? ProfileState.Success
-                    )?.profile
+                (_profileState.value as? ProfileState.Success)
+                    ?.profile
 
             if (currentProfile == null) {
-
                 _profileState.value =
                     ProfileState.Error(
-                        "Student profile is not loaded yet."
+                        "Student profile is not loaded. Please retry."
                     )
-
                 return@launch
             }
 
@@ -196,29 +185,25 @@ class ProfileViewModel(
                     updates
                 )
 
-            if (result.isSuccess) {
-
-                loadProfile()
-
-            } else {
-
-                val updatedProfile =
-                    applyLocalUpdates(
-                        profile = currentProfile,
-                        updates = updates
-                    )
-
-                _profileState.value =
-                    ProfileState.Success(
-                        updatedProfile
-                    )
-            }
+            result.fold(
+                onSuccess = {
+                    loadProfile()
+                },
+                onFailure = { error ->
+                    _profileState.value =
+                        ProfileState.Error(
+                            error.message
+                                ?: "Profile update failed. Your changes were not confirmed as saved."
+                        )
+                }
+            )
         }
     }
 
     private fun createProfileFromAuthUser(
         authUser: AuthUser
     ): StudentProfile {
+        val currentTime = System.currentTimeMillis()
 
         return StudentProfile(
             userId = authUser.userId,
@@ -227,44 +212,8 @@ class ProfileViewModel(
             phoneNumber = authUser.phoneNumber,
             photoUrl = authUser.photoUrl,
             role = "student",
-            createdAt = System.currentTimeMillis(),
-            updatedAt = System.currentTimeMillis()
-        )
-    }
-
-    private fun applyLocalUpdates(
-        profile: StudentProfile,
-        updates: Map<String, Any?>
-    ): StudentProfile {
-
-        return profile.copy(
-
-            displayName =
-                if (updates.containsKey("displayName")) {
-                    updates["displayName"]
-                        ?.toString()
-                        ?: profile.displayName
-                } else {
-                    profile.displayName
-                },
-
-            phoneNumber =
-                if (updates.containsKey("phoneNumber")) {
-                    updates["phoneNumber"] as? String
-                } else {
-                    profile.phoneNumber
-                },
-
-            photoUrl =
-                if (updates.containsKey("photoUrl")) {
-                    updates["photoUrl"] as? String
-                } else {
-                    profile.photoUrl
-                },
-
-            updatedAt =
-                (updates["updatedAt"] as? Long)
-                    ?: profile.updatedAt
+            createdAt = currentTime,
+            updatedAt = currentTime
         )
     }
 }
