@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.commerzo.app.data.model.auth.AuthState
 import com.commerzo.app.ui.viewmodel.auth.AuthViewModel
+import com.commerzo.app.ui.viewmodel.settings.SettingsViewModel
 
 /**
  * COMMERZO authentication entry point.
