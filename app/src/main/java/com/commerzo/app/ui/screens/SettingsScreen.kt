@@ -54,7 +54,7 @@ fun SettingsScreen(
     onBack: () -> Unit,
     onAboutClick: () -> Unit,
     viewModel: SettingsViewModel = viewModel()
-)
+) {
 
     val darkModeEnabled by viewModel.darkModeEnabled.collectAsState()
     val notificationsEnabled by viewModel.notificationsEnabled.collectAsState()
@@ -364,7 +364,7 @@ private fun SettingsInfoCard(
     title: String,
     subtitle: String,
     onClick: (() -> Unit)? = null
-)
+) {
     Card(
         modifier = Modifier
     .fillMaxWidth()
