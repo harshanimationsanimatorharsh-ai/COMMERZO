@@ -1,3 +1,4 @@
+
 package com.commerzo.app.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -10,8 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 
 // ============================================================
-// COMMERZO — Professional Material 3 Theme
-// Phase 7 — Professional Design System
+// COMMERZO — MATERIAL 3 COLOR SYSTEM
 // ============================================================
 
 private val LightColors = lightColorScheme(
@@ -26,7 +26,7 @@ private val LightColors = lightColorScheme(
     onSecondaryContainer = CommerzoOnSecondaryContainer,
 
     tertiary = CommerzoTertiary,
-    onTertiary = CommerzoWhite,
+    onTertiary = CommerzoBlack,
     tertiaryContainer = CommerzoTertiaryContainer,
     onTertiaryContainer = CommerzoOnTertiaryContainer,
 
@@ -48,21 +48,25 @@ private val LightColors = lightColorScheme(
     onErrorContainer = CommerzoOnErrorContainer
 )
 
+// ============================================================
+// DARK COLOR SCHEME
+// ============================================================
+
 private val DarkColors = darkColorScheme(
     primary = CommerzoPrimaryDark,
     onPrimary = CommerzoBlack,
-    primaryContainer = CommerzoPrimaryContainer,
-    onPrimaryContainer = CommerzoOnPrimaryContainer,
+    primaryContainer = CommerzoDarkPrimaryContainer,
+    onPrimaryContainer = CommerzoDarkOnPrimaryContainer,
 
     secondary = CommerzoSecondary,
     onSecondary = CommerzoBlack,
-    secondaryContainer = CommerzoDarkSurfaceVariant,
-    onSecondaryContainer = CommerzoSecondary,
+    secondaryContainer = CommerzoDarkSecondaryContainer,
+    onSecondaryContainer = CommerzoDarkOnSecondaryContainer,
 
     tertiary = CommerzoTertiary,
     onTertiary = CommerzoBlack,
-    tertiaryContainer = CommerzoTertiaryContainer,
-    onTertiaryContainer = CommerzoTertiary,
+    tertiaryContainer = CommerzoDarkTertiaryContainer,
+    onTertiaryContainer = CommerzoDarkOnTertiaryContainer,
 
     background = CommerzoDarkBackground,
     onBackground = CommerzoDarkOnBackground,
@@ -74,16 +78,16 @@ private val DarkColors = darkColorScheme(
     onSurfaceVariant = CommerzoDarkOnSurfaceVariant,
 
     outline = CommerzoDarkOutline,
-    outlineVariant = CommerzoDarkOutline,
+    outlineVariant = CommerzoDarkOutlineVariant,
 
     error = CommerzoError,
     onError = CommerzoWhite,
-    errorContainer = CommerzoErrorContainer,
-    onErrorContainer = CommerzoOnErrorContainer
+    errorContainer = CommerzoDarkErrorContainer,
+    onErrorContainer = CommerzoDarkOnErrorContainer
 )
 
 // ============================================================
-// Centralized Shape System
+// CENTRALIZED SHAPE SYSTEM
 // ============================================================
 
 private val CommerzoShapes = Shapes(
@@ -95,7 +99,7 @@ private val CommerzoShapes = Shapes(
 )
 
 // ============================================================
-// Root Theme
+// ROOT THEME
 // ============================================================
 
 @Composable
