@@ -53,6 +53,7 @@ import com.commerzo.app.core.AppVersion
 fun SettingsScreen(
     onBack: () -> Unit,
     onAboutClick: () -> Unit,
+    onPrivacyPolicyClick: () -> Unit,
     viewModel: SettingsViewModel = viewModel()
 ) {
 
@@ -183,11 +184,12 @@ fun SettingsScreen(
     onClick = onAboutClick
 ) 
 
-            SettingsInfoCard(
-                icon = Icons.Default.Policy,
-                title = "Privacy Policy",
-                subtitle = "Privacy information will be available soon"
-            )
+           SettingsInfoCard(
+    icon = Icons.Default.Policy,
+    title = "Privacy Policy",
+    subtitle = "Read how your information is handled",
+    onClick = onPrivacyPolicyClick
+) 
 
             SettingsInfoCard(
                 icon = Icons.Default.Policy,
