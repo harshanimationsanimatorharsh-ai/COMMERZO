@@ -35,8 +35,10 @@ import com.commerzo.app.ui.viewmodel.settings.SettingsViewModel
  */
 @Composable
 fun AuthNavigation(
-    authViewModel: AuthViewModel = viewModel()
-) {
+    authViewModel: AuthViewModel = viewModel(),
+    settingsViewModel: SettingsViewModel = viewModel()
+)
+    
     val authState by authViewModel.authState.collectAsState()
 
     /*
