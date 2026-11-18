@@ -606,7 +606,10 @@ fun AppNavigation(
         },
         onPrivacyPolicyClick = {
     navController.navigate(Screen.PrivacyPolicy.route)
-        }
+        },
+    onTermsConditionsClick = {
+    navController.navigate(Screen.TermsConditions.route)
+    }
     )
                 }
         
