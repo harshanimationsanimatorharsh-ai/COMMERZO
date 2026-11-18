@@ -2,6 +2,7 @@
 package com.commerzo.app.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,6 +38,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.commerzo.app.core.AppVersion
 
 @Composable
 fun AboutScreen(
@@ -75,8 +77,6 @@ fun AboutScreen(
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
 
-            // BRAND HERO
-
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(28.dp),
@@ -95,7 +95,7 @@ fun AboutScreen(
                         shape = RoundedCornerShape(24.dp),
                         color = MaterialTheme.colorScheme.surface
                     ) {
-                        androidx.compose.foundation.layout.Box(
+                        Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
@@ -137,14 +137,10 @@ fun AboutScreen(
                 }
             }
 
-            // OUR PURPOSE
-
             AboutSection(
                 title = "Our Purpose",
                 description = "COMMERZO aims to make structured learning and practice more accessible to students. The goal is to help learners understand concepts, practise regularly and track their progress."
             )
-
-            // LEARNING EXPERIENCE
 
             Text(
                 text = "Learning Experience",
@@ -176,14 +172,10 @@ fun AboutScreen(
                 description = "Keep track of your learning activity and achievements."
             )
 
-            // PLATFORM DETAILS
-
             AboutSection(
                 title = "Supported Learning",
                 description = "The platform is designed around Class 11 and Class 12 learning, with support for MP Board and CBSE content where available."
             )
-
-            // DEVELOPER
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -216,8 +208,6 @@ fun AboutScreen(
                 }
             }
 
-            // VERSION
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -231,7 +221,7 @@ fun AboutScreen(
                 )
 
                 Text(
-                    text = "Version 5.3.0",
+                    text = AppVersion.label,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -299,7 +289,7 @@ private fun AboutFeature(
                 shape = RoundedCornerShape(14.dp),
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
-                androidx.compose.foundation.layout.Box(
+                Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
