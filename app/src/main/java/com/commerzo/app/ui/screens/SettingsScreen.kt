@@ -1,3 +1,4 @@
+
 package com.commerzo.app.ui.screens
 
 import androidx.compose.foundation.clickable
@@ -17,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,12 +47,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.commerzo.app.core.AppVersion
 import com.commerzo.app.ui.theme.CommerzoDimensions
 import com.commerzo.app.ui.viewmodel.settings.SettingsViewModel
-import com.commerzo.app.core.AppVersion
-import androidx.compose.material3.FilterChip
 import com.commerzo.app.ui.viewmodel.settings.ThemeMode
 
+@Composable
 fun SettingsScreen(
     onBack: () -> Unit,
     onAboutClick: () -> Unit,
@@ -59,7 +60,6 @@ fun SettingsScreen(
     onTermsConditionsClick: () -> Unit,
     viewModel: SettingsViewModel = viewModel()
 ) {
-
     val themeMode by viewModel.themeMode.collectAsState()
     val notificationsEnabled by viewModel.notificationsEnabled.collectAsState()
 
@@ -120,16 +120,9 @@ fun SettingsScreen(
                 title = "Appearance"
             )
 
-            SettingsToggleCard(
-                icon = Icons.Default.DarkMode,
-                title = "Dark Mode",
-                subtitle = if (darkModeEnabled) {
-                    "Dark appearance is enabled"
-                } else {
-                    "Use a darker appearance"
-                },
-                checked = darkModeEnabled,
-                onCheckedChange = viewModel::setDarkModeEnabled
+            ThemeModeSelector(
+                selectedMode = themeMode,
+                onModeSelected = viewModel::setThemeMode
             )
 
             SettingsSectionTitle(
@@ -180,26 +173,26 @@ fun SettingsScreen(
                 title = "About COMMERZO"
             )
 
-           SettingsInfoCard(
-    icon = Icons.Default.Info,
-    title = "About COMMERZO",
-    subtitle = "Learn more about the app",
-    onClick = onAboutClick
-) 
-
-           SettingsInfoCard(
-    icon = Icons.Default.Policy,
-    title = "Privacy Policy",
-    subtitle = "Read how your information is handled",
-    onClick = onPrivacyPolicyClick
-) 
+            SettingsInfoCard(
+                icon = Icons.Default.Info,
+                title = "About COMMERZO",
+                subtitle = "Learn more about the app",
+                onClick = onAboutClick
+            )
 
             SettingsInfoCard(
-    icon = Icons.Default.Policy,
-    title = "Terms & Conditions",
-    subtitle = "Read the rules for using COMMERZO",
-    onClick = onTermsConditionsClick
-)
+                icon = Icons.Default.Policy,
+                title = "Privacy Policy",
+                subtitle = "Read how your information is handled",
+                onClick = onPrivacyPolicyClick
+            )
+
+            SettingsInfoCard(
+                icon = Icons.Default.Policy,
+                title = "Terms & Conditions",
+                subtitle = "Read the rules for using COMMERZO",
+                onClick = onTermsConditionsClick
+            )
 
             VersionCard()
 
@@ -292,7 +285,9 @@ private fun SettingsSectionTitle(
         fontWeight = FontWeight.ExtraBold,
         color = MaterialTheme.colorScheme.onBackground
     )
-    @Composable
+}
+
+@Composable
 private fun ThemeModeSelector(
     selectedMode: ThemeMode,
     onModeSelected: (ThemeMode) -> Unit
@@ -367,7 +362,6 @@ private fun ThemeModeSelector(
             }
         }
     }
-}
 }
 
 @Composable
@@ -449,12 +443,12 @@ private fun SettingsInfoCard(
 ) {
     Card(
         modifier = Modifier
-    .fillMaxWidth()
-    .clickable(
-        enabled = onClick != null
-    ) {
-        onClick?.invoke()
-    },
+            .fillMaxWidth()
+            .clickable(
+                enabled = onClick != null
+            ) {
+                onClick?.invoke()
+            },
         elevation = CardDefaults.cardElevation(
             defaultElevation = 1.dp
         )
@@ -629,10 +623,10 @@ private fun VersionCard() {
             )
 
             Text(
-    text = AppVersion.label,
-    style = MaterialTheme.typography.labelSmall,
-    color = MaterialTheme.colorScheme.onSurfaceVariant
-)
+                text = AppVersion.label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
