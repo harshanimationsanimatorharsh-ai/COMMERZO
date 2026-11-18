@@ -49,6 +49,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.commerzo.app.ui.theme.CommerzoDimensions
 import com.commerzo.app.ui.viewmodel.settings.SettingsViewModel
 import com.commerzo.app.core.AppVersion
+import androidx.compose.material3.FilterChip
+import com.commerzo.app.ui.viewmodel.settings.ThemeMode
 
 fun SettingsScreen(
     onBack: () -> Unit,
@@ -58,7 +60,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel()
 ) {
 
-    val darkModeEnabled by viewModel.darkModeEnabled.collectAsState()
+    val themeMode by viewModel.themeMode.collectAsState()
     val notificationsEnabled by viewModel.notificationsEnabled.collectAsState()
 
     Scaffold(
@@ -290,6 +292,82 @@ private fun SettingsSectionTitle(
         fontWeight = FontWeight.ExtraBold,
         color = MaterialTheme.colorScheme.onBackground
     )
+    @Composable
+private fun ThemeModeSelector(
+    selectedMode: ThemeMode,
+    onModeSelected: (ThemeMode) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(CommerzoDimensions.CardPadding),
+            verticalArrangement = Arrangement.spacedBy(
+                CommerzoDimensions.Space8
+            )
+        ) {
+            Text(
+                text = "App Theme",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Text(
+                text = "Choose your preferred appearance",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                FilterChip(
+                    selected = selectedMode == ThemeMode.SYSTEM,
+                    onClick = {
+                        onModeSelected(ThemeMode.SYSTEM)
+                    },
+                    label = {
+                        Text("System")
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+
+                FilterChip(
+                    selected = selectedMode == ThemeMode.LIGHT,
+                    onClick = {
+                        onModeSelected(ThemeMode.LIGHT)
+                    },
+                    label = {
+                        Text("Light")
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+
+                FilterChip(
+                    selected = selectedMode == ThemeMode.DARK,
+                    onClick = {
+                        onModeSelected(ThemeMode.DARK)
+                    },
+                    label = {
+                        Text("Dark")
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
 }
 
 @Composable
