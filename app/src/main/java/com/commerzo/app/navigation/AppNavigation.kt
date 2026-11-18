@@ -43,6 +43,7 @@ import com.commerzo.app.ui.screens.TestSelectionScreen
 import com.commerzo.app.ui.viewmodel.auth.AuthViewModel
 import com.commerzo.app.ui.screens.PrivacyPolicyScreen
 import com.commerzo.app.ui.screens.TermsConditionsScreen
+import com.commerzo.app.ui.viewmodel.settings.SettingsViewModel
 
 data class NavigationTestResult(
     val total: Int = 0,
@@ -56,8 +57,9 @@ data class NavigationTestResult(
 @Composable
 fun AppNavigation(
     navController: NavHostController = rememberNavController(),
-    authViewModel: AuthViewModel = viewModel()
-) {
+    authViewModel: AuthViewModel = viewModel(),
+    settingsViewModel: SettingsViewModel = viewModel()
+){
     var latestTestResult by remember {
         mutableStateOf(NavigationTestResult())
     }
@@ -597,6 +599,7 @@ fun AppNavigation(
                 }
 
                 composable(Screen.Settings.route) {
+    composable(Screen.Settings.route) {
     SettingsScreen(
         onBack = {
             navController.popBackStack()
@@ -605,13 +608,14 @@ fun AppNavigation(
             navController.navigate(Screen.About.route)
         },
         onPrivacyPolicyClick = {
-    navController.navigate(Screen.PrivacyPolicy.route)
+            navController.navigate(Screen.PrivacyPolicy.route)
         },
-    onTermsConditionsClick = {
-    navController.navigate(Screen.TermsConditions.route)
-    }
+        onTermsConditionsClick = {
+            navController.navigate(Screen.TermsConditions.route)
+        },
+        viewModel = settingsViewModel
     )
-                }
+    }
         
                 composable(Screen.About.route) {
     AboutScreen(
