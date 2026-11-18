@@ -47,6 +47,8 @@ sealed class Screen(
     
     data object PrivacyPolicy : Screen("privacy_policy")
 
+    data object TermsConditions : Screen("terms_conditions")
+
     // STUDY RESOURCES
 
     data object StudyResources : Screen("study_resources")
