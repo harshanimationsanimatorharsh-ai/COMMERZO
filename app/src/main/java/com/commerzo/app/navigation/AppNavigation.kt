@@ -42,6 +42,7 @@ import com.commerzo.app.ui.screens.TestScreen
 import com.commerzo.app.ui.screens.TestSelectionScreen
 import com.commerzo.app.ui.viewmodel.auth.AuthViewModel
 import com.commerzo.app.ui.screens.PrivacyPolicyScreen
+import com.commerzo.app.ui.screens.TermsConditionsScreen
 
 data class NavigationTestResult(
     val total: Int = 0,
@@ -623,8 +624,15 @@ fun AppNavigation(
         }
     )
                 }
-            }
+                composable(Screen.TermsConditions.route) {
+    TermsConditionsScreen(
+        onBack = {
+            navController.popBackStack()
         }
+    )
+                }
+            }        
+       }
     }
 }
 
