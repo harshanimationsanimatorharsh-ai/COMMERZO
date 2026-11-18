@@ -597,8 +597,7 @@ fun AppNavigation(
                         }
                     )
                 }
-
-                composable(Screen.Settings.route) {
+        
     composable(Screen.Settings.route) {
     SettingsScreen(
         onBack = {
