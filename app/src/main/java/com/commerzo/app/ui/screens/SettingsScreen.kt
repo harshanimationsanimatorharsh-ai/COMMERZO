@@ -1,5 +1,6 @@
 package com.commerzo.app.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,11 +49,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.commerzo.app.ui.theme.CommerzoDimensions
 import com.commerzo.app.ui.viewmodel.settings.SettingsViewModel
 
-@Composable
 fun SettingsScreen(
     onBack: () -> Unit,
+    onAboutClick: () -> Unit,
     viewModel: SettingsViewModel = viewModel()
-) {
+)
+
     val darkModeEnabled by viewModel.darkModeEnabled.collectAsState()
     val notificationsEnabled by viewModel.notificationsEnabled.collectAsState()
 
@@ -173,11 +175,12 @@ fun SettingsScreen(
                 title = "About COMMERZO"
             )
 
-            SettingsInfoCard(
-                icon = Icons.Default.Info,
-                title = "About COMMERZO",
-                subtitle = "Learn more about the app"
-            )
+           SettingsInfoCard(
+    icon = Icons.Default.Info,
+    title = "About COMMERZO",
+    subtitle = "Learn more about the app",
+    onClick = onAboutClick
+) 
 
             SettingsInfoCard(
                 icon = Icons.Default.Policy,
@@ -358,14 +361,17 @@ private fun SettingsToggleCard(
 private fun SettingsInfoCard(
     icon: ImageVector,
     title: String,
-    subtitle: String
-) {
+    subtitle: String,
+    onClick: (() -> Unit)? = null
+)
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
+        modifier = Modifier
+    .fillMaxWidth()
+    .clickable(
+        enabled = onClick != null
+    ) {
+        onClick?.invoke()
+    },
         elevation = CardDefaults.cardElevation(
             defaultElevation = 1.dp
         )
