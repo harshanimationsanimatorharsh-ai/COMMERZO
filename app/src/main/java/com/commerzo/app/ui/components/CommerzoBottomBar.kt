@@ -1,3 +1,4 @@
+
 package com.commerzo.app.ui.components
 
 import androidx.compose.foundation.layout.WindowInsets
@@ -7,6 +8,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Quiz
+import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -33,6 +35,7 @@ fun CommerzoBottomBar(
         BottomBarItem(Screen.Home, "Home", Icons.Default.Home),
         BottomBarItem(Screen.Practice, "Practice", Icons.Default.MenuBook),
         BottomBarItem(Screen.Tests, "Tests", Icons.Default.Quiz),
+        BottomBarItem(Screen.Games, "Games", Icons.Default.SportsEsports),
         BottomBarItem(Screen.Profile, "Profile", Icons.Default.AccountCircle)
     )
 
