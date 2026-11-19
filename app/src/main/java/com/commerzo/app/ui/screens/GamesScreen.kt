@@ -1,9 +1,8 @@
+
 package com.commerzo.app.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,366 +10,284 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Quiz
-import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material.icons.filled.Whatshot
+import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.commerzo.app.ui.theme.CommerzoDimensions
+import kotlin.random.Random
 
+private enum class MathOperation(
+    val title: String,
+    val symbol: String
+) {
+    ADDITION("Addition", "+"),
+    SUBTRACTION("Subtraction", "−"),
+    MULTIPLICATION("Multiplication", "×"),
+    DIVISION("Division", "÷")
+}
+
+private data class MathQuestion(
+    val first: Int,
+    val second: Int,
+    val operation: MathOperation,
+    val answer: Int,
+    val options: List<Int>
+) {
+    val expression: String
+        get() = "$first ${operation.symbol} $second"
+}
+
+private const val ROUND_SIZE = 10
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GamesScreen() {
-
-    val games = listOf(
-        GameItem(
-            title = "Math Challenge",
-            subtitle = "Fast mathematical problem solving.",
-            icon = Icons.Default.Quiz,
-            category = "QUICK PLAY"
-        ),
-        GameItem(
-            title = "Equation Game",
-            subtitle = "Practice mathematical thinking.",
-            icon = Icons.Default.Psychology,
-            category = "LOGIC"
-        ),
-        GameItem(
-            title = "Mind Sharp",
-            subtitle = "Memory, logic and quick thinking.",
-            icon = Icons.Default.Psychology,
-            category = "BRAIN"
-        ),
-        GameItem(
-            title = "Puzzle Challenge",
-            subtitle = "Solve educational puzzles.",
-            icon = Icons.Default.EmojiEvents,
-            category = "PUZZLE"
-        ),
-        GameItem(
-            title = "Speed Challenge",
-            subtitle = "Answer questions against the clock.",
-            icon = Icons.Default.Timer,
-            category = "SPEED"
-        ),
-        GameItem(
-            title = "Daily Challenge",
-            subtitle = "A new challenge designed for daily practice.",
-            icon = Icons.Default.FlashOn,
-            category = "DAILY"
-        )
-    )
+    var selectedOperation by remember {
+        mutableStateOf<MathOperation?>(null)
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
-                        Text(
-                            text = "Games",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Text(
-                            text = "Learn through challenges",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    Text(
+                        text = if (selectedOperation == null) {
+                            "Games 🎮"
+                        } else {
+                            "Quick Math"
+                        },
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                navigationIcon = {
+                    if (selectedOperation != null) {
+                        TextButton(
+                            onClick = {
+                                selectedOperation = null
+                            }
+                        ) {
+                            Icon(
+                                Icons.Default.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                            Text("Back")
+                        }
                     }
                 }
             )
         }
-    ) { paddingValues ->
+    ) { padding ->
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(
-                horizontal = CommerzoDimensions.ScreenHorizontal,
-                vertical = CommerzoDimensions.ScreenVertical
-            ),
-            verticalArrangement = Arrangement.spacedBy(
-                CommerzoDimensions.CardSpacing
+        if (selectedOperation == null) {
+            GamesHome(
+                modifier = Modifier.padding(padding),
+                onMathClick = {
+                    selectedOperation = MathOperation.ADDITION
+                }
             )
-        ) {
-            item {
-                GamesHeroCard()
-            }
-
-            item {
-                SectionHeader(
-                    title = "Game Zone",
-                    subtitle = "Short learning challenges are coming to COMMERZO."
-                )
-            }
-
-            items(
-                items = games,
-                key = { it.title }
-            ) { game ->
-                GameCard(
-                    game = game
-                )
-            }
-
-            item {
-                GamesComingSoonCard()
-            }
+        } else {
+            QuickMathGame(
+                operation = selectedOperation!!,
+                modifier = Modifier.padding(padding),
+                onExit = {
+                    selectedOperation = null
+                }
+            )
         }
     }
 }
 
-private data class GameItem(
-    val title: String,
-    val subtitle: String,
-    val icon: ImageVector,
-    val category: String
-)
-
 @Composable
-private fun GamesHeroCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
+private fun GamesHome(
+    modifier: Modifier = Modifier,
+    onMathClick: () -> Unit
+) {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    CommerzoDimensions.CardPaddingLarge
-                )
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+        item {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                ),
+                shape = RoundedCornerShape(24.dp)
             ) {
-                Surface(
-                    modifier = Modifier.size(52.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.surface.copy(
-                        alpha = 0.78f
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.FlashOn,
-                        contentDescription = null,
-                        modifier = Modifier.padding(
-                            CommerzoDimensions.Space12
-                        ),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                Spacer(
-                    modifier = Modifier.width(
-                        CommerzoDimensions.Space12
-                    )
-                )
-
                 Column(
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.padding(22.dp)
                 ) {
                     Text(
-                        text = "GAME ZONE",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-
-                    Spacer(
-                        modifier = Modifier.height(
-                            CommerzoDimensions.Space4
-                        )
+                        "PLAY. LEARN. IMPROVE.",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
                     )
 
                     Text(
-                        text = "Play. Learn. Improve.",
-                        style = MaterialTheme.typography.titleLarge,
+                        "Welcome to Game Zone 🎮",
+                        style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+
+                    Spacer(Modifier.height(8.dp))
+
+                    Text(
+                        "Challenge your maths, memory and logical thinking.",
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }
+        }
 
-            Spacer(
-                modifier = Modifier.height(
-                    CommerzoDimensions.Space12
-                )
-            )
-
+        item {
             Text(
-                text = "Turn practice into short, engaging learning challenges designed for Commerce students.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                "Quick Math",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
             )
+        }
 
-            Spacer(
-                modifier = Modifier.height(
-                    CommerzoDimensions.Space12
-                )
-            )
-
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                color = MaterialTheme.colorScheme.surface.copy(
-                    alpha = 0.72f
-                )
-            ) {
-                Row(
-                    modifier = Modifier.padding(
-                        horizontal = CommerzoDimensions.Space12,
-                        vertical = CommerzoDimensions.Space10
-                    ),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+        item {
+            GameMenuCard(
+                title = "Quick Math Challenge",
+                subtitle = "Addition, subtraction, multiplication and division",
+                icon = {
                     Icon(
-                        imageVector = Icons.Default.Whatshot,
+                        Icons.Default.Calculate,
                         contentDescription = null,
-                        modifier = Modifier.size(
-                            CommerzoDimensions.IconSmall
-                        ),
-                        tint = MaterialTheme.colorScheme.primary
+                        modifier = Modifier.size(32.dp)
                     )
+                },
+                onClick = onMathClick
+            )
+        }
 
-                    Spacer(
-                        modifier = Modifier.width(
-                            CommerzoDimensions.Space8
-                        )
-                    )
+        item {
+            Text(
+                "More Games",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
 
-                    Text(
-                        text = "Games are being prepared for a future release.",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
+        item {
+            GameMenuCard(
+                "Quiz Arena",
+                "Educational quizzes with changing questions",
+                { Icon(Icons.Default.Quiz, contentDescription = null) },
+                enabled = false
+            )
+        }
+
+        item {
+            GameMenuCard(
+                "Puzzle Zone",
+                "Number patterns and logic challenges",
+                { Icon(Icons.Default.Extension, contentDescription = null) },
+                enabled = false
+            )
+        }
+
+        item {
+            GameMenuCard(
+                "Brain Games",
+                "Memory and concentration challenges",
+                { Icon(Icons.Default.Psychology, contentDescription = null) },
+                enabled = false
+            )
         }
     }
 }
 
 @Composable
-private fun GameCard(
-    game: GameItem
+private fun GameMenuCard(
+    title: String,
+    subtitle: String,
+    icon: @Composable () -> Unit,
+    onClick: () -> Unit = {},
+    enabled: Boolean = true
 ) {
     Card(
+        onClick = onClick,
+        enabled = enabled,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 1.dp
+            defaultElevation = 2.dp
         )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    CommerzoDimensions.CardPaddingLarge
-                ),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Surface(
-                modifier = Modifier.size(50.dp),
                 shape = RoundedCornerShape(14.dp),
-                color = MaterialTheme.colorScheme.secondaryContainer
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier.size(54.dp)
             ) {
-                Icon(
-                    imageVector = game.icon,
-                    contentDescription = null,
-                    modifier = Modifier.padding(
-                        CommerzoDimensions.Space12
-                    ),
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer
-                )
+                androidx.compose.foundation.layout.Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    icon()
+                }
             }
-
-            Spacer(
-                modifier = Modifier.width(
-                    CommerzoDimensions.Space12
-                )
-            )
 
             Column(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = game.category,
-                    style = MaterialTheme.typography.labelSmall,
+                    title,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    style = MaterialTheme.typography.titleMedium
                 )
-
-                Spacer(
-                    modifier = Modifier.height(
-                        CommerzoDimensions.Space4
-                    )
-                )
-
+                Spacer(Modifier.height(4.dp))
                 Text(
-                    text = game.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Spacer(
-                    modifier = Modifier.height(
-                        CommerzoDimensions.Space4
-                    )
-                )
-
-                Text(
-                    text = game.subtitle,
+                    subtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-
-                Spacer(
-                    modifier = Modifier.height(
-                        CommerzoDimensions.Space8
-                    )
-                )
-
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant
-                ) {
+                if (!enabled) {
+                    Spacer(Modifier.height(6.dp))
                     Text(
-                        text = "Coming soon",
-                        modifier = Modifier.padding(
-                            horizontal = CommerzoDimensions.Space8,
-                            vertical = CommerzoDimensions.Space4
-                        ),
+                        "Coming in next update",
                         style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -379,89 +296,393 @@ private fun GameCard(
 }
 
 @Composable
-private fun GamesComingSoonCard() {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant
+private fun QuickMathGame(
+    operation: MathOperation,
+    modifier: Modifier = Modifier,
+    onExit: () -> Unit
+) {
+    var currentOperation by remember(operation) {
+        mutableStateOf(operation)
+    }
+
+    val seenQuestions = remember(operation) {
+        mutableSetOf<String>()
+    }
+
+    var question by remember(operation) {
+        mutableStateOf(
+            generateQuestion(operation, seenQuestions)
+        )
+    }
+
+    var questionNumber by remember(operation) {
+        mutableStateOf(1)
+    }
+
+    var score by remember(operation) {
+        mutableStateOf(0)
+    }
+
+    var selectedAnswer by remember(operation) {
+        mutableStateOf<Int?>(null)
+    }
+
+    var finished by remember(operation) {
+        mutableStateOf(false)
+    }
+
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(18.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    CommerzoDimensions.CardPaddingLarge
-                ),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Surface(
-                modifier = Modifier.size(52.dp),
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.primaryContainer
-            ) {
-                Box(
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Psychology,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
-            Spacer(
-                modifier = Modifier.height(
-                    CommerzoDimensions.Space12
-                )
-            )
-
+        item {
             Text(
-                text = "Real Game Engine Coming Soon",
+                "Choose operation",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
+        }
 
-            Spacer(
-                modifier = Modifier.height(
-                    CommerzoDimensions.Space4
+        item {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    MathOperation.entries.take(2).forEach {
+                        OperationButton(
+                            operation = it,
+                            selected = currentOperation == it,
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                currentOperation = it
+                                seenQuestions.clear()
+                                question = generateQuestion(it, seenQuestions)
+                                questionNumber = 1
+                                score = 0
+                                selectedAnswer = null
+                                finished = false
+                            }
+                        )
+                    }
+                }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    MathOperation.entries.drop(2).forEach {
+                        OperationButton(
+                            operation = it,
+                            selected = currentOperation == it,
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                currentOperation = it
+                                seenQuestions.clear()
+                                question = generateQuestion(it, seenQuestions)
+                                questionNumber = 1
+                                score = 0
+                                selectedAnswer = null
+                                finished = false
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+        if (finished) {
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text("ROUND COMPLETED 🎉")
+                        Spacer(Modifier.height(12.dp))
+                        Text(
+                            "$score / $ROUND_SIZE",
+                            style = MaterialTheme.typography.displayMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text("Your final score")
+                        Spacer(Modifier.height(18.dp))
+
+                        Button(
+                            onClick = {
+                                seenQuestions.clear()
+                                question = generateQuestion(
+                                    currentOperation,
+                                    seenQuestions
+                                )
+                                questionNumber = 1
+                                score = 0
+                                selectedAnswer = null
+                                finished = false
+                            }
+                        ) {
+                            Text("Play Again")
+                        }
+                    }
+                }
+            }
+        } else {
+            item {
+                Text(
+                    "Question $questionNumber of $ROUND_SIZE",
+                    fontWeight = FontWeight.Bold
                 )
-            )
+                Text(
+                    "Score: $score",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
-            Text(
-                text = "Timed challenges, scores, XP and achievements will be connected when the dedicated Games engine is implemented.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 34.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            currentOperation.title.uppercase(),
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        Text(
+                            question.expression,
+                            style = MaterialTheme.typography.displaySmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            "= ?",
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                    }
+                }
+            }
+
+            item {
+                Text(
+                    "Select your answer",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    question.options.chunked(2).forEach { pair ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            pair.forEach { option ->
+                                val isSelected = selectedAnswer == option
+                                val isCorrect = option == question.answer
+
+                                val containerColor = when {
+                                    selectedAnswer == null ->
+                                        MaterialTheme.colorScheme.surfaceVariant
+                                    isSelected && isCorrect ->
+                                        MaterialTheme.colorScheme.primaryContainer
+                                    isSelected ->
+                                        MaterialTheme.colorScheme.errorContainer
+                                    else ->
+                                        MaterialTheme.colorScheme.surfaceVariant
+                                }
+
+                                Button(
+                                    onClick = {
+                                        if (selectedAnswer == null) {
+                                            selectedAnswer = option
+                                            if (isCorrect) score++
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(58.dp),
+                                    enabled = selectedAnswer == null,
+                                    shape = RoundedCornerShape(14.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = containerColor,
+                                        contentColor = MaterialTheme.colorScheme.onSurface
+                                    )
+                                ) {
+                                    Text(
+                                        option.toString(),
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                            if (pair.size == 1) {
+                                Spacer(Modifier.weight(1f))
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (selectedAnswer != null) {
+                item {
+                    Text(
+                        if (selectedAnswer == question.answer) {
+                            "Correct answer! ✅"
+                        } else {
+                            "Correct answer: ${question.answer}"
+                        },
+                        fontWeight = FontWeight.Bold,
+                        color = if (selectedAnswer == question.answer) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.error
+                        }
+                    )
+                }
+
+                item {
+                    Button(
+                        onClick = {
+                            if (questionNumber == ROUND_SIZE) {
+                                finished = true
+                            } else {
+                                questionNumber++
+                                question = generateQuestion(
+                                    currentOperation,
+                                    seenQuestions
+                                )
+                                selectedAnswer = null
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            if (questionNumber == ROUND_SIZE) {
+                                "See Result"
+                            } else {
+                                "Next Question"
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+        item {
+            OutlinedButton(
+                onClick = onExit,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Exit Game")
+            }
         }
     }
 }
 
 @Composable
-private fun SectionHeader(
-    title: String,
-    subtitle: String
+private fun OperationButton(
+    operation: MathOperation,
+    selected: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
-    Column(
-        modifier = Modifier.padding(
-            top = CommerzoDimensions.Space8
-        )
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
+    if (selected) {
+        Button(
+            onClick = onClick,
+            modifier = modifier.height(52.dp)
+        ) {
+            Text("${operation.symbol} ${operation.title}")
+        }
+    } else {
+        OutlinedButton(
+            onClick = onClick,
+            modifier = modifier.height(52.dp)
+        ) {
+            Text("${operation.symbol} ${operation.title}")
+        }
+    }
+}
 
-        Spacer(
-            modifier = Modifier.height(
-                CommerzoDimensions.Space4
-            )
-        )
+private fun generateQuestion(
+    operation: MathOperation,
+    seen: MutableSet<String>
+): MathQuestion {
+    repeat(1000) {
+        val first: Int
+        val second: Int
+        val answer: Int
 
-        Text(
-            text = subtitle,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+        when (operation) {
+            MathOperation.ADDITION -> {
+                first = Random.nextInt(1, 501)
+                second = Random.nextInt(1, 501)
+                answer = first + second
+            }
+
+            MathOperation.SUBTRACTION -> {
+                first = Random.nextInt(10, 501)
+                second = Random.nextInt(1, first + 1)
+                answer = first - second
+            }
+
+            MathOperation.MULTIPLICATION -> {
+                first = Random.nextInt(2, 21)
+                second = Random.nextInt(2, 21)
+                answer = first * second
+            }
+
+            MathOperation.DIVISION -> {
+                second = Random.nextInt(2, 13)
+                answer = Random.nextInt(2, 21)
+                first = second * answer
+            }
+        }
+
+        val key = "$first:${operation.name}:$second"
+        if (!seen.add(key)) return@repeat
+
+        val options = mutableSetOf(answer)
+        while (options.size < 4) {
+            val offset = Random.nextInt(-15, 16)
+            val candidate = answer + offset
+            if (candidate >= 0 && candidate != answer) {
+                options.add(candidate)
+            }
+        }
+
+        return MathQuestion(
+            first = first,
+            second = second,
+            operation = operation,
+            answer = answer,
+            options = options.shuffled()
         )
     }
+
+    // Fallback: a fresh addition question if a question pool is exhausted.
+    val first = Random.nextInt(1, 501)
+    val second = Random.nextInt(1, 501)
+    val answer = first + second
+
+    return MathQuestion(
+        first,
+        second,
+        MathOperation.ADDITION,
+        answer,
+        listOf(answer, answer + 1, answer + 2, answer + 3).shuffled()
+    )
 }
