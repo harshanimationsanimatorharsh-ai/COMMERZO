@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Quiz
-import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -30,8 +29,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -73,53 +72,69 @@ fun GamesScreen() {
         mutableStateOf<MathOperation?>(null)
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = if (selectedOperation == null) {
-                            "Games 🎮"
-                        } else {
-                            "Quick Math"
-                        },
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                navigationIcon = {
-                    if (selectedOperation != null) {
-                        TextButton(
-                            onClick = {
-                                selectedOperation = null
+    var showQuizArena by remember {
+        mutableStateOf(false)
+    }
+
+    // Quiz Arena has its own Scaffold and TopAppBar.
+    if (showQuizArena) {
+        QuizArenaScreen(
+            onBack = {
+                showQuizArena = false
+            }
+        )
+    } else {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = if (selectedOperation == null) {
+                                "Games 🎮"
+                            } else {
+                                "Quick Math"
+                            },
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    navigationIcon = {
+                        if (selectedOperation != null) {
+                            TextButton(
+                                onClick = {
+                                    selectedOperation = null
+                                }
+                            ) {
+                                Icon(
+                                    Icons.Default.ArrowBack,
+                                    contentDescription = "Back"
+                                )
+                                Text("Back")
                             }
-                        ) {
-                            Icon(
-                                Icons.Default.ArrowBack,
-                                contentDescription = "Back"
-                            )
-                            Text("Back")
                         }
                     }
-                }
-            )
-        }
-    ) { padding ->
+                )
+            }
+        ) { padding ->
 
-        if (selectedOperation == null) {
-            GamesHome(
-                modifier = Modifier.padding(padding),
-                onMathClick = {
-                    selectedOperation = MathOperation.ADDITION
-                }
-            )
-        } else {
-            QuickMathGame(
-                operation = selectedOperation!!,
-                modifier = Modifier.padding(padding),
-                onExit = {
-                    selectedOperation = null
-                }
-            )
+            if (selectedOperation == null) {
+                GamesHome(
+                    modifier = Modifier.padding(padding),
+                    onMathClick = {
+                        selectedOperation = MathOperation.ADDITION
+                    },
+                    onQuizClick = {
+                        showQuizArena = true
+                    }
+                )
+            } else {
+                QuickMathGame(
+                    operation = selectedOperation!!,
+                    modifier = Modifier.padding(padding),
+                    onExit = {
+                        selectedOperation = null
+                    }
+                )
+            }
         }
     }
 }
@@ -127,7 +142,8 @@ fun GamesScreen() {
 @Composable
 private fun GamesHome(
     modifier: Modifier = Modifier,
-    onMathClick: () -> Unit
+    onMathClick: () -> Unit,
+    onQuizClick: () -> Unit
 ) {
     LazyColumn(
         modifier = modifier
@@ -202,27 +218,42 @@ private fun GamesHome(
 
         item {
             GameMenuCard(
-                "Quiz Arena",
-                "Educational quizzes with changing questions",
-                { Icon(Icons.Default.Quiz, contentDescription = null) },
+                title = "Quiz Arena",
+                subtitle = "Educational quizzes with changing questions",
+                icon = {
+                    Icon(
+                        Icons.Default.Quiz,
+                        contentDescription = null
+                    )
+                },
+                onClick = onQuizClick
+            )
+        }
+
+        item {
+            GameMenuCard(
+                title = "Puzzle Zone",
+                subtitle = "Number patterns and logic challenges",
+                icon = {
+                    Icon(
+                        Icons.Default.Extension,
+                        contentDescription = null
+                    )
+                },
                 enabled = false
             )
         }
 
         item {
             GameMenuCard(
-                "Puzzle Zone",
-                "Number patterns and logic challenges",
-                { Icon(Icons.Default.Extension, contentDescription = null) },
-                enabled = false
-            )
-        }
-
-        item {
-            GameMenuCard(
-                "Brain Games",
-                "Memory and concentration challenges",
-                { Icon(Icons.Default.Psychology, contentDescription = null) },
+                title = "Brain Games",
+                subtitle = "Memory and concentration challenges",
+                icon = {
+                    Icon(
+                        Icons.Default.Psychology,
+                        contentDescription = null
+                    )
+                },
                 enabled = false
             )
         }
@@ -673,7 +704,6 @@ private fun generateQuestion(
         )
     }
 
-    // Fallback: a fresh addition question if a question pool is exhausted.
     val first = Random.nextInt(1, 501)
     val second = Random.nextInt(1, 501)
     val answer = first + second
