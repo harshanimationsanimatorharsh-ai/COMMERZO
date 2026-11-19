@@ -276,112 +276,105 @@ class FirebaseAuthRepository(
         }
     }
 
-    override suspend fun sendPhoneOtp(
-        activity: Activity,
-        phoneNumber: String
-    ): Result<Unit> {
-        return try {
-            val normalizedPhoneNumber =
-                phoneNumber.trim()
+ override suspend fun sendPhoneOtp(
+    activity: Activity,
+    phoneNumber: String
+): Result<Unit> {
+    return try {
+        val digits = phoneNumber.filter { it.isDigit() }
 
-            if (normalizedPhoneNumber.isBlank()) {
+        val normalizedPhoneNumber = when {
+            digits.length == 10 &&
+                digits.firstOrNull() in '6'..'9' -> {
+                "+91$digits"
+            }
+
+            digits.length == 12 &&
+                digits.startsWith("91") &&
+                digits[2] in '6'..'9' -> {
+                "+$digits"
+            }
+
+            else -> {
                 return Result.failure(
                     IllegalArgumentException(
-                        "Please enter your mobile number."
+                        "Please enter a valid 10-digit Indian mobile number."
                     )
                 )
             }
+        }
 
-            if (!normalizedPhoneNumber.startsWith("+")) {
-                return Result.failure(
-                    IllegalArgumentException(
-                        "Please enter your mobile number with country code, for example +91XXXXXXXXXX."
-                    )
-                )
-            }
+        phoneVerificationId = null
 
-            phoneVerificationId = null
+        suspendCancellableCoroutine { continuation ->
 
-            suspendCancellableCoroutine { continuation ->
+            val callbacks =
+                object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
 
-                val callbacks =
-                    object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                    override fun onVerificationCompleted(
+                        credential: PhoneAuthCredential
+                    ) {
+                        // Manual OTP verification remains the current UI flow.
+                    }
 
-                        override fun onVerificationCompleted(
-                            credential: PhoneAuthCredential
-                        ) {
-                            // Manual OTP verification remains the current UI flow.
-                        }
-
-                        override fun onVerificationFailed(
-                            exception: FirebaseException
-                        ) {
-                            if (continuation.isActive) {
-                                continuation.resumeWith(
-                                    Result.failure(
-                                        exception.toUserFacingPhoneAuthException()
-                                    )
+                    override fun onVerificationFailed(
+                        exception: FirebaseException
+                    ) {
+                        if (continuation.isActive) {
+                            continuation.resumeWith(
+                                Result.failure(
+                                    exception.toUserFacingPhoneAuthException()
                                 )
-                            }
-                        }
-
-                        override fun onCodeSent(
-                            verificationId: String,
-                            token: PhoneAuthProvider.ForceResendingToken
-                        ) {
-                            phoneVerificationId =
-                                verificationId
-
-                            if (continuation.isActive) {
-                                continuation.resume(
-                                    Result.success(Unit)
-                                )
-                            }
-                        }
-
-                        override fun onCodeAutoRetrievalTimeOut(
-                            verificationId: String
-                        ) {
-                            if (phoneVerificationId == null) {
-                                phoneVerificationId =
-                                    verificationId
-                            }
-
-                            if (continuation.isActive) {
-                                continuation.resume(
-                                    Result.success(Unit)
-                                )
-                            }
+                            )
                         }
                     }
 
-                val options =
-                    PhoneAuthOptions.newBuilder(
-                        firebaseAuth
-                    )
-                        .setPhoneNumber(
-                            normalizedPhoneNumber
-                        )
-                        .setTimeout(
-                            60L,
-                            TimeUnit.SECONDS
-                        )
-                        .setActivity(activity)
-                        .setCallbacks(callbacks)
-                        .build()
+                    override fun onCodeSent(
+                        verificationId: String,
+                        token: PhoneAuthProvider.ForceResendingToken
+                    ) {
+                        phoneVerificationId = verificationId
 
-                PhoneAuthProvider.verifyPhoneNumber(
-                    options
-                )
+                        if (continuation.isActive) {
+                            continuation.resume(
+                                Result.success(Unit)
+                            )
+                        }
+                    }
 
-                continuation.invokeOnCancellation {
-                    phoneVerificationId = null
+                    override fun onCodeAutoRetrievalTimeOut(
+                        verificationId: String
+                    ) {
+                        if (phoneVerificationId == null) {
+                            phoneVerificationId = verificationId
+                        }
+
+                        if (continuation.isActive) {
+                            continuation.resume(
+                                Result.success(Unit)
+                            )
+                        }
+                    }
                 }
+
+            val options =
+                PhoneAuthOptions.newBuilder(firebaseAuth)
+                    .setPhoneNumber(normalizedPhoneNumber)
+                    .setTimeout(60L, TimeUnit.SECONDS)
+                    .setActivity(activity)
+                    .setCallbacks(callbacks)
+                    .build()
+
+            PhoneAuthProvider.verifyPhoneNumber(options)
+
+            continuation.invokeOnCancellation {
+                phoneVerificationId = null
             }
-        } catch (exception: Exception) {
-            Result.failure(exception)
         }
+    } catch (exception: Exception) {
+        Result.failure(exception)
     }
+ }
 
     override suspend fun verifyPhoneOtp(
         otp: String
