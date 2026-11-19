@@ -1,3 +1,4 @@
+
 package com.commerzo.app.ui.screens.auth
 
 import android.app.Activity
@@ -14,8 +15,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Button
@@ -42,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.commerzo.app.data.model.auth.AuthState
@@ -56,45 +58,20 @@ fun LoginScreen(
 ) {
     val context = LocalContext.current
 
-    var email by remember {
-        mutableStateOf("")
-    }
-
-    var password by remember {
-        mutableStateOf("")
-    }
-
-    var phoneNumber by remember {
-        mutableStateOf("")
-    }
-
-    var otp by remember {
-        mutableStateOf("")
-    }
-
-    var phoneLoginMode by remember {
-        mutableStateOf(false)
-    }
-
-    var localError by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var passwordResetRequested by remember {
-        mutableStateOf(false)
-    }
-
-    var passwordResetSuccess by remember {
-        mutableStateOf(false)
-    }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var phoneNumber by remember { mutableStateOf("") }
+    var otp by remember { mutableStateOf("") }
+    var phoneLoginMode by remember { mutableStateOf(false) }
+    var localError by remember { mutableStateOf<String?>(null) }
+    var passwordResetRequested by remember { mutableStateOf(false) }
+    var passwordResetSuccess by remember { mutableStateOf(false) }
 
     val authState by viewModel.authState.collectAsState()
 
     LaunchedEffect(authState) {
         when (authState) {
-            is AuthState.LoggedIn -> {
-                onLoginSuccess()
-            }
+            is AuthState.LoggedIn -> onLoginSuccess()
 
             is AuthState.LoggedOut -> {
                 if (passwordResetRequested) {
@@ -108,41 +85,27 @@ fun LoginScreen(
         }
     }
 
-    val authError =
-        (authState as? AuthState.Error)?.message
+    val authError = (authState as? AuthState.Error)?.message
 
     val isEmailVerificationError =
-        authError?.contains(
-            "verify your email",
-            ignoreCase = true
-        ) == true ||
-            authError?.contains(
-                "verification",
-                ignoreCase = true
-            ) == true
+        authError?.contains("verify your email", ignoreCase = true) == true ||
+            authError?.contains("verification", ignoreCase = true) == true
 
-    val isLoading =
-        authState is AuthState.Loading
-
-    val isOtpSent =
-        authState is AuthState.PhoneOtpSent
+    val isLoading = authState is AuthState.Loading
+    val isOtpSent = authState is AuthState.PhoneOtpSent
 
     Scaffold { paddingValues ->
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .verticalScroll(
-                    rememberScrollState()
-                )
+                .verticalScroll(rememberScrollState())
                 .padding(
                     horizontal = CommerzoDimensions.ScreenHorizontal,
                     vertical = CommerzoDimensions.Space24
                 ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             LoginBrandHeader()
 
             Spacer(
@@ -157,17 +120,14 @@ fun LoginScreen(
                     CommerzoDimensions.Space20
                 ),
                 colors = CardDefaults.cardColors(
-                    containerColor =
-                        MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             ) {
-
                 Column(
                     modifier = Modifier.padding(
                         CommerzoDimensions.CardPaddingLarge
                     )
                 ) {
-
                     if (phoneLoginMode) {
                         PhoneLoginContent(
                             phoneNumber = phoneNumber,
@@ -177,40 +137,37 @@ fun LoginScreen(
                             localError = localError,
                             authError = authError,
                             onPhoneNumberChange = {
-                                phoneNumber = it
+                                phoneNumber = it.filter { char ->
+                                    char.isDigit()
+                                }.take(10)
                                 localError = null
                             },
                             onOtpChange = {
                                 if (it.length <= 6) {
-                                    otp = it.filter { character ->
-                                        character.isDigit()
+                                    otp = it.filter { char ->
+                                        char.isDigit()
                                     }
                                     localError = null
                                 }
                             },
                             onSendOtp = {
-                                val normalizedPhone =
-                                    phoneNumber.trim()
+                                val digits = phoneNumber.filter {
+                                    it.isDigit()
+                                }
 
                                 when {
-                                    normalizedPhone.isBlank() -> {
+                                    digits.length != 10 -> {
                                         localError =
-                                            "Please enter your mobile number."
+                                            "Please enter a valid 10-digit Indian mobile number."
                                     }
 
-                                    !normalizedPhone.startsWith("+") -> {
+                                    digits.firstOrNull() !in '6'..'9' -> {
                                         localError =
-                                            "Please include the country code, for example +91XXXXXXXXXX."
-                                    }
-
-                                    normalizedPhone.length < 10 -> {
-                                        localError =
-                                            "Please enter a valid mobile number."
+                                            "Please enter a valid Indian mobile number."
                                     }
 
                                     else -> {
-                                        val activity =
-                                            context as? Activity
+                                        val activity = context as? Activity
 
                                         if (activity == null) {
                                             localError =
@@ -220,7 +177,7 @@ fun LoginScreen(
 
                                             viewModel.sendPhoneOtp(
                                                 activity = activity,
-                                                phoneNumber = normalizedPhone
+                                                phoneNumber = "+91$digits"
                                             )
                                         }
                                     }
@@ -256,8 +213,7 @@ fun LoginScreen(
                             authError = authError,
                             isEmailVerificationError =
                                 isEmailVerificationError,
-                            passwordResetSuccess =
-                                passwordResetSuccess,
+                            passwordResetSuccess = passwordResetSuccess,
                             onEmailChange = {
                                 email = it
                                 localError = null
@@ -286,7 +242,6 @@ fun LoginScreen(
                                         localError = null
                                         passwordResetSuccess = false
                                         passwordResetRequested = true
-
                                         viewModel.sendPasswordResetEmail(
                                             email.trim()
                                         )
@@ -315,7 +270,6 @@ fun LoginScreen(
                                     else -> {
                                         localError = null
                                         passwordResetSuccess = false
-
                                         viewModel.signInWithEmail(
                                             email.trim(),
                                             password
@@ -324,16 +278,12 @@ fun LoginScreen(
                                 }
                             },
                             onGoogleSignIn = {
-                                val activity =
-                                    context as? Activity
+                                val activity = context as? Activity
 
                                 if (activity != null) {
                                     localError = null
                                     passwordResetSuccess = false
-
-                                    viewModel.signInWithGoogle(
-                                        activity
-                                    )
+                                    viewModel.signInWithGoogle(activity)
                                 } else {
                                     localError =
                                         "Unable to open Google Sign-In."
@@ -457,9 +407,7 @@ private fun EmailLoginContent(
         value = email,
         onValueChange = onEmailChange,
         modifier = Modifier.fillMaxWidth(),
-        label = {
-            Text("Email")
-        },
+        label = { Text("Email") },
         singleLine = true,
         enabled = !isLoading
     )
@@ -474,12 +422,9 @@ private fun EmailLoginContent(
         value = password,
         onValueChange = onPasswordChange,
         modifier = Modifier.fillMaxWidth(),
-        label = {
-            Text("Password")
-        },
+        label = { Text("Password") },
         singleLine = true,
-        visualTransformation =
-            PasswordVisualTransformation(),
+        visualTransformation = PasswordVisualTransformation(),
         enabled = !isLoading
     )
 
@@ -493,8 +438,7 @@ private fun EmailLoginContent(
 
     if (passwordResetSuccess) {
         StatusMessage(
-            message =
-                "Password reset email sent. Check your inbox and follow the instructions.",
+            message = "Password reset email sent. Check your inbox and follow the instructions.",
             positive = true
         )
     }
@@ -520,8 +464,7 @@ private fun EmailLoginContent(
             )
 
             Text(
-                text =
-                    "Open the verification email, verify your address, and sign in again.",
+                text = "Open the verification email, verify your address, and sign in again.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -637,7 +580,7 @@ private fun PhoneLoginContent(
         text = if (isOtpSent) {
             "Enter the verification code sent to your mobile."
         } else {
-            "Use your mobile number to continue."
+            "Use your Indian mobile number to continue."
         },
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -654,9 +597,10 @@ private fun PhoneLoginContent(
             value = otp,
             onValueChange = onOtpChange,
             modifier = Modifier.fillMaxWidth(),
-            label = {
-                Text("6-Digit OTP")
-            },
+            label = { Text("6-Digit OTP") },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number
+            ),
             singleLine = true,
             enabled = !isLoading
         )
@@ -668,7 +612,7 @@ private fun PhoneLoginContent(
         )
 
         Text(
-            text = "OTP sent to $phoneNumber",
+            text = "OTP sent to +91$phoneNumber",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -709,12 +653,20 @@ private fun PhoneLoginContent(
             value = phoneNumber,
             onValueChange = onPhoneNumberChange,
             modifier = Modifier.fillMaxWidth(),
-            label = {
-                Text("Mobile Number")
+            label = { Text("Mobile Number") },
+            leadingIcon = {
+                Text(
+                    text = "+91",
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
             },
             placeholder = {
-                Text("+91XXXXXXXXXX")
+                Text("10-digit mobile number")
             },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Phone
+            ),
             singleLine = true,
             enabled = !isLoading
         )
@@ -726,8 +678,7 @@ private fun PhoneLoginContent(
         )
 
         Text(
-            text =
-                "Include your country code, for example +91XXXXXXXXXX.",
+            text = "Enter your 10-digit Indian mobile number.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
