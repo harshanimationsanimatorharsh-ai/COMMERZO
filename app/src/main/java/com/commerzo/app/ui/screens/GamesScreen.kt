@@ -74,6 +74,7 @@ fun GamesScreen() {
 
     var showQuizArena by remember { mutableStateOf(false) }
     var showPuzzleZone by remember { mutableStateOf(false) }
+    var showBrainGames by remember { mutableStateOf(false) }
 
     when {
         showQuizArena -> {
@@ -85,6 +86,12 @@ fun GamesScreen() {
         showPuzzleZone -> {
             PuzzleZoneScreen(
                 onBack = { showPuzzleZone = false }
+            )
+        }
+
+        showBrainGames -> {
+            BrainGamesScreen(
+                onBack = { showBrainGames = false }
             )
         }
 
@@ -129,6 +136,9 @@ fun GamesScreen() {
                         },
                         onPuzzleClick = {
                             showPuzzleZone = true
+                        },
+                        onBrainClick = {
+                            showBrainGames = true
                         }
                     )
                 } else {
@@ -148,7 +158,8 @@ private fun GamesHome(
     modifier: Modifier = Modifier,
     onMathClick: () -> Unit,
     onQuizClick: () -> Unit,
-    onPuzzleClick: () -> Unit
+    onPuzzleClick: () -> Unit,
+    onBrainClick: () -> Unit
 ) {
     LazyColumn(
         modifier = modifier
@@ -170,13 +181,16 @@ private fun GamesHome(
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
                     )
+
                     Text(
                         "Welcome to Game Zone 🎮",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
+
                     Spacer(Modifier.height(8.dp))
+
                     Text(
                         "Challenge your maths, memory and logical thinking.",
                         color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -245,7 +259,7 @@ private fun GamesHome(
                 icon = {
                     Icon(Icons.Default.Psychology, contentDescription = null)
                 },
-                enabled = false
+                onClick = onBrainClick
             )
         }
     }
@@ -267,7 +281,9 @@ private fun GameMenuCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp
+        )
     ) {
         Row(
             modifier = Modifier
@@ -294,12 +310,15 @@ private fun GameMenuCard(
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleMedium
                 )
+
                 Spacer(Modifier.height(4.dp))
+
                 Text(
                     subtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
                 if (!enabled) {
                     Spacer(Modifier.height(6.dp))
                     Text(
@@ -330,6 +349,7 @@ private fun QuickMathGame(
     var question by remember(operation) {
         mutableStateOf(generateQuestion(operation, seenQuestions))
     }
+
     var questionNumber by remember(operation) { mutableStateOf(1) }
     var score by remember(operation) { mutableStateOf(0) }
     var selectedAnswer by remember(operation) { mutableStateOf<Int?>(null) }
@@ -369,6 +389,7 @@ private fun QuickMathGame(
                         )
                     }
                 }
+
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     MathOperation.entries.drop(2).forEach {
                         OperationButton(
@@ -406,30 +427,44 @@ private fun QuickMathGame(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text("ROUND COMPLETED 🎉")
+
                         Spacer(Modifier.height(12.dp))
+
                         Text(
                             "$score / $ROUND_SIZE",
                             style = MaterialTheme.typography.displayMedium,
                             fontWeight = FontWeight.Bold
                         )
+
                         Text("Your final score")
+
                         Spacer(Modifier.height(18.dp))
+
                         Button(
                             onClick = {
                                 seenQuestions.clear()
-                                question = generateQuestion(currentOperation, seenQuestions)
+                                question = generateQuestion(
+                                    currentOperation,
+                                    seenQuestions
+                                )
                                 questionNumber = 1
                                 score = 0
                                 selectedAnswer = null
                                 finished = false
                             }
-                        ) { Text("Play Again") }
+                        ) {
+                            Text("Play Again")
+                        }
                     }
                 }
             }
         } else {
             item {
-                Text("Question $questionNumber of $ROUND_SIZE", fontWeight = FontWeight.Bold)
+                Text(
+                    "Question $questionNumber of $ROUND_SIZE",
+                    fontWeight = FontWeight.Bold
+                )
+
                 Text(
                     "Score: $score",
                     color = MaterialTheme.colorScheme.primary,
@@ -455,14 +490,21 @@ private fun QuickMathGame(
                             currentOperation.title.uppercase(),
                             style = MaterialTheme.typography.labelMedium
                         )
+
                         Spacer(Modifier.height(12.dp))
+
                         Text(
                             question.expression,
                             style = MaterialTheme.typography.displaySmall,
                             fontWeight = FontWeight.Bold
                         )
+
                         Spacer(Modifier.height(8.dp))
-                        Text("= ?", style = MaterialTheme.typography.titleLarge)
+
+                        Text(
+                            "= ?",
+                            style = MaterialTheme.typography.titleLarge
+                        )
                     }
                 }
             }
@@ -482,6 +524,7 @@ private fun QuickMathGame(
                             pair.forEach { option ->
                                 val isSelected = selectedAnswer == option
                                 val isCorrect = option == question.answer
+
                                 val containerColor = when {
                                     selectedAnswer == null ->
                                         MaterialTheme.colorScheme.surfaceVariant
@@ -517,7 +560,10 @@ private fun QuickMathGame(
                                     )
                                 }
                             }
-                            if (pair.size == 1) Spacer(Modifier.weight(1f))
+
+                            if (pair.size == 1) {
+                                Spacer(Modifier.weight(1f))
+                            }
                         }
                     }
                 }
@@ -547,15 +593,21 @@ private fun QuickMathGame(
                                 finished = true
                             } else {
                                 questionNumber++
-                                question = generateQuestion(currentOperation, seenQuestions)
+                                question = generateQuestion(
+                                    currentOperation,
+                                    seenQuestions
+                                )
                                 selectedAnswer = null
                             }
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            if (questionNumber == ROUND_SIZE) "See Result"
-                            else "Next Question"
+                            if (questionNumber == ROUND_SIZE) {
+                                "See Result"
+                            } else {
+                                "Next Question"
+                            }
                         )
                     }
                 }
@@ -566,7 +618,9 @@ private fun QuickMathGame(
             OutlinedButton(
                 onClick = onExit,
                 modifier = Modifier.fillMaxWidth()
-            ) { Text("Exit Game") }
+            ) {
+                Text("Exit Game")
+            }
         }
     }
 }
@@ -579,11 +633,17 @@ private fun OperationButton(
     onClick: () -> Unit
 ) {
     if (selected) {
-        Button(onClick = onClick, modifier = modifier.height(52.dp)) {
+        Button(
+            onClick = onClick,
+            modifier = modifier.height(52.dp)
+        ) {
             Text("${operation.symbol} ${operation.title}")
         }
     } else {
-        OutlinedButton(onClick = onClick, modifier = modifier.height(52.dp)) {
+        OutlinedButton(
+            onClick = onClick,
+            modifier = modifier.height(52.dp)
+        ) {
             Text("${operation.symbol} ${operation.title}")
         }
     }
@@ -604,16 +664,19 @@ private fun generateQuestion(
                 second = Random.nextInt(1, 501)
                 answer = first + second
             }
+
             MathOperation.SUBTRACTION -> {
                 first = Random.nextInt(10, 501)
                 second = Random.nextInt(1, first + 1)
                 answer = first - second
             }
+
             MathOperation.MULTIPLICATION -> {
                 first = Random.nextInt(2, 21)
                 second = Random.nextInt(2, 21)
                 answer = first * second
             }
+
             MathOperation.DIVISION -> {
                 second = Random.nextInt(2, 13)
                 answer = Random.nextInt(2, 21)
@@ -625,9 +688,12 @@ private fun generateQuestion(
         if (!seen.add(key)) return@repeat
 
         val options = mutableSetOf(answer)
+
         while (options.size < 4) {
             val candidate = answer + Random.nextInt(-15, 16)
-            if (candidate >= 0 && candidate != answer) options.add(candidate)
+            if (candidate >= 0 && candidate != answer) {
+                options.add(candidate)
+            }
         }
 
         return MathQuestion(
@@ -642,6 +708,7 @@ private fun generateQuestion(
     val first = Random.nextInt(1, 501)
     val second = Random.nextInt(1, 501)
     val answer = first + second
+
     return MathQuestion(
         first,
         second,
