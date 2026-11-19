@@ -76,14 +76,15 @@ fun AppNavigation(
         }
 
     val showBottomBar =
-        when (currentRoute) {
-            Screen.Home.route,
-            Screen.Practice.route,
-            Screen.Tests.route,
-            Screen.Profile.route -> true
+    when (currentRoute) {
+        Screen.Home.route,
+        Screen.Practice.route,
+        Screen.Tests.route,
+        Screen.Games.route,
+        Screen.Profile.route -> true
 
-            else -> false
-        }
+        else -> false
+    }
 
     Scaffold(
         bottomBar = {
