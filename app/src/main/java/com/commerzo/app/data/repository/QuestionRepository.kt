@@ -543,6 +543,17 @@ class QuestionRepository {
 
     fun getQuestions(subjectId: String, chapterId: String): List<Question> =
         getQuestions(subjectId, chapterId, Board.MP_BOARD, ClassLevel.CLASS_12)
+        
+
+fun getAllQuestions(): List<Question> {
+    return questionBank()
+        .distinctBy { it.id }
+        .filter { question ->
+            question.options.size >= 2 &&
+                question.correctAnswer in question.options.indices &&
+                question.question.isNotBlank()
+        }
+}
 
     private fun questionBank(): List<Question> = buildList {
         add(Question(
