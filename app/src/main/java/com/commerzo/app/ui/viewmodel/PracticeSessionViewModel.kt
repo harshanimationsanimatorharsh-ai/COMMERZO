@@ -1,5 +1,9 @@
 package com.commerzo.app.ui.viewmodel
 
+import androidx.lifecycle.viewModelScope
+import com.commerzo.app.data.repository.progress.StudentProgressRepository
+import kotlinx.coroutines.launch
+import java.util.UUID
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.commerzo.app.data.model.Board
@@ -24,6 +28,9 @@ class PracticeSessionViewModel(
 
     private val questionBankManager =
         QuestionBankManager()
+
+        private val studentProgressRepository =
+    StudentProgressRepository()
 
     private val preferences =
         application.getSharedPreferences(
@@ -183,31 +190,47 @@ class PracticeSessionViewModel(
     }
 
     fun submitAnswer() {
-        if (
-            _submitted.value ||
-            _isFinished.value
-        ) {
-            return
+    if (
+        _submitted.value ||
+        _isFinished.value
+    ) {
+        return
+    }
+
+    val selected =
+        _selectedAnswer.value ?: return
+
+    val currentQuestion =
+        _questions.value.getOrNull(
+            _currentIndex.value
+        ) ?: return
+
+    val isCorrect =
+        selected == currentQuestion.correctAnswer
+
+    updateCurrentAnswerState(
+        selectedAnswer = selected,
+        submitted = true
+    )
+
+    recalculateResults()
+
+    saveCurrentProgress()
+
+    // Prevent duplicate submissions.
+    _submitted.value = true
+
+    // Record this practice answer in student XP.
+    val eventId = UUID.randomUUID().toString()
+
+    viewModelScope.launch {
+        runCatching {
+            studentProgressRepository.recordPracticeAnswer(
+                isCorrect = isCorrect,
+                eventId = eventId
+            )
         }
-
-        val selected =
-            _selectedAnswer.value ?: return
-
-        val currentQuestion =
-            _questions.value.getOrNull(
-                _currentIndex.value
-            ) ?: return
-
-        updateCurrentAnswerState(
-            selectedAnswer = selected,
-            submitted = true
-        )
-
-        recalculateResults()
-
-        saveCurrentProgress()
-
-        _submitted.value = true
+    }
     }
 
     fun skipQuestion() {
