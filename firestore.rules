@@ -325,6 +325,59 @@ service cloud.firestore {
     }
 
 
+    
+    // ============================================================
+    // STUDENT PROGRESS — XP / STREAK
+    // ============================================================
+
+    match /student_progress/{userId} {
+
+      // Students can read only their own progress.
+      allow read: if isOwner(userId) || isAdmin();
+
+      // Initial progress document.
+      allow create: if isOwner(userId)
+        && request.resource.data.userId == userId
+        && request.resource.data.lifetimeXpUnits is int
+        && request.resource.data.weeklyXpUnits is int
+        && request.resource.data.currentStreak is int
+        && request.resource.data.longestStreak is int
+        && request.resource.data.totalActiveSeconds is int
+        && request.resource.data.totalCorrectAnswers is int;
+
+      // Student can update only their own progress.
+      allow update: if isOwner(userId)
+        && request.resource.data.userId == userId
+        && request.resource.data.lifetimeXpUnits is int
+        && request.resource.data.weeklyXpUnits is int
+        && request.resource.data.currentStreak is int
+        && request.resource.data.longestStreak is int
+        && request.resource.data.totalActiveSeconds is int
+        && request.resource.data.totalCorrectAnswers is int;
+
+      allow delete: if isAdmin();
+
+      // Individual activity events.
+      match /events/{eventId} {
+
+        allow read: if isOwner(userId) || isAdmin();
+
+        allow create: if isOwner(userId)
+          && request.resource.data.eventId == eventId
+          && request.resource.data.xpUnits is int
+          && request.resource.data.correctAnswers is int
+          && request.resource.data.activeSeconds is int
+          && request.resource.data.createdAt is int
+          && request.resource.data.xpUnits >= 0
+          && request.resource.data.correctAnswers >= 0
+          && request.resource.data.activeSeconds >= 0;
+
+        // Events cannot be edited or deleted by students.
+        allow update, delete: if isAdmin();
+      }
+    }
+
+
     // ============================================================
     // DEFAULT DENY
     // ============================================================
