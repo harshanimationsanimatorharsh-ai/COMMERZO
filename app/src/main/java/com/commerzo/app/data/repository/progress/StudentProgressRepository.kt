@@ -96,6 +96,20 @@ class StudentProgressRepository(
         )
     }
 
+    /**
+ * Records one submitted practice answer.
+ * Correct answer = 2.5 XP; wrong answer = 0 XP.
+ */
+suspend fun recordPracticeAnswer(
+    isCorrect: Boolean,
+    eventId: String
+): StudentProgress {
+    return addActivity(
+        eventId = eventId,
+        xpUnits = if (isCorrect) 5L else 0L,
+        correctAnswers = if (isCorrect) 1L else 0L
+    )
+}
     suspend fun awardCorrectAnswers(
         correctAnswers: Int,
         eventId: String = UUID.randomUUID().toString()
