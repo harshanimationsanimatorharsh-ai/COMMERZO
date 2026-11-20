@@ -44,6 +44,9 @@ import com.commerzo.app.ui.viewmodel.auth.AuthViewModel
 import com.commerzo.app.ui.screens.PrivacyPolicyScreen
 import com.commerzo.app.ui.screens.TermsConditionsScreen
 import com.commerzo.app.ui.viewmodel.settings.SettingsViewModel
+import androidx.compose.runtime.LaunchedEffect
+import com.commerzo.app.data.repository.progress.StudentProgressRepository
+import java.util.UUID
 
 data class NavigationTestResult(
     val total: Int = 0,
@@ -52,6 +55,7 @@ data class NavigationTestResult(
     val wrong: Int = 0,
     val unattempted: Int = 0,
     val marked: Int = 0
+    val eventId: String = ""
 )
 
 @Composable
@@ -62,6 +66,9 @@ fun AppNavigation(
 ){
     var latestTestResult by remember {
         mutableStateOf(NavigationTestResult())
+    }
+    val studentProgressRepository = remember {
+    StudentProgressRepository()
     }
 
     val currentBackStackEntry by
@@ -247,6 +254,7 @@ fun AppNavigation(
                                 wrong = wrong,
                                 unattempted = unattempted,
                                 marked = marked
+                                eventId = UUID.randomUUID().toString()
                             )
 
                             navController.navigate(Screen.TestResult.route)
@@ -549,6 +557,18 @@ fun AppNavigation(
                 }
 
                 composable(Screen.TestResult.route) {
+                    LaunchedEffect(latestTestResult.eventId) {
+    val eventId = latestTestResult.eventId
+
+    if (eventId.isNotBlank()) {
+        runCatching {
+            studentProgressRepository.recordTestResult(
+                correctAnswers = latestTestResult.correct,
+                eventId = eventId
+            )
+        }
+    }
+                    }
                     TestResultScreen(
                         total = latestTestResult.total,
                         answered = latestTestResult.answered,
