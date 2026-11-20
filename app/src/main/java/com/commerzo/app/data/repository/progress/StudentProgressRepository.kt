@@ -76,6 +76,26 @@ class StudentProgressRepository(
      * 1 correct answer = 2.5 XP.
      * XP is stored in half-point units to avoid rounding errors.
      */
+     
+    /**
+     * Records every completed test, including tests with zero correct answers.
+     * 1 correct answer = 2.5 XP.
+     */
+    suspend fun recordTestResult(
+        correctAnswers: Int,
+        eventId: String
+    ): StudentProgress {
+        require(correctAnswers in 0..500) {
+            "Correct answers must be between 0 and 500"
+        }
+
+        return addActivity(
+            eventId = eventId,
+            xpUnits = correctAnswers.toLong() * 5L,
+            correctAnswers = correctAnswers.toLong()
+        )
+    }
+
     suspend fun awardCorrectAnswers(
         correctAnswers: Int,
         eventId: String = UUID.randomUUID().toString()
