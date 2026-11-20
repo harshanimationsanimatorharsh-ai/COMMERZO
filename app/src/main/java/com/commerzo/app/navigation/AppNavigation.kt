@@ -54,7 +54,7 @@ data class NavigationTestResult(
     val correct: Int = 0,
     val wrong: Int = 0,
     val unattempted: Int = 0,
-    val marked: Int = 0
+    val marked: Int = 0,
     val eventId: String = ""
 )
 
