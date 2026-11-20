@@ -253,7 +253,7 @@ fun AppNavigation(
                                 correct = correct,
                                 wrong = wrong,
                                 unattempted = unattempted,
-                                marked = marked
+                                marked = marked,
                                 eventId = UUID.randomUUID().toString()
                             )
 
